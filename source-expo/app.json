@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "RIPMyFriend",
+    "slug": "RIPMyFriend",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/rip-logo.jpeg",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#174e3b"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.huynh.maziReactNative"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FFFFFF"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": ["expo-font"],
+    "newArchEnabled": true
+  }
+}
