@@ -21,7 +21,7 @@ export default StyleSheet.create({
     justifyContent: 'space-between',
   },
   logo: {
-    width: 200,
-    height: 200,
+    width: 250,
+    height: 250,
   },
 });

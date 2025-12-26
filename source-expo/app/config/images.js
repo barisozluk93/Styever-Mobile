@@ -9,7 +9,7 @@ export const Images = {
   eHSBC: require('@/assets/images/e-hsbc.png'),
   eProduct: require('@/assets/images/e-product.png'),
   mazi: require('@/assets/images/mazi.png'),
-  logo: require('@/assets/images/rip-logo.jpeg'),
+  logo: require('@/assets/images/logo.png'),
   avata1: require('@/assets/images/avata-01.jpeg'),
   avata2: require('@/assets/images/avata-02.jpeg'),
   avata3: require('@/assets/images/avata-03.jpeg'),
