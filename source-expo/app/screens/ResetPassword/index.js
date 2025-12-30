@@ -4,31 +4,52 @@ import { useTranslation } from 'react-i18next';
 import { BaseColor, BaseStyle, Images, useTheme } from '@/config';
 import { Button, Header, Icon, Image, SafeAreaView, TextInput } from '@/components';
 import styles from './styles';
+import { isNullOrEmpty } from '@/utils/utility';
+import { resetPasswordRequest } from '@/apis/authApi';
+import Toast from 'react-native-toast-message';
 
-const successInit = {
-  email: true,
-};
 const ResetPassword = (props) => {
   const { navigation } = props;
   const { t } = useTranslation();
   const { colors } = useTheme();
   const [email, setEmail] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(successInit);
 
-  const onReset = () => {
-    if (email === '') {
-      setSuccess({
-        ...success,
-        email: false,
-      });
-    } else {
-      setLoading(true);
-      setTimeout(() => {
-        setLoading(false);
-        navigation.navigate('SignIn');
-      }, 500);
+  function isButtonDisabled() {
+    if (isNullOrEmpty(email)) {
+      return true;
     }
+
+    return false;
+  }
+
+  const onConfirm = async () => {
+
+    resetPasswordRequest(email).then(response => {
+          console.log("aaa : ")
+
+      if (response.isSuccess) {
+        Toast.show({
+          type: 'success',
+          text1: t('success'),
+          text2: t('success_message'),
+        });
+
+        navigation.navigate('SignIn');
+      }
+      else {
+        Toast.show({
+          type: 'error',
+          text1: t('error'),
+          text2: t('error_file_message'),
+        });
+      }
+    }).catch((error) => {
+      Toast.show({
+        type: 'error',
+        text1: t('error'),
+        text2: t('error_file_message'),
+      });
+    });
   };
 
   return (
@@ -58,26 +79,20 @@ const ResetPassword = (props) => {
           <TextInput
             style={[BaseStyle.textInput, { marginTop: 65 }]}
             onChangeText={(text) => setEmail(text)}
-            onFocus={() => {
-              setSuccess({
-                ...success,
-                email: true,
-              });
-            }}
             autoCorrect={false}
             placeholder={t('email_address')}
-            placeholderTextColor={success.email ? BaseColor.grayColor : colors.primary}
+            placeholderTextColor={BaseColor.grayColor}
             value={email}
             selectionColor={colors.primary}
           />
           <View style={{ width: '100%' }}>
             <Button
               full
+              disabled={isButtonDisabled()}
               style={{ marginTop: 20 }}
               onPress={() => {
-                onReset();
+                onConfirm();
               }}
-              loading={loading}
             >
               {t('reset_password')}
             </Button>

@@ -45,8 +45,7 @@
   "account": "Hesap",
   "change_language": "Dil Değiştir",
   "password": "Şifre",
-  "re_password": "Şifre Tekrar",
-  "password_confirm": "Şifre Onayı",
+  "password_confirm": "Yeni Şifre Onayı",
   "confirm": "Onayla",
   "contact_us": "Bizimle İletişime Geç",
   "contact_details": "İletişim Detayları",
@@ -406,5 +405,18 @@
   "platinumProperty5": "Genişletilmiş bio",
   "platinumProperty6": "Yapay zeka destekli bio yazar",
   "pay": "Öde",
-  "homeAddress": "Ev"
+  "homeAddress": "Ev",
+
+  "success": "Başarılı!",
+  "success_message": "İşlem başarı ile gerçekleştirildi.",
+  "error": "Hata!",
+  "error_login_message": "Geçersiz kullanıcı adı veya şifre.",
+  "system": "Sistem",
+  "username": "Kullanıcı Adı",
+  "current_password": "Güncel Şifre",
+  "new_password": "Yeni Şifre",
+  "re_password": "Re-Password",
+
+  "no_data": "Gösterilecek veri bulunamadı."
+
 }

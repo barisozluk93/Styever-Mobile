@@ -14,6 +14,7 @@ export const Images = {
   avata2: require('@/assets/images/avata-02.jpeg'),
   avata3: require('@/assets/images/avata-03.jpeg'),
   avata4: require('@/assets/images/avata-04.jpeg'),
+  avata5: require('@/assets/images/blank.png'),
   profile1: require('@/assets/images/profile-1.jpg'),
   profile2: require('@/assets/images/profile-2.jpg'),
   profile3: require('@/assets/images/profile-3.jpg'),

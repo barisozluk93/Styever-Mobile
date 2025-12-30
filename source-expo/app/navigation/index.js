@@ -8,10 +8,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { ApplicationActions } from '@/actions';
 import * as Utils from '@/utils';
 import { languageSelect, getInto } from '@/selectors';
-import { BaseSetting, useTheme } from '@/config';
+import { BaseColor, BaseSetting, useTheme } from '@/config';
 import AssistiveTouch from './AssistiveTouch';
 import * as rootNavigation from './rootNavigation';
 import { AllScreens, ModalScreens } from './config';
+import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message';
+import { removeToken } from '@/utils/storage';
 
 const RootStack = createStackNavigator();
 const MainStack = createStackNavigator();
@@ -73,9 +75,49 @@ const Navigator = () => {
 
   useEffect(() => {
     if (!loading) {
+      removeToken();
+      dispatch({ type: "AUTH_LOGOUT" });
+      dispatch({ type: "USER_INIT" });
+
       rootNavigation.dispatch(StackActions.replace(intro ? 'NewsMenu' : 'NewsMenu'));
     }
   }, [loading]);
+
+  const toastConfig = {
+  success: (props) => (
+    <BaseToast
+      {...props}
+      text1Style={{
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: theme.colors.text,
+      }}
+      text2Style={{
+        fontSize: 12,
+        fontWeight: 'normal',
+        color: theme.colors.text,
+      }}
+      style={{borderWidth: 1, borderColor: theme.colors.border, borderLeftColor: BaseColor.greenColor, backgroundColor: theme.colors.background}}
+    />
+  ),
+  error: (props) => (
+    <ErrorToast
+      {...props}
+      text1Style={{
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: theme.colors.text,
+      }}
+      text2Style={{
+        fontSize: 12,
+        fontWeight: 'normal',
+        color: theme.colors.text,
+      }}
+      style={{borderWidth: 1, borderColor: theme.colors.border, borderLeftColor: BaseColor.pinkDarkColor, backgroundColor: theme.colors.background}}
+    />
+  ),
+   
+  };
 
   return (
     // Use the font with the fontFamily property after loading
@@ -97,6 +139,7 @@ const Navigator = () => {
           })}
         </RootStack.Navigator>
       </NavigationContainer>
+      <Toast config={toastConfig} />
       {!loading && <AssistiveTouch goToApp={goToApp} />}
     </View>
   );

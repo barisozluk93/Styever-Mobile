@@ -2,12 +2,14 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, TouchableOpacity, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { BaseStyle, useTheme } from '@/config';
+import { BaseStyle, Images, useTheme } from '@/config';
 // Load sample data
 import { UserData } from '@/data';
 import { Button, Icon, ProfileDetail, ProfilePerformance, SafeAreaView, Tag, Text } from '@/components';
 import { AuthActions } from '@/actions';
 import styles from './styles';
+import { useFocusEffect } from '@react-navigation/native';
+import { logout } from '@/actions/auth';
 
 const { authentication } = AuthActions;
 
@@ -16,10 +18,7 @@ const Profile = (props) => {
   const { t } = useTranslation();
   const { navigation } = props;
   const dispatch = useDispatch();
-  const [loading, setLoading] = useState(false);
-  const [userData] = useState(UserData[0]);
-  const auth = useSelector((state) => state.auth);
-  const login = auth.login.success;
+  const {loading, user} = useSelector((state) => state.user);
 
   /**
    * @description Simple logout with Redux
@@ -27,12 +26,8 @@ const Profile = (props) => {
    * @date 2019-09-01
    */
   const onLogOut = () => {
-    setLoading(true);
-    dispatch(
-      authentication(false, () => {
-        setLoading(false);
-      })
-    );
+    dispatch(logout());
+    dispatch({type: "USER_INIT"});
   };
 
   const onLogIn = () => {
@@ -54,29 +49,16 @@ const Profile = (props) => {
         </View>
         <View style={{ flex: 1 }}>
           <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
-            {login && (
+            {user && (
               <ProfileDetail
-                image={userData.image}
-                textFirst={userData.name}
-                point={userData.point}
-                textSecond={userData.city}
-                textThird={userData.id}
+                image={user.fileResult ? user.fileResult.fileContents : Images.avata5}
+                textFirst={user.name + " " + user.surname}
+                textSecond={user.username}
+                textThird={user.email}
                 onPress={() => {}}
               />
             )}
-            {/* {login && (
-              <View style={styles.viewFollow}>
-                <View style={{ flex: 3 }}>
-                  <Tag primary style={styles.follow} styleText={{}}>
-                    + {t('follow')}
-                  </Tag>
-                </View>
-
-                <View style={{ flex: 5 }}>
-                  <ProfilePerformance data={userData.performance} />
-                </View>
-              </View>
-            )} */}
+            
             <View style={{ width: '100%' }}>
               <TouchableOpacity
                 style={styleItem}
@@ -84,10 +66,10 @@ const Profile = (props) => {
                   navigation.navigate('Setting');
                 }}
               >
-                <Text body1>{t('setting')}</Text>
+                <Text body1>{t('system')}</Text>
                 <Icon name="angle-right" size={18} color={colors.primary} style={{ marginLeft: 5 }} enableRTL={true} />
               </TouchableOpacity>
-              {login && (
+              {user && (
                 <TouchableOpacity
                   style={styleItem}
                   onPress={() => {
@@ -104,7 +86,7 @@ const Profile = (props) => {
                   />
                 </TouchableOpacity>
               )}
-              {login && (
+              {user && (
                 <TouchableOpacity
                   style={styleItem}
                   onPress={() => {
@@ -121,66 +103,14 @@ const Profile = (props) => {
                   />
                 </TouchableOpacity>
               )}
-
-              {login && (
-                <TouchableOpacity
-                  style={styleItem}
-                  onPress={() => {
-                    navigation.navigate('EBank');
-                  }}
-                >
-                  <Text body1>{t('payments')}</Text>
-                  <Icon
-                    name="angle-right"
-                    size={18}
-                    color={colors.primary}
-                    style={{ marginLeft: 5 }}
-                    enableRTL={true}
-                  />
-                </TouchableOpacity>
-              )}
-
-              {login && (
-                <TouchableOpacity
-                  style={styleItem}
-                  onPress={() => {
-                    navigation.navigate('EAddress');
-                  }}
-                >
-                  <Text body1>{t('billing_address')}</Text>
-                  <Icon
-                    name="angle-right"
-                    size={18}
-                    color={colors.primary}
-                    style={{ marginLeft: 5 }}
-                    enableRTL={true}
-                  />
-                </TouchableOpacity>
-              )}
-              <TouchableOpacity
-                style={styleItem}
-                onPress={() => {
-                  navigation.navigate('ContactUs');
-                }}
-              >
-                <Text body1>{t('contact_us')}</Text>
-                <Icon name="angle-right" size={18} color={colors.primary} style={{ marginLeft: 5 }} enableRTL={true} />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styleItem}
-                onPress={() => {
-                  navigation.navigate('AboutUs');
-                }}
-              >
-                <Text body1>{t('about_us')}</Text>
-                <Icon name="angle-right" size={18} color={colors.primary} style={{ marginLeft: 5 }} enableRTL={true} />
-              </TouchableOpacity>
+              
+              
             </View>
           </ScrollView>
         </View>
       </View>
       <View style={{ padding: 10 }}>
-        {login ? (
+        {user ? (
           <Button full loading={loading} onPress={() => onLogOut()}>
             {t('sign_out')}
           </Button>

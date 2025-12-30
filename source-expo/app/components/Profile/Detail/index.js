@@ -25,12 +25,7 @@ export default function ProfileDetail({
     <TouchableOpacity style={[styles.contain, style]} onPress={onPress} activeOpacity={0.9}>
       <View style={[styles.contentLeft, styleLeft]}>
         <View>
-          <Image source={image} style={[styles.thumb, styleThumb]} borderRadius={30} />
-          {/* <View style={[styles.point, { backgroundColor: colors.primaryLight }]}>
-            <Text overline whiteColor semibold>
-              {point}
-            </Text>
-          </View> */}
+          <Image source={{ uri: `data:image/*;base64,${image}` }} style={[styles.thumb, styleThumb]} borderRadius={30} />
         </View>
         <View style={{ alignItems: 'flex-start' }}>
           <Text headline semibold numberOfLines={1}>

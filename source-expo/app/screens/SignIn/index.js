@@ -1,11 +1,14 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { TouchableOpacity, View, KeyboardAvoidingView, Platform } from 'react-native';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { BaseColor, BaseStyle, Images, useTheme } from '@/config';
 import { AuthActions } from '@/actions';
 import { Button, Header, Icon, Image, SafeAreaView, Text, TextInput } from '@/components';
 import styles from './styles';
+import { getUserByToken, login } from '@/actions/auth';
+import { loadToken } from '@/utils/storage';
+import Toast from 'react-native-toast-message';
 
 const { authentication } = AuthActions;
 const successInit = {
@@ -18,29 +21,41 @@ const SignIn = (props) => {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const dispatch = useDispatch();
-  const [id, setId] = useState('test');
-  const [password, setPassword] = useState('123456');
-  const [loading, setLoading] = useState(false);
+  const [id, setId] = useState();
+  const [password, setPassword] = useState();
   const [success, setSuccess] = useState(successInit);
+  const { loading, error, token } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    var access_token = loadToken();
+    if (!access_token) {
+      dispatch({ type: "AUTH_LOGOUT" });
+      dispatch({ type: "USER_INIT" });
+    }
+  }, [navigation]);
+
+  useEffect(() => {
+        console.log("Token : " + token);
+
+    if (token) {
+      dispatch(getUserByToken());
+      navigation.navigate('NewsMenu');
+    }
+  }, [token]);
+
+  useEffect(() => {
+    if (error) {
+      Toast.show({
+        type: 'error',
+        text1: t('error'),
+        text2: t('error_login_message'),
+      });
+    }
+  }, [error]);
 
   const onLogin = () => {
-    if (id === '' || password === '') {
-      setSuccess({
-        ...success,
-        id: false,
-        password: false,
-      });
-    } else {
-      setLoading(true);
-      dispatch(
-        authentication(true, (response) => {
-          if (response.success && id === 'test' && password === '123456') {
-            navigation.navigate('Profile');
-          } else {
-            setLoading(false);
-          }
-        })
-      );
+    if (id !== '' && password !== '') {
+      dispatch(login(id, password));
     }
   };
 

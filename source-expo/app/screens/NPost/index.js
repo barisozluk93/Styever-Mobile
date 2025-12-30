@@ -24,7 +24,7 @@ export const modes = {
 
 const NPost = ({ mode = modes.square, posts = PostListData }) => {
   const auth = useSelector((state) => state.auth);
-  const login = auth.login.success;
+  const login = auth.accessToken ? true : false;
 
   const navigation = useNavigation();
   const { t } = useTranslation();

@@ -27,7 +27,7 @@ const NotFound = () => {
           color: parseHexTransparency(colors.text, 50),
         }}
       >
-        {t('not_found')}
+        {t('no_data')}
       </Text>
     </View>
   );

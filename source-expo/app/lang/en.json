@@ -45,8 +45,7 @@
   "account": "Account",
   "change_language": "Change Language",
   "password": "Password",
-  "re_password": "Re-Password",
-  "password_confirm": "Password Confirm",
+  "password_confirm": "New Password Confirm",
   "confirm": "Confirm",
   "contact_us": "Contact Us",
   "contact_details": "Contact Details",
@@ -404,5 +403,19 @@
   "platinumProperty4": "8 YouTube videos (2 per pet)",
   "platinumProperty5": "Extended bio",
   "platinumProperty6": "AI powered bio writer",
-  "pay": "Pay"
-}
+  "pay": "Pay",
+
+  "success": "Success!",
+  "success_message": "Transaction successfuly completed.",
+  "error": "Error!",
+  "error_login_message": "Invalid username or password.",
+  "system": "System",
+  "username": "Username",
+  "current_password": "Current Password",
+  "new_password": "New Password",
+  "re_password": "Re-Password",
+
+  "no_data": "No data available."
+
+
+} 

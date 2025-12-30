@@ -1,11 +1,12 @@
 {
   "expo": {
-    "name": "RIPMyFriend",
-    "slug": "RIPMyFriend",
+    "name": "styever",
+    "slug": "styever",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/rip-logo.jpeg",
+    "icon": "./assets/icon.png",
     "splash": {
+      "image": "./assets/icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#174e3b"
     },
@@ -14,14 +15,16 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
+      "icon": "./assets/icon.png",
       "supportsTablet": true,
-      "bundleIdentifier": "com.huynh.maziReactNative"
+      "bundleIdentifier": "com.klcsoft.styever"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "package": "com.klcsoft.styever"
     },
     "web": {
       "favicon": "./assets/favicon.png"

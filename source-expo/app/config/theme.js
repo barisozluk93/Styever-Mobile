@@ -19,7 +19,7 @@ export const BaseColor = {
   pinkLightColor: '#FF5E80',
   pinkDarkColor: '#F90030',
   accentColor: '#4A90A4',
-  darkgreenColor: '#174e3b'
+  darkgreenColor: '#0A4A32'
 };
 
 /**
@@ -31,9 +31,9 @@ export const ThemeSupport = [
     light: {
       dark: false,
       colors: {
-        primary: '#2e604f',
-        primaryDark: '#174e3b',
-        primaryLight: '#457162',
+        primary: '#0A4A32',
+        primaryDark: '#022d1c',
+        primaryLight: '#3E8C6F',
         accent: '#FF8A65',
         background: 'white',
         card: '#F5F5F5',
@@ -44,9 +44,9 @@ export const ThemeSupport = [
     dark: {
       dark: true,
       colors: {
-        primary: '#2e604f',
-        primaryDark: '#174e3b',
-        primaryLight: '#457162',
+        primary: '#0A4A32',
+        primaryDark: '#022d1c',
+        primaryLight: '#3E8C6F',
         accent: '#FF8A65',
         background: '#010101',
         card: '#121212',
@@ -210,9 +210,9 @@ export const DefaultTheme = {
   light: {
     dark: false,
     colors: {
-      primary: '#2e604f',
-      primaryDark: '#174e3b',
-      primaryLight: '##457162',
+      primary: '#0A4A32',
+      primaryDark: '#022d1c',
+      primaryLight: '#3E8C6F',
       accent: '#FF8A65',
       background: 'white',
       card: '#F5F5F5',
@@ -223,9 +223,9 @@ export const DefaultTheme = {
   dark: {
     dark: true,
     colors: {
-      primary: '#2e604f',
-      primaryDark: '#174e3b',
-      primaryLight: '##457162',
+      primary: '#0A4A32',
+      primaryDark: '#022d1c',
+      primaryLight: '#3E8C6F',
       accent: '#FF8A65',
       background: '#010101',
       card: '#121212',
@@ -254,7 +254,7 @@ export const useTheme = () => {
   const forceDark = useSelector((state) => state.application.force_dark);
   const themeStorage = useSelector((state) => state.application.theme);
   const listTheme = ThemeSupport.filter((item) => item.theme === themeStorage);
-  const theme = listTheme.length > 0 ? listTheme[0] : DefaultTheme;
+  const theme = DefaultTheme;
 
   if (forceDark) {
     return { theme: theme.dark, colors: theme.dark.colors };
