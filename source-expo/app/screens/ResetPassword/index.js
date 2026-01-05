@@ -25,8 +25,6 @@ const ResetPassword = (props) => {
   const onConfirm = async () => {
 
     resetPasswordRequest(email).then(response => {
-          console.log("aaa : ")
-
       if (response.isSuccess) {
         Toast.show({
           type: 'success',

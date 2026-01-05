@@ -15,13 +15,14 @@ import NFavourite from '@/screens/NFavourite';
 import { tabBarIcon, tabBarIconHaveNoty, BottomTabNavigatorMazi } from '@/navigation/components';
 import Pricing from '@/screens/Pricing';
 import Payment from '@/screens/Payment';
+import NPostEditNew from '@/screens/NPostEditNew';
 
 export const NewsTabScreens = {
   NHome: {
     component: NPost,
     options: {
-      title: 'home',
-      tabBarIcon: ({ color }) => tabBarIcon({ color, name: 'home' }),
+      title: 'memories',
+      tabBarIcon: ({ color }) => tabBarIcon({ color, name: 'photo-video' }),
     },
   },
   // NCategory: {
@@ -83,6 +84,12 @@ export default {
     component: NPostDetail,
     options: {
       title: 'post_detail',
+    },
+  },
+  NPostEditNew: {
+    component: NPostEditNew,
+    options: {
+      title: 'post_view',
     },
   },
   NSearch: {

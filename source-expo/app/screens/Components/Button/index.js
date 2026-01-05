@@ -151,7 +151,7 @@ const ButtonReview = ({ navigation }) => {
             <Button
               style={{ marginVertical: 4 }}
               round
-              icon={<Icon style={{ marginHorizontal: 5 }} name="home" color="white" size={16} />}
+              icon={<Icon style={{ marginHorizontal: 5 }} name="memories" color="white" size={16} />}
             >
               Icon
             </Button>

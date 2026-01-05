@@ -21,6 +21,9 @@ export { default as Avatars } from './Avatars';
 export { default as RangeSlider } from './RangeSlider';
 export { PlaceholderLine, Placeholder } from './Placeholder';
 export { default as ModalOption } from './ModalOption';
+export { default as ModalLike } from './ModalLike';
+export { default as ModalComment } from './ModalComment';
+export { default as MediaSlider } from './MediaSlider';
 
 // Card components
 export { default as Card } from './Card/Card';

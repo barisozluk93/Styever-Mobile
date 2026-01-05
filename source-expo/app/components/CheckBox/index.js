@@ -10,10 +10,11 @@ const CheckBox = ({
   uncheckedIcon = 'square',
   checked = true,
   color = '',
+  disabled = false
 }) => {
   const { colors } = useTheme();
   return (
-    <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center' }} onPress={onPress}>
+    <TouchableOpacity disabled={disabled} style={{ flexDirection: 'row', alignItems: 'center' }} onPress={onPress}>
       <Icon solid={checked} name={checked ? checkedIcon : uncheckedIcon} color={color || colors.text} size={24} />
       <Text body1 style={{ paddingHorizontal: 8 }}>
         {title}

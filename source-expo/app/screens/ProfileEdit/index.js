@@ -75,7 +75,8 @@ const ProfileEdit = (props) => {
       <ScrollView>
         <View style={styles.contain}>
           <View>
-            <Image source={{ uri: `data:image/*;base64,${image}` }} style={styles.thumb} borderRadius={50} />
+            {user.fileResult && <Image source={{ uri: `data:image/*;base64,${image}` }} style={styles.thumb} borderRadius={50} />}
+            {!user.fileResult && <Image source={image} style={styles.thumb} borderRadius={50} />}
           </View>
           <View style={styles.contentTitle}>
             <Text headline semibold>

@@ -29,7 +29,6 @@
   "discover_channels": "Discover Channels",
   "description_discover_channels": "Science, Tech Engineer, Art & Math",
   "categories": "Categories",
-  "category": "Category",
   "pets": "Pets",
   "bird": "Bird",
   "cat": "Cat",
@@ -37,7 +36,7 @@
   "fish": "Fish",
   "hamster": "Hamster",
   "horse": "Horse",
-  "turtle": "Kaplumbağa",
+  "turtle": "Turtle",
   "home": "Home",
   "pricing": "Payment Plan",
   "posts": "Posts",
@@ -303,7 +302,6 @@
   "process": "Process",
   "sort": "Sort",
   "tickets": "Tickets",
-  "comments": "Comments",
   "on_hold": "On Hold",
   "on_going": "On Going",
   "edit": "Edit",
@@ -415,7 +413,18 @@
   "new_password": "New Password",
   "re_password": "Re-Password",
 
-  "no_data": "No data available."
-
+  "no_data": "No data available.",
+  "category": "Category",
+  "birth_date": "Birth Date",
+  "death_date": "Death Date",
+  "prev": "Prev.",
+  "next": "Next",
+  "like": "Like",
+  "comment": "Comment",
+  "comments": "Comments",  
+  "memories": "Memories",
+  "memory": "Memory",   
+  "private": "Private",
+  "open_to_comment": "Open To Comment"   
 
 } 

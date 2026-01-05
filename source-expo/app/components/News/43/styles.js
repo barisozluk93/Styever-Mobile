@@ -1,31 +1,93 @@
 import { StyleSheet } from 'react-native';
-import * as Utils from '@/utils';
-import { BaseColor } from '@/config';
 
 export default StyleSheet.create({
-  imageBackground: {
-    height: ((Utils.getWidthDevice() - 40) * 3) / 4,
-    width: '100%',
+  card: {
+    width: "100%",
+    flexDirection: "row",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  viewBackground: {
+
+  image: {
+    width: 120,
+    height: 168,
+    borderTopLeftRadius: 8,
+    borderBottomLeftRadius: 8,
+    overflow: 'hidden',
+    marginRight: 12,
+  },
+
+  content: {
     flex: 1,
-    alignItems: 'flex-start',
-    justifyContent: 'flex-end',
-    padding: 10,
+    paddingTop: 8,
+    paddingBottom: 8,
+    paddingRight: 8
   },
-  viewItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 5,
+
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+    paddingBottom: 8,
+    borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  thumb: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: 5,
+
+  name: {
+    fontSize: 16,
   },
-  styleThumb: {
-    borderWidth: 1,
-    borderColor: BaseColor.whiteColor,
+
+  stats: {
+    flexDirection: "row",
+  },
+
+  statItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginLeft: 10,
+  },
+
+  statText: {
+    marginLeft: 6,
+    fontSize: 16
+  },
+
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginVertical: 4,
+  },
+
+  label: {
+    color: "#6B7280",
+    fontSize: 12,
+  },
+
+  value: {
+    fontSize: 12,
+    marginLeft: 6,
+  },
+
+  iconValue: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  footer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 12,
+    paddingTop: 8,
+    borderTopWidth: StyleSheet.hairlineWidth,
+  },
+
+  footerText: {
+    marginLeft: 6,
+    fontSize: 12,
   },
 });
+

@@ -4,11 +4,13 @@ import { useTheme } from '@/config';
 import Icon from '@/components/Icon';
 import Text from '@/components/Text';
 import ModalFilter from './ModalFilter';
+import { useTranslation } from 'react-i18next';
 
 const PickerSelect = ({ label = '', options = [], value = {}, onChange = () => {} }) => {
   const { colors } = useTheme();
   const [modalVisible, setModalVisible] = useState(false);
-
+  const { t } = useTranslation();
+  
   const onSave = (itemSelected) => {
     onChange(itemSelected);
     setModalVisible(false);
@@ -18,7 +20,7 @@ const PickerSelect = ({ label = '', options = [], value = {}, onChange = () => {
 
   return (
     <View>
-      <Text numberOfLines={1} footnote bold>
+      <Text numberOfLines={1} headline bold>
         {label}
       </Text>
       <TouchableOpacity
@@ -35,9 +37,9 @@ const PickerSelect = ({ label = '', options = [], value = {}, onChange = () => {
         onPress={() => setModalVisible(true)}
       >
         <Text footnote style={{ flex: 1 }} numberOfLines={1}>
-          {value?.name}
+          {t(value?.name)}
         </Text>
-        <Icon name="chevron-down" color={colors.tex} />
+        <Icon name="chevron-down" color={colors.text} />
       </TouchableOpacity>
 
       <ModalFilter

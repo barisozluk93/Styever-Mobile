@@ -8,7 +8,7 @@ import Loading from './Loading';
 const NewsGrid = ({
   title = '',
   style = {},
-  image = Images.news,
+  image = '',
   onPress = () => {},
   loading,
   imageStyle = {},
@@ -23,7 +23,7 @@ const NewsGrid = ({
   return (
     <TouchableOpacity style={[styles.container, style]} onPress={onPress}>
       <View style={[styles.content, { backgroundColor: colors.background }]}>
-        <ImageBackground source={image} style={[styles.imageBackground, imageStyle]} borderRadius={8} />
+        <ImageBackground source={{ uri: `data:image/*;base64,${image}` }} style={[styles.imageBackground, imageStyle]} borderRadius={8} />
         {componentTitle ? (
           componentTitle
         ) : (

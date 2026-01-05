@@ -114,8 +114,8 @@ const MusicMenu = () => {
         name="MaziIntro"
         component={Apps}
         options={{
-          tabBarLabel: t('home'),
-          tabBarIcon: ({ color }) => <Icon name="home" color={color} size={18} />,
+          tabBarLabel: t('memories'),
+          tabBarIcon: ({ color }) => <Icon name="memories" color={color} size={18} />,
         }}
       />
       <Tab.Screen

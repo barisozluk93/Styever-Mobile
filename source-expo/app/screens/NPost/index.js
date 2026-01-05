@@ -1,115 +1,57 @@
-import { useEffect, useRef, useState } from 'react';
-import { Animated, Platform, RefreshControl, View } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Animated, Platform, RefreshControl, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useNavigation } from '@react-navigation/native';
-import { PostListData } from '@/data';
-import { FilterSort, Header, Icon, News169, News43, NewsGrid, NewsList, SafeAreaView, Text } from '@/components';
-import { BaseStyle, useTheme } from '@/config';
-// Load sample data
-import * as Utils from '@/utils';
-import styles from './styles';
-import { AuthActions } from '@/actions';
-import { useSelector } from 'react-redux';
-
-let timeoutChangeMode = null;
-
-const { authentication } = AuthActions;
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { Header, Icon, ModalComment, ModalLike, News43, NotFound, SafeAreaView, Tag, Text } from '@/components';
+import { BaseColor, BaseStyle, Images, useTheme } from '@/config';
+import { useDispatch, useSelector } from 'react-redux';
+import { listMemory } from '@/actions/memory';
+import { dislikeRequest, likeRequest } from '@/apis/memoryApi';
 
 export const modes = {
   square: 'square',
-  bars: 'bars',
-  thList: 'th-list',
-  thLarge: 'th-large',
 };
 
-const NPost = ({ mode = modes.square, posts = PostListData }) => {
-  const auth = useSelector((state) => state.auth);
-  const login = auth.accessToken ? true : false;
+const NPost = ({ mode = modes.square }) => {
+  const { user } = useSelector((state) => state.user);
+  const login = user ? true : false;
 
+  const dispatch = useDispatch();
   const navigation = useNavigation();
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const { loading, memories, page, totalPages, searchTerm, categoryId } = useSelector(state => state.memory);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [likes, setLikes] = useState([]);
+  const [showLikesAction, setShowLikesAction] = useState(false);
+  const [memoryId, setMemoryId] = useState();
+  const [showCommentsAction, setShowCommentsAction] = useState(false);
   const [refreshing] = useState(false);
   const [modeView, setModeView] = useState(mode);
-  const [list] = useState(posts);
-  const [loading, setLoading] = useState(true);
   const scrollAnim = useRef(new Animated.Value(0)).current;
-  const offsetAnim = useRef(new Animated.Value(0)).current;
-  const clampedScroll = useRef(
-    Animated.diffClamp(
-      Animated.add(
-        scrollAnim.interpolate({
-          inputRange: [0, 1],
-          outputRange: [0, 1],
-          extrapolateLeft: 'clamp',
-        }),
-        offsetAnim
-      ),
-      0,
-      40
-    )
-  ).current;
 
-  useEffect(() => {
-    setTimeout(() => {
-      setLoading(false);
-    }, 1000);
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
 
-  const onChangeSort = () => {};
+      return () => {
+        dispatch({ type: 'MEMORY_INIT' });
+      };
+    }, [currentPage, searchTerm, categoryId])
+  );
 
-  /**
-   * @description Open modal when filterring mode is applied
-   * @author Passion UI <passionui.com>
-   * @date 2019-09-01
-   */
+  const fetchData = () => {
+    dispatch(listMemory(currentPage, 4, searchTerm, categoryId));
+  }
+
   const onFilter = () => {
     navigation.navigate('NFilter');
-  };
-
-  /**
-   * @description Open modal when view mode is pressed
-   * @author Passion UI <passionui.com>
-   * @date 2019-09-01
-   */
-  const onChangeView = () => {
-    setLoading(true);
-    clearTimeout(timeoutChangeMode);
-    timeoutChangeMode = setTimeout(() => {
-      setLoading(false);
-    }, 1000);
-    Utils.enableExperimental();
-    let modeInline = 'square';
-    switch (modeView) {
-      case 'square':
-        modeInline = 'bars';
-        break;
-      case 'bars':
-        modeInline = 'th-list';
-        break;
-      case 'th-list':
-        modeInline = 'th-large';
-        break;
-      case 'th-large':
-        modeInline = 'square';
-        break;
-
-      default:
-        break;
-    }
-    setModeView(modeInline);
   };
 
   const getTotalCol = () => {
     switch (modeView) {
       case 'square':
         return 1;
-      case 'bars':
-        return 1;
-      case 'th-list':
-        return 1;
-      case 'th-large':
-        return 2;
       default:
         return 1;
     }
@@ -118,6 +60,80 @@ const NPost = ({ mode = modes.square, posts = PostListData }) => {
   const goPostDetail = (item) => () => {
     navigation.navigate('NPostDetail', { item: item });
   };
+
+  const openLikedList = (item) => {
+    setLikes([]);
+    setLikes([...item.likes]);
+    setShowLikesAction(true);
+  };
+
+    const like = (item) => {
+      if (user) {
+        if (item.likesCount > 0 && item.likes.filter(f => f.userId === user.id)) {
+          dislikeRequest(item.id, user.id).then(response => {
+            if (response.isSuccess) {
+              fetchData();
+              Toast.show({
+                  type: 'success',
+                  text1: t('success'),
+                  text2: t('success_message'),
+                });
+            }
+            else {
+              Toast.show({
+                type: 'error',
+                text1: t('error'),
+                text2: t('error_file_message'),
+              });
+            }
+          }).catch(error => {
+            Toast.show({
+              type: 'error',
+              text1: t('error'),
+              text2: t('error_file_message'),
+            });
+          })
+        }
+        else {
+          likeRequest(0, item.id, user.id).then(response => {
+            if (response.isSuccess) {
+                fetchData();
+  
+                Toast.show({
+                  type: 'success',
+                  text1: t('success'),
+                  text2: t('success_message'),
+                });
+            }
+            else {
+              Toast.show({
+                type: 'error',
+                text1: t('error'),
+                text2: t('error_file_message'),
+              });
+            }
+          }).catch(error => {
+            Toast.show({
+              type: 'error',
+              text1: t('error'),
+              text2: t('error_file_message'),
+            });
+          })
+        }
+      }
+    }
+
+  const openCommentList = (item) => {
+    if(item.isOpenToComment) {
+      setMemoryId();
+      setMemoryId(item.id);
+      setShowCommentsAction(true);
+    }
+  };
+
+  const onProccessSuccess = () => {
+    fetchData();
+  }
 
   const renderItem = ({ item, index }) => {
     switch (modeView) {
@@ -128,75 +144,102 @@ const NPost = ({ mode = modes.square, posts = PostListData }) => {
             loading={loading}
             style={{ marginVertical: 8 }}
             name={item.name}
-            description={item.description}
-            title={item.title}
-            image={item.image}
+            deathDate={item.deathDate}
+            birthDate={item.birthDate}
+            postDate={item.postDate}
+            username={item.userName}
+            category={item.category}
+            commentCount={item.commentsCount}
+            likeCount={item.likesCount}
+            image={(item.files && item.files.length > 0) ? item.files.filter(f => f.isPrimary)[0]?.fileResult?.fileContents : Images.avata6}
+            fileResult={(item.files && item.files.length > 0) ? item.files.filter(f => f.isPrimary)[0]?.fileResult?.fileContents : undefined}
+            isLiked={login ? (item.likesCount > 0 ? (item.likes.filter(f => f.userId === user.id) ? true : false) : false) : false}
             onPress={goPostDetail(item)}
-          />
-        );
-      case 'bars':
-        return (
-          <News169
-            avatar={item.avatar}
-            loading={loading}
-            style={{ marginVertical: 8 }}
-            name={item.name}
-            description={item.description}
-            title={item.title}
-            image={item.image}
-            onPress={goPostDetail(item)}
+            onLikePress={() => like(item)}
+            onLikeListPress={() => openLikedList(item)}
+            onCommentPress={() => openCommentList(item)}
           />
         );
 
-      case 'th-list':
-        return (
-          <NewsList
-            avatar={item.avatar}
-            loading={loading}
-            style={{ marginVertical: 8 }}
-            description={item.description}
-            title={item.title}
-            subtitle={item.subtitle}
-            date={item.date}
-            image={item.image}
-            onPress={goPostDetail(item)}
-          />
-        );
-      case 'th-large':
-        return (
-          <NewsGrid
-            avatar={item.avatar}
-            loading={loading}
-            style={{
-              paddingLeft: index % 2 === 0 ? 0 : 15,
-              paddingBottom: 15,
-            }}
-            image={item.image}
-            description={item.description}
-            title={item.title}
-            onPress={goPostDetail(item)}
-          />
-        );
       default:
         break;
     }
   };
 
   const renderList = () => {
-    const navbarTranslate = clampedScroll.interpolate({
-      inputRange: [0, 40],
-      outputRange: [0, -40],
-      extrapolate: 'clamp',
-    });
-    const android = Platform.OS === 'android';
     return (
       <View style={{ flex: 1 }}>
-        <Animated.FlatList
+
+        {!loading &&
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              paddingVertical: 16,
+              paddingLeft: 8,
+              borderBottomWidth: StyleSheet.hairlineWidth,
+              borderBottomColor: colors.border,
+            }}
+          >
+            <View style={{ flex: 1, alignItems: "flex-start" }}>
+              <Tag
+                gray
+                style={{
+                  borderRadius: 3,
+                  backgroundColor: colors.primary,
+                  paddingVertical: 3,
+                }}
+                textStyle={{
+                  paddingHorizontal: 4,
+                  fontSize: 15,
+                  color: BaseColor.whiteColor,
+                }}
+                icon={<Icon name="sliders-h" color={BaseColor.whiteColor} size={15} />}
+                onPress={() => onFilter()}
+              >
+                {t("filter")}
+              </Tag>
+            </View>
+            {memories && memories.length > 0 && <View
+              style={{
+                position: "absolute",
+                left: 0,
+                right: 0,
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <TouchableOpacity
+                disabled={page === 1}
+                onPress={() => setCurrentPage(page - 1)}
+                style={{ marginHorizontal: 6, opacity: page === 1 ? 0.4 : 1 }}
+              >
+                <Text style={{ paddingVertical: 2.5, borderRadius: 8, height: 25, textAlign: "center", color: colors.text, fontSize: 16 }}>‹ {t('prev')}</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity disabled={true}>
+                <Text style={{ paddingVertical: 1.75, borderRadius: 8, width: 30, height: 25, textAlign: "center", color: BaseColor.whiteColor, backgroundColor: colors.primary, fontSize: 16 }}>
+                  {page}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                disabled={page === totalPages}
+                onPress={() => setCurrentPage(page + 1)}
+                style={{ marginHorizontal: 6, opacity: page === totalPages ? 0.4 : 1 }}
+              >
+                <Text style={{ paddingVertical: 2.5, borderRadius: 8, height: 25, textAlign: "center", color: colors.text, fontSize: 16 }}>{t('next')} ›</Text>
+              </TouchableOpacity>
+            </View>}
+          </View>
+        }
+        {!loading && memories && memories.length === 0 && <NotFound />}
+
+        {!loading && <Animated.FlatList
           showsHorizontalScrollIndicator={false}
           showsVerticalScrollIndicator={false}
-          contentInset={{ top: 50 }}
           contentContainerStyle={{
-            marginTop: android ? 50 : 0,
             paddingHorizontal: 20,
           }}
           refreshControl={
@@ -204,7 +247,7 @@ const NPost = ({ mode = modes.square, posts = PostListData }) => {
               colors={[colors.primary]}
               tintColor={colors.primary}
               refreshing={refreshing}
-              onRefresh={() => {}}
+              onRefresh={() => { }}
             />
           }
           scrollEventThrottle={1}
@@ -220,15 +263,41 @@ const NPost = ({ mode = modes.square, posts = PostListData }) => {
             ],
             { useNativeDriver: true }
           )}
-          data={list}
+          data={memories}
           key={getTotalCol()}
           numColumns={getTotalCol()}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
-        />
-        <Animated.View style={[styles.navbar, { transform: [{ translateY: navbarTranslate }] }]}>
-          <FilterSort modeView={modeView} onChangeSort={onChangeSort} onChangeView={onChangeView} onFilter={onFilter} />
-        </Animated.View>
+        />}
+
+        {loading ? (
+          <ActivityIndicator size="large" style={{ flex: 1 }} />
+        ) : null
+        }
+
+        {showLikesAction && likes && likes.length > 0 && <ModalLike
+          options={likes}
+          isVisible={showLikesAction}
+          onSwipeComplete={() => {
+            setShowLikesAction(false);
+          }}
+          onBackdropPress={() => {
+            setShowLikesAction(false)
+          }}
+        />}
+
+        {showCommentsAction && <ModalComment
+          isProccessSuccess={() => onProccessSuccess()}
+          memoryId={memoryId}
+          isVisible={showCommentsAction}
+          onSwipeComplete={() => {
+            setShowCommentsAction(false);
+          }}
+          onBackdropPress={() => {
+            setShowCommentsAction(false)
+          }}
+        />}
+
       </View>
     );
   };
@@ -236,20 +305,17 @@ const NPost = ({ mode = modes.square, posts = PostListData }) => {
   return (
     <SafeAreaView style={BaseStyle.safeAreaView} edges={['right', 'top', 'left']}>
       <Header
-        title={t('home')}
-        renderRight={() => {
-          return <Icon name="search" size={20} color={colors.primary} />;
-        }}
-        onPressRight={() => {
-          navigation.navigate('NSearchHistory');
-        }}
+        title={t('memories')}
         renderLeft={() => {
-          return <Text headline primaryColor style={{width: 100}}>
+          return <Text headline primaryColor style={{ width: 100 }}>
             {t('create')}
           </Text>;
         }}
         onPressLeft={() => {
-          if(!login) navigation.navigate('Pricing');
+          if (!login) { navigation.navigate('Pricing') }
+          else {
+            navigation.navigate('NPostEditNew')
+          }
         }}
       />
       {renderList()}

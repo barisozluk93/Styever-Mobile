@@ -28,6 +28,8 @@ const Profile = (props) => {
   const onLogOut = () => {
     dispatch(logout());
     dispatch({type: "USER_INIT"});
+
+    navigation.navigate('NHome');
   };
 
   const onLogIn = () => {
@@ -55,6 +57,7 @@ const Profile = (props) => {
                 textFirst={user.name + " " + user.surname}
                 textSecond={user.username}
                 textThird={user.email}
+                fileResult={user.fileResult}
                 onPress={() => {}}
               />
             )}

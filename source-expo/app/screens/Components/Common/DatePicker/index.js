@@ -24,8 +24,8 @@ const DatePicker = ({ label, onChange, value = new Date(), formatDisplay = 'YYYY
   };
 
   return (
-    <View>
-      <Text footnote bold>
+    <View style={{width: "48.5%", marginRight: 10}}>
+      <Text headline bold>
         {label}
       </Text>
       <TouchableOpacity

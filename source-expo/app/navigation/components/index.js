@@ -38,7 +38,7 @@ export const BottomTabNavigatorMazi = ({ tabScreens = {} }) => {
   const { colors } = useTheme();
   return (
     <BottomTab.Navigator
-      initialRouteName="Home"
+      initialRouteName="Memories"
       screenOptions={{
         headerShown: false,
         tabBarShowIcon: true,

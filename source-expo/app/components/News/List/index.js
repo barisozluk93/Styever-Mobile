@@ -9,7 +9,7 @@ import styles from './styles';
 const NewsList = ({
   style = {},
   onPress = () => {},
-  image = Images.news,
+  image = '',
   title = '',
   subtitle = '',
   date = '',
@@ -20,7 +20,7 @@ const NewsList = ({
   }
   return (
     <TouchableOpacity style={[styles.contain, style]} onPress={onPress} activeOpacity={0.9}>
-      <Image source={image} style={styles.image} borderRadius={8} />
+      <Image source={{ uri: `data:image/*;base64,${image}` }} style={styles.image} borderRadius={8} />
       <View
         style={{
           paddingHorizontal: 10,

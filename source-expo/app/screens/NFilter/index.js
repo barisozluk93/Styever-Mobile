@@ -1,66 +1,86 @@
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, TouchableOpacity, View } from 'react-native';
 import { BaseColor, BaseStyle, useTheme } from '@/config';
 import * as Utils from '@/utils';
-import { Header, Icon, SafeAreaView, Tag, Text, TextInput } from '@/components';
+import { Button, Header, Icon, SafeAreaView, Tag, Text, TextInput } from '@/components';
 import styles from './styles';
+import { useDispatch, useSelector } from 'react-redux';
+import { isNullOrEmpty } from '@/utils/utility';
 
-const categoryInit = [
-  { id: '1', name: 'bird' },
-  { id: '2', name: 'cat' },
-  { id: '3', name: 'dog' },
-  { id: '4', name: 'fish' },
-  { id: '6', name: 'hamster' },
-  { id: '8', name: 'horse' },
-  { id: '10', name: 'turtle' }
-];
-
-const facilitiesInit = [
-  { id: '1', icon: 'wifi', name: 'News', checked: true },
-  { id: '2', icon: 'bath', name: 'Impeachment' },
-  { id: '3', icon: 'paw', name: 'West Bank' },
-  { id: '4', icon: 'bus', name: 'Donald Trump' },
-  { id: '5', icon: 'cart-plus', name: 'Corona Virus' },
-  { id: '6', icon: 'clock', name: 'White House' },
+const categories = [
+  { value: '1', text: 'bird' },
+  { value: '2', text: 'cat' },
+  { value: '3', text: 'dog' },
+  { value: '4', text: 'fish' },
+  { value: '5', text: 'hamster' },
+  { value: '6', text: 'horse' },
+  { value: '7', text: 'turtle' }
 ];
 
 const NFilter = (props) => {
   const { navigation } = props;
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const dispatch = useDispatch();
   const [search, setSearch] = useState('');
-  const [category, setCategory] = useState(categoryInit);
-  const [facilities] = useState(facilitiesInit);
+  const [category, setCategory] = useState();
   const [scrollEnabled, setScrollEnabled] = useState(true);
+  const { categoryId, searchTerm } = useSelector(state => state.memory);
+
+  const renderItem = ({ item, checked, onPress }) => {
+    return (
+      <Tag
+        key={item.id}
+        icon={checked ? <Icon style={{ marginRight: 5 }} name="check" color={BaseColor.whiteColor} size={16} /> : null}
+        primary={checked}
+        outline={!checked}
+        style={{
+          marginTop: 8,
+          marginRight: 8,
+          height: 28,
+          minWidth: 100,
+        }}
+        onPress={onPress}
+      >
+        {t(item.text)}
+      </Tag>
+    );
+  };
 
   useEffect(() => {
-    category.map((item) => {
-      item.name = t(item.name);
-    })
-  }, []);
+    if(searchTerm && !isNullOrEmpty(searchTerm)) {
+      setSearch(searchTerm);
+    }
 
-  /**
-   * @description Called when filtering option > category
-   * @author Passion UI <passionui.com>
-   * @date 2019-09-01
-   * @param {*} select
-   */
-  const onSelectCategory = (select) => {
-    const categoryNew = category.map((item) => {
-      if (item.name === select.name) {
-        return {
-          ...item,
-          checked: true,
-        };
-      } else {
-        return {
-          ...item,
-          checked: false,
-        };
-      }
-    });
-    setCategory(categoryNew);
+    if(categoryId && !isNullOrEmpty(categoryId) && !isNaN(categoryId)) {
+      setCategory(categoryId);
+    }        
+  }, [categoryId, searchTerm]);
+
+  const onClear = () => {
+    setSearch();
+    setCategory();
+  };
+
+  const onFilter = () => {
+    var filter = {};
+    if(search) {
+      filter.searchTerm = search;
+    }
+    else{
+      filter.searchTerm = undefined;
+    }
+
+    if(category) {
+      filter.categoryId = category;
+    }
+    else{
+      filter.categoryId = undefined;
+    }
+
+    dispatch({ type: 'MEMORY_SET_FILTER', payload: filter ? filter : null });
+    navigation.goBack();
   };
 
   return (
@@ -73,12 +93,12 @@ const NFilter = (props) => {
         renderRight={() => {
           return (
             <Text headline primaryColor numberOfLines={1}>
-              {t('apply')}
+              {t('clear')}
             </Text>
           );
         }}
         onPressLeft={() => navigation.goBack()}
-        onPressRight={() => navigation.goBack()}
+        onPressRight={() => onClear()}
       />
       <ScrollView
         scrollEnabled={scrollEnabled}
@@ -87,79 +107,42 @@ const NFilter = (props) => {
         }
       >
         <View style={{ paddingHorizontal: 20, paddingTop: 10 }}>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              marginBottom: 20,
-            }}
-          >
-            {/* <TextInput
-              style={BaseStyle.textInput}
-              onChangeText={(text) => setSearch(text)}
-              autoCorrect={false}
-              placeholder={t('enter_keywords')}
-              placeholderTextColor={BaseColor.grayColor}
-              value={search}
-              selectionColor={colors.primary}
-              onSubmitEditing={() => {
-                navigation.goBack();
-              }}
-            /> */}
-            <TouchableOpacity
-              onPress={() => {
-                setSearch('');
-              }}
-              style={styles.btnClearSearch}
-            >
-              <Icon name="times" size={18} color={BaseColor.grayColor} />
-            </TouchableOpacity>
-          </View>
           <Text headline semibold>
+            {t('search')}
+          </Text>
+          <View style={[styles.wrapContent, { marginTop: 8 }]}>
+            <TextInput
+              value={search}
+              onChangeText={(val) => setSearch(val)}
+              placeholder={t('search')}
+              iconLeft={<Icon name="search" color={colors.border} style={{ marginRight: 8 }} size={18} />}
+            />
+          </View>
+          <Text headline semibold style={{ marginTop: 20 }}>
             {t('pets')}
           </Text>
           <View style={styles.wrapContent}>
-            {category.map((item) => {
-              return (
-                <Tag
-                  primary={item.checked}
-                  outline={!item.checked}
-                  key={item.id}
-                  style={{
-                    marginTop: 8,
-                    marginRight: 8,
-                    height: 28,
-                  }}
-                  onPress={() => onSelectCategory(item)}
-                >
-                  {item.name}
-                </Tag>
-              );
-            })}
+            {categories.map((item, index) => (
+              <Fragment key={index}>
+                {renderItem({
+                  item,
+                  index,
+                  checked: category ? item.value === category : false,
+                  onPress: () => setCategory(item.value),
+                })}
+              </Fragment>
+            ))}
           </View>
-          {/* <Text headline semibold style={{ marginTop: 20 }}>
-            {t('tags').toUpperCase()}
-          </Text>
-          <View style={styles.wrapContent}>
-            {facilities.map((item) => {
-              return (
-                <Tag
-                  chip
-                  key={item.id}
-                  style={{
-                    marginTop: 8,
-                    marginRight: 8,
-                    paddingHorizontal: 8,
-                    height: 28,
-                  }}
-                >
-                  {item.name}
-                </Tag>
-              );
-            })}
-          </View> */}
         </View>
       </ScrollView>
+      <View style={{ paddingHorizontal: 20, marginBottom: 20 }}>
+        <Button
+          full
+          onPress={onFilter}
+        >
+          {t('apply')}
+        </Button>
+      </View>
     </SafeAreaView>
   );
 };

@@ -29,7 +29,6 @@
   "discover_channels": "Discover Channels",
   "description_discover_channels": "Science, Tech Engineer, Art & Math",
   "categories": "Categories",
-  "category": "Category",
   "pets": "Evcil Hayvanlar",
   "bird": "Kuş",
   "cat": "Kedi",
@@ -85,7 +84,7 @@
   "duration": "Duration",
   "night": "Night",
   "search_history": "Search history",
-  "clear": "Clear",
+  "clear": "Temizle",
   "recently_viewed": "Recently viewed",
   "forgot_your_password": "Şifrenizi mi unuttunuz?",
   "hightest_rating": "Hightest Rating",
@@ -304,7 +303,6 @@
   "process": "Process",
   "sort": "Sort",
   "tickets": "Tickets",
-  "comments": "Comments",
   "on_hold": "On Hold",
   "on_going": "On Going",
   "edit": "Edit",
@@ -417,6 +415,17 @@
   "new_password": "Yeni Şifre",
   "re_password": "Re-Password",
 
-  "no_data": "Gösterilecek veri bulunamadı."
-
+  "no_data": "Gösterilecek veri bulunamadı.",
+  "category": "Türü",
+  "birth_date": "Doğum Tarihi",
+  "death_date": "Ölüm Tarihi",
+  "prev": "Önceki",
+  "next": "Sonraki",
+  "like": "Beğenme",
+  "comment": "Yorum Yap",
+  "comments": "Yorumlar",
+  "memories": "Anılar",
+  "memory": "Anı",
+  "private": "Herkese Kapalı",
+  "open_to_comment": "Yoruma Açık"   
 }

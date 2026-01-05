@@ -75,7 +75,7 @@ const ModalFilter = (props) => {
                   onPress={() => onSelectFilter(item)}
                 >
                   <Text style={{ flex: 1 }} footnote whiteColor={isChecked}>
-                    {item.name}
+                    {t(item.name)}
                   </Text>
                   {isChecked && <Icon name="check" color={colors.primary} />}
                 </TouchableOpacity>

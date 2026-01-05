@@ -78,6 +78,7 @@ const Navigator = () => {
       removeToken();
       dispatch({ type: "AUTH_LOGOUT" });
       dispatch({ type: "USER_INIT" });
+      dispatch({ type: "MEMORY_INIT" });
 
       rootNavigation.dispatch(StackActions.replace(intro ? 'NewsMenu' : 'NewsMenu'));
     }
@@ -140,7 +141,7 @@ const Navigator = () => {
         </RootStack.Navigator>
       </NavigationContainer>
       <Toast config={toastConfig} />
-      {!loading && <AssistiveTouch goToApp={goToApp} />}
+
     </View>
   );
 };

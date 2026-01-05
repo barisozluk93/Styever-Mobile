@@ -35,11 +35,9 @@ const SignIn = (props) => {
   }, [navigation]);
 
   useEffect(() => {
-        console.log("Token : " + token);
-
     if (token) {
       dispatch(getUserByToken());
-      navigation.navigate('NewsMenu');
+      navigation.navigate('NHome');
     }
   }, [token]);
 

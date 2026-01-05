@@ -8,8 +8,8 @@ import styles from './styles';
 
 const News169 = ({
   style = {},
-  image = Images.news,
-  avatar = Images.profile2,
+  image = '',
+  avatar = '',
   name = '',
   description = '',
   title = '',
@@ -22,7 +22,7 @@ const News169 = ({
 
   return (
     <TouchableOpacity style={style} onPress={onPress}>
-      <ImageBackground source={image} style={styles.imageBackground} borderRadius={8} />
+      <ImageBackground source={{ uri: `data:image/*;base64,${image}` }} style={styles.imageBackground} borderRadius={8} />
       <ProfileAuthor image={avatar} name={name} description={description} />
       <Text title3 semibold>
         {title}
