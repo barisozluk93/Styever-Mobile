@@ -4,6 +4,7 @@ const initialState = {
   searchTerm: null,
   page: null,
   pageSize: null,
+  totalPages: null,
   totalCounts: null,
   loading: false,
   error: null,
@@ -25,6 +26,7 @@ export default function MemoryReducer(state = initialState, action) {
         page: action.payload.data.page,
         pageSize: action.payload.data.pageSize,
         totalCounts: action.payload.data.totalCount,
+        totalPages: action.payload.data.totalPages,
       };
 
     case 'MEMORY_LIST_FAIL':

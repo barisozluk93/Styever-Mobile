@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Button, Header, Icon, Image, SafeAreaView, Text, TextInput } from '@/components';
 import { BaseColor, BaseStyle, Images, useTheme } from '@/config';
@@ -9,6 +9,14 @@ import { profileEdit } from '@/apis/userApi';
 import { getUserById } from '@/actions/auth';
 import { isNullOrEmpty } from '@/utils/utility';
 import Toast from 'react-native-toast-message';
+
+const successInit = {
+  email: true,
+  name: true,
+  surname: true,
+  username: true,
+  phone: true
+};
 
 const ProfileEdit = (props) => {
   const { navigation } = props;
@@ -22,43 +30,64 @@ const ProfileEdit = (props) => {
   const [email, setEmail] = useState(user.email);
   const [phone, setPhone] = useState(user.phone);
   const [image] = useState(user.fileResult ? user.fileResult.fileContents : Images.avata5);
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(successInit);
 
   const onConfirm = async () => {
-    profileEdit(user.id, email, user.fileId, name, surname, username, phone, user.roles, "***").then(response => {
-      if (response.isSuccess) {
-        dispatch(getUserById(user.id));
 
-        Toast.show({
-          type: 'success',
-          text1: t('success'),
-          text2: t('success_message'),
-        });
+    if (isNullOrEmpty(username) || isNullOrEmpty(name) || isNullOrEmpty(surname) || isNullOrEmpty(email) || isNullOrEmpty(phone)) {
+      setSuccess({
+        ...success,
+        username: !isNullOrEmpty(username) ? true : false,
+        name: !isNullOrEmpty(name) ? true : false,
+        surname: !isNullOrEmpty(surname) ? true : false,
+        email: !isNullOrEmpty(email) ? true : false,
+        phone: !isNullOrEmpty(phone) ? true : false,
+      });
+    }
+    else {
+      setLoading(true);
 
-        navigation.goBack();
-      }
-      else {
+      profileEdit(user.id, email, user.fileId, name, surname, username, phone, user.roles, "***").then(response => {
+        if (response.isSuccess) {
+          dispatch(getUserById(user.id));
+
+          Toast.show({
+            type: 'success',
+            text1: t('success'),
+            text2: t('success_message'),
+          });
+
+          setTimeout(() => {
+            setLoading(false);
+            navigation.goBack();
+          }, 500);
+        }
+        else {
+          Toast.show({
+            type: 'error',
+            text1: t('error'),
+            text2: t('error_file_message'),
+          });
+
+          setLoading(false);
+        }
+      }).catch((err) => {
         Toast.show({
           type: 'error',
           text1: t('error'),
           text2: t('error_file_message'),
         });
-      }
-    }).catch((err) => {
-      Toast.show({
-        type: 'error',
-        text1: t('error'),
-        text2: t('error_file_message'),
-      });
-    })
-  }
 
-  function isButtonDisabled() {
-    if (isNullOrEmpty(username) || isNullOrEmpty(name) || isNullOrEmpty(surname) || isNullOrEmpty(email) || isNullOrEmpty(phone)) {
-      return true;
+        setLoading(false);
+      })
     }
-
-    return false;
   }
+
+  const offsetKeyboard = Platform.select({
+    ios: 0,
+    android: 20,
+  });
 
   return (
     <SafeAreaView style={BaseStyle.safeAreaView} edges={['right', 'top', 'left']}>
@@ -72,94 +101,103 @@ const ProfileEdit = (props) => {
         }}
         onPressRight={() => { }}
       />
-      <ScrollView>
-        <View style={styles.contain}>
-          <View>
-            {user.fileResult && <Image source={{ uri: `data:image/*;base64,${image}` }} style={styles.thumb} borderRadius={50} />}
-            {!user.fileResult && <Image source={image} style={styles.thumb} borderRadius={50} />}
+
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={offsetKeyboard}
+        style={{
+          flex: 1,
+        }}
+      >
+        <ScrollView>
+          <View style={styles.contain}>
+            <View>
+              {user.fileResult && <Image source={{ uri: `data:image/*;base64,${image}` }} style={styles.thumb} borderRadius={50} />}
+              {!user.fileResult && <Image source={image} style={styles.thumb} borderRadius={50} />}
+            </View>
+            <View style={styles.contentTitle}>
+              <Text headline semibold>
+                {t('username')}
+              </Text>
+            </View>
+            <TextInput
+              style={BaseStyle.textInput}
+              onChangeText={(text) => setUsername(text)}
+              autoCorrect={false}
+              placeholder={t('username')}
+              placeholderTextColor={success.username ? BaseColor.grayColor : colors.primary}
+              value={username}
+              selectionColor={colors.primary}
+            />
+            <View style={styles.contentTitle}>
+              <Text headline semibold>
+                {t('name')}
+              </Text>
+            </View>
+            <TextInput
+              style={BaseStyle.textInput}
+              onChangeText={(text) => setName(text)}
+              autoCorrect={false}
+              placeholder={t('name')}
+              placeholderTextColor={success.name ? BaseColor.grayColor : colors.primary}
+              value={name}
+              selectionColor={colors.primary}
+            />
+            <View style={styles.contentTitle}>
+              <Text headline semibold>
+                {t('surname')}
+              </Text>
+            </View>
+            <TextInput
+              style={BaseStyle.textInput}
+              onChangeText={(text) => setSurname(text)}
+              autoCorrect={false}
+              placeholder={t('surname')}
+              placeholderTextColor={success.surname ? BaseColor.grayColor : colors.primary}
+              value={surname}
+              selectionColor={colors.primary}
+            />
+            <View style={styles.contentTitle}>
+              <Text headline semibold>
+                {t('email')}
+              </Text>
+            </View>
+            <TextInput
+              style={BaseStyle.textInput}
+              onChangeText={(text) => setEmail(text)}
+              autoCorrect={false}
+              placeholder={t('email')}
+              placeholderTextColor={success.email ? BaseColor.grayColor : colors.primary}
+              value={email}
+            />
+            <View style={styles.contentTitle}>
+              <Text headline semibold>
+                {t('phone')}
+              </Text>
+            </View>
+            <TextInput
+              style={BaseStyle.textInput}
+              onChangeText={(text) => setPhone(text)}
+              autoCorrect={false}
+              placeholder={t('phone')}
+              placeholderTextColor={success.phone ? BaseColor.grayColor : colors.primary}
+              value={phone}
+              selectionColor={colors.primary}
+            />
           </View>
-          <View style={styles.contentTitle}>
-            <Text headline semibold>
-              {t('username')}
-            </Text>
-          </View>
-          <TextInput
-            style={BaseStyle.textInput}
-            onChangeText={(text) => setUsername(text)}
-            autoCorrect={false}
-            placeholder={t('input_id')}
-            placeholderTextColor={BaseColor.grayColor}
-            value={username}
-            selectionColor={colors.primary}
-          />
-          <View style={styles.contentTitle}>
-            <Text headline semibold>
-              {t('name')}
-            </Text>
-          </View>
-          <TextInput
-            style={BaseStyle.textInput}
-            onChangeText={(text) => setName(text)}
-            autoCorrect={false}
-            placeholder={t('input_name')}
-            placeholderTextColor={BaseColor.grayColor}
-            value={name}
-            selectionColor={colors.primary}
-          />
-          <View style={styles.contentTitle}>
-            <Text headline semibold>
-              {t('surname')}
-            </Text>
-          </View>
-          <TextInput
-            style={BaseStyle.textInput}
-            onChangeText={(text) => setSurname(text)}
-            autoCorrect={false}
-            placeholder={t('input_surname')}
-            placeholderTextColor={BaseColor.grayColor}
-            value={surname}
-            selectionColor={colors.primary}
-          />
-          <View style={styles.contentTitle}>
-            <Text headline semibold>
-              {t('email')}
-            </Text>
-          </View>
-          <TextInput
-            style={BaseStyle.textInput}
-            onChangeText={(text) => setEmail(text)}
-            autoCorrect={false}
-            placeholder={t('input_email')}
-            placeholderTextColor={BaseColor.grayColor}
-            value={email}
-          />
-          <View style={styles.contentTitle}>
-            <Text headline semibold>
-              {t('phone')}
-            </Text>
-          </View>
-          <TextInput
-            style={BaseStyle.textInput}
-            onChangeText={(text) => setPhone(text)}
-            autoCorrect={false}
-            placeholder={t('input_phone')}
-            placeholderTextColor={BaseColor.grayColor}
-            value={phone}
-            selectionColor={colors.primary}
-          />
+        </ScrollView>
+        <View style={{ padding: 20 }}>
+          <Button
+            loading={loading}
+            full
+            onPress={() => {
+              onConfirm();
+            }}
+          >
+            {t('confirm')}
+          </Button>
         </View>
-      </ScrollView>
-      <View style={{ padding: 20 }}>
-        <Button
-          disabled={isButtonDisabled()}
-          full
-          onPress={() => {
-            onConfirm();
-          }}
-        >
-          {t('confirm')}
-        </Button>
-      </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };

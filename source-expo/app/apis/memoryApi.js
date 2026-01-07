@@ -1,4 +1,3 @@
-import { isDate } from "moment";
 import api from "./axiosClient";
 
 export const listMemoryRequest = async (page, pageSize, searchTerm, categoryId) => {
@@ -23,16 +22,16 @@ export const getMemoryRequest = async (memoryId) => {
 
 export const editRequest = async (id, userId, birthDate, deathDate, isPrivate, isOpenToComment, categoryId, name, text) => {
   let data = {
-      id: id,
-      userId: userId,
-      birthDate: birthDate,
-      deathDate: deathDate,
-      isPrivate: isPrivate,
-      isOpenToComment: isOpenToComment,
-      categoryId: categoryId,
-      name: name,
-      text: text,
-      isDeleted: false
+    id: id,
+    userId: userId,
+    birthDate: birthDate,
+    deathDate: deathDate,
+    isPrivate: isPrivate,
+    isOpenToComment: isOpenToComment,
+    categoryId: categoryId,
+    name: name,
+    text: text,
+    isDeleted: false
   }
 
   const response = await api.post(`Memory/Update`, data);
@@ -42,16 +41,16 @@ export const editRequest = async (id, userId, birthDate, deathDate, isPrivate, i
 
 export const saveRequest = async (id, userId, birthDate, deathDate, isPrivate, isOpenToComment, categoryId, name, text) => {
   let data = {
-      id: id,
-      userId: userId,
-      birthDate: birthDate,
-      deathDate: deathDate,
-      isPrivate: isPrivate,
-      isOpenToComment: isOpenToComment,
-      categoryId: categoryId,
-      name: name,
-      text: text,
-      isDeleted: false
+    id: id,
+    userId: userId,
+    birthDate: birthDate,
+    deathDate: deathDate,
+    isPrivate: isPrivate,
+    isOpenToComment: isOpenToComment,
+    categoryId: categoryId,
+    name: name,
+    text: text,
+    isDeleted: false
   }
 
   const response = await api.post(`Memory/Save`, data);
@@ -110,9 +109,15 @@ export const memoryFileDeleteRequest = async (id) => {
 };
 
 export const setMemoryFileIsPrimaryRequest = async (id) => {
-    const response = await api.get(`Memory/SetMemoryFileIsPrimary/${id}`);
+  const response = await api.get(`Memory/SetMemoryFileIsPrimary/${id}`);
 
-    return response.data;
+  return response.data;
+}
+
+export const getMemoryCountRequest = async (id) => {
+  const response = await api.get(`Memory/GetMemoryCount/${id}`);
+
+  return response.data;
 }
 
 

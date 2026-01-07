@@ -1,12 +1,12 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Animated, Platform, RefreshControl, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { useCallback, useRef, useState } from 'react';
+import { ActivityIndicator, Animated, RefreshControl, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import { Header, Icon, ModalComment, ModalLike, News43, NotFound, SafeAreaView, Tag, Text } from '@/components';
+import { Header, Icon, ModalComment, ModalLike, News43, News45, NotFound, SafeAreaView, Tag, Text } from '@/components';
 import { BaseColor, BaseStyle, Images, useTheme } from '@/config';
 import { useDispatch, useSelector } from 'react-redux';
 import { listMemory } from '@/actions/memory';
-import { dislikeRequest, likeRequest } from '@/apis/memoryApi';
+import { dislikeRequest, getMemoryCountRequest, likeRequest } from '@/apis/memoryApi';
 
 export const modes = {
   square: 'square',
@@ -29,6 +29,7 @@ const NPost = ({ mode = modes.square }) => {
   const [refreshing] = useState(false);
   const [modeView, setModeView] = useState(mode);
   const scrollAnim = useRef(new Animated.Value(0)).current;
+  const [isNewMemoryVisible, setIsNewMemoryVisible] = useState(true);
 
   useFocusEffect(
     useCallback(() => {
@@ -67,64 +68,64 @@ const NPost = ({ mode = modes.square }) => {
     setShowLikesAction(true);
   };
 
-    const like = (item) => {
-      if (user) {
-        if (item.likesCount > 0 && item.likes.filter(f => f.userId === user.id)) {
-          dislikeRequest(item.id, user.id).then(response => {
-            if (response.isSuccess) {
-              fetchData();
-              Toast.show({
-                  type: 'success',
-                  text1: t('success'),
-                  text2: t('success_message'),
-                });
-            }
-            else {
-              Toast.show({
-                type: 'error',
-                text1: t('error'),
-                text2: t('error_file_message'),
-              });
-            }
-          }).catch(error => {
+  const like = (item) => {
+    if (user) {
+      if (item.likesCount > 0 && item.likes.filter(f => f.userId === user.id)) {
+        dislikeRequest(item.id, user.id).then(response => {
+          if (response.isSuccess) {
+            fetchData();
+            Toast.show({
+              type: 'success',
+              text1: t('success'),
+              text2: t('success_message'),
+            });
+          }
+          else {
             Toast.show({
               type: 'error',
               text1: t('error'),
               text2: t('error_file_message'),
             });
-          })
-        }
-        else {
-          likeRequest(0, item.id, user.id).then(response => {
-            if (response.isSuccess) {
-                fetchData();
-  
-                Toast.show({
-                  type: 'success',
-                  text1: t('success'),
-                  text2: t('success_message'),
-                });
-            }
-            else {
-              Toast.show({
-                type: 'error',
-                text1: t('error'),
-                text2: t('error_file_message'),
-              });
-            }
-          }).catch(error => {
+          }
+        }).catch(error => {
+          Toast.show({
+            type: 'error',
+            text1: t('error'),
+            text2: t('error_file_message'),
+          });
+        })
+      }
+      else {
+        likeRequest(0, item.id, user.id).then(response => {
+          if (response.isSuccess) {
+            fetchData();
+
+            Toast.show({
+              type: 'success',
+              text1: t('success'),
+              text2: t('success_message'),
+            });
+          }
+          else {
             Toast.show({
               type: 'error',
               text1: t('error'),
               text2: t('error_file_message'),
             });
-          })
-        }
+          }
+        }).catch(error => {
+          Toast.show({
+            type: 'error',
+            text1: t('error'),
+            text2: t('error_file_message'),
+          });
+        })
       }
     }
+  }
 
   const openCommentList = (item) => {
-    if(item.isOpenToComment) {
+    if (item.isOpenToComment && ((!login && item.commentCount > 0) || login)) {
       setMemoryId();
       setMemoryId(item.id);
       setShowCommentsAction(true);
@@ -135,24 +136,51 @@ const NPost = ({ mode = modes.square }) => {
     fetchData();
   }
 
+  const controlIsNewMemoryVisible = () => {
+    getMemoryCountRequest(user.id).then(response => {
+      if (response.isSuccess) {
+        if (user.roles.includes(2) || user.roles.includes(3)) {
+          if (response.data >= 1) {
+            setIsNewMemoryVisible(false);
+          }
+          else {
+            setIsNewMemoryVisible(true);
+          }
+        }
+        else if (user.roles.includes(4)) {
+          if (response.data >= 4) {
+            setIsNewMemoryVisible(false);
+          }
+          else {
+            setIsNewMemoryVisible(true);
+          }
+        }
+        else {
+          setIsNewMemoryVisible(true);
+        }
+      }
+      else {
+        setIsNewMemoryVisible(true);
+      }
+    })
+  }
+
   const renderItem = ({ item, index }) => {
     switch (modeView) {
       case 'square':
         return (
-          <News43
-            avatar={item.avatar}
+          <News45
             loading={loading}
             style={{ marginVertical: 8 }}
-            name={item.name}
-            deathDate={item.deathDate}
-            birthDate={item.birthDate}
-            postDate={item.postDate}
-            username={item.userName}
-            category={item.category}
-            commentCount={item.commentsCount}
-            likeCount={item.likesCount}
+            avatar={item.userAvatar ? item.userAvatar?.fileContents : Images.avata5}
+            isAvatarExist={item.userAvatar ? true : false}
             image={(item.files && item.files.length > 0) ? item.files.filter(f => f.isPrimary)[0]?.fileResult?.fileContents : Images.avata6}
             fileResult={(item.files && item.files.length > 0) ? item.files.filter(f => f.isPrimary)[0]?.fileResult?.fileContents : undefined}
+            username={item.userName}
+            title={item.name}
+            postDate={item.postDate}
+            commentCount={item.commentsCount}
+            likeCount={item.likesCount}
             isLiked={login ? (item.likesCount > 0 ? (item.likes.filter(f => f.userId === user.id) ? true : false) : false) : false}
             onPress={goPostDetail(item)}
             onLikePress={() => like(item)}
@@ -307,9 +335,15 @@ const NPost = ({ mode = modes.square }) => {
       <Header
         title={t('memories')}
         renderLeft={() => {
-          return <Text headline primaryColor style={{ width: 100 }}>
-            {t('create')}
-          </Text>;
+          if (login) {
+            controlIsNewMemoryVisible();
+          }
+
+          if (isNewMemoryVisible) {
+            return <Text headline primaryColor style={{ width: 100 }}>
+              {t('create')}
+            </Text>;
+          }
         }}
         onPressLeft={() => {
           if (!login) { navigation.navigate('Pricing') }

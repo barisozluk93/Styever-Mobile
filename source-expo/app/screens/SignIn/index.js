@@ -9,8 +9,8 @@ import styles from './styles';
 import { getUserByToken, login } from '@/actions/auth';
 import { loadToken } from '@/utils/storage';
 import Toast from 'react-native-toast-message';
+import { isNullOrEmpty } from '@/utils/utility';
 
-const { authentication } = AuthActions;
 const successInit = {
   id: true,
   password: true,
@@ -24,7 +24,8 @@ const SignIn = (props) => {
   const [id, setId] = useState();
   const [password, setPassword] = useState();
   const [success, setSuccess] = useState(successInit);
-  const { loading, error, token } = useSelector((state) => state.auth);
+  const { error, token } = useSelector((state) => state.auth);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     var access_token = loadToken();
@@ -37,7 +38,11 @@ const SignIn = (props) => {
   useEffect(() => {
     if (token) {
       dispatch(getUserByToken());
-      navigation.navigate('NHome');
+
+      setTimeout(() => {
+        setLoading(false);
+        navigation.navigate('NHome');
+      }, 500)
     }
   }, [token]);
 
@@ -48,12 +53,23 @@ const SignIn = (props) => {
         text1: t('error'),
         text2: t('error_login_message'),
       });
+
+      setLoading(false);
     }
   }, [error]);
 
   const onLogin = () => {
-    if (id !== '' && password !== '') {
+    
+    if (!isNullOrEmpty(id) && !isNullOrEmpty(password)) {
+      setLoading(true);
       dispatch(login(id, password));
+    }
+    else{
+      setSuccess({
+        ...success,
+        id: !isNullOrEmpty(id) ? true : false,
+        password: !isNullOrEmpty(password) ? true : false
+      });
     }
   };
 
@@ -89,12 +105,6 @@ const SignIn = (props) => {
           <TextInput
             style={[BaseStyle.textInput]}
             onChangeText={(text) => setId(text)}
-            onFocus={() => {
-              setSuccess({
-                ...success,
-                id: true,
-              });
-            }}
             autoCorrect={false}
             placeholder={t('input_id')}
             placeholderTextColor={success.id ? BaseColor.grayColor : colors.primary}
@@ -104,12 +114,6 @@ const SignIn = (props) => {
           <TextInput
             style={[BaseStyle.textInput, { marginTop: 10 }]}
             onChangeText={(text) => setPassword(text)}
-            onFocus={() => {
-              setSuccess({
-                ...success,
-                password: true,
-              });
-            }}
             autoCorrect={false}
             placeholder={t('input_password')}
             secureTextEntry={true}

@@ -24,7 +24,6 @@ import styles from './styles';
 import { useSelector } from 'react-redux';
 import { dislikeRequest, getMemoryRequest, likeRequest } from '@/apis/memoryApi';
 import Toast from 'react-native-toast-message';
-import { File, Paths } from 'expo-file-system';
 
 const NPostDetail = (props) => {
   const { navigation, route } = props;
@@ -35,6 +34,7 @@ const NPostDetail = (props) => {
   const [heightHeader, setHeightHeader] = useState(Utils.heightHeader());
   const scrollY = useRef(new Animated.Value(0)).current;
   const { user } = useSelector((state) => state.user);
+  const login = user ? true : false;
   const [likes, setLikes] = useState([]);
   const [showLikesAction, setShowLikesAction] = useState(false);
   const [showCommentsAction, setShowCommentsAction] = useState(false);
@@ -209,7 +209,7 @@ const NPostDetail = (props) => {
   }
 
   const openCommentList = () => {
-    if(itemData.isOpenToComment) {
+    if (itemData.isOpenToComment && ((!login && itemData.commentCount > 0) || login)) {
       setShowCommentsAction(true);
     }
   };
@@ -458,7 +458,7 @@ const NPostDetail = (props) => {
                 }
               }}
               onPressLeft={() => {
-                navigation.navigate('NHome');
+                navigation.navigate('NPost');
               }}
               onPressRight={() => {
                 if (user && user.id === itemData.userId) {

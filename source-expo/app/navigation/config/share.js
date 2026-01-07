@@ -13,6 +13,9 @@ import SignUp from '@/screens/SignUp';
 import ThemeSetting from '@/screens/ThemeSetting';
 import Loading from '@/screens/Loading';
 import SliderIntro from '@/screens/SliderIntro';
+import component from './component';
+import Address from '@/screens/Address';
+import MyAddresses from '@/screens/MyAddresses';
 
 export default {
   Loading: {
@@ -77,6 +80,18 @@ export default {
     options: {
       title: 'sign_out',
     },
+  },
+  MyAddresses: {
+    component: MyAddresses,
+    options: {
+      title: 'my_address'
+    }
+  },
+  Address: {
+    component: Address,
+    options: {
+      title: 'address'
+    }
   },
   PreviewComponent: {
     component: PreviewComponent,

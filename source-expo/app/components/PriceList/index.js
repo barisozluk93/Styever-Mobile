@@ -1,101 +1,46 @@
 import PropTypes from 'prop-types';
 import { TouchableOpacity, View } from 'react-native';
-import { BaseColor, FontWeight, useTheme } from '@/config';
+import { useTheme } from '@/config';
 import Text from '@/components/Text';
 import styles from './styles';
-import { getHeightDevice, getWidthDevice } from '@/utils';
-import Tag from '../Tag';
-import Button from '../Button';
+import Icon from '@/components/Icon';
 import { useTranslation } from 'react-i18next';
-import { useNavigation } from '@react-navigation/native';
 
 const PriceList = ({
   style = {},
-  onPress = () => { },
+  onSelect = () => { },
   disabled = true,
   item = {},
+  selected
 }) => {
   const { colors } = useTheme();
   const { t } = useTranslation();
-  const navigation = useNavigation();
-
+  
   return (
-    <TouchableOpacity disabled={disabled} style={[styles.container, style]} onPress={onPress}>
-      <View
-        style={[
-          styles.content,
-          {
-            backgroundColor: colors.background,
-            borderColor: colors.border,
-            width: getWidthDevice() - 20,
-            height: "100%"
-          },
-        ]}
-      >
-        <Text headline numberOfLines={2}>
-          {item.name}
-        </Text>
-
-        <Text
-          light
-          style={{
-            paddingTop: 30,
-            fontSize: 20
-          }}>
-          {item.description}
-        </Text>
-
-        <View
-          style={{
-            alignItems: 'center',
-            alignContent: 'center',
-            paddingTop: 30,
-            paddingBottom: 30
-          }}
-        >
-          <Tag
-            light
-            textStyle={{
-              color: BaseColor.whiteColor,
-              fontSize: 20
-            }}
-            style={{
-              backgroundColor: colors.primaryLight,
-              minWidth: 80,
-            }}
-          >
-            {item.price}
-          </Tag>
-        </View>
-        <View
-          style={{
-            alignItems: 'center',
-            alignContent: 'center',
-            paddingBottom: 30
-          }}
-        >
-          {item.properties.map((property, colIndex) => (
-            <Text
-              light
-              style={{
-                paddingTop: 20,
-                fontWeight: 'bold'
-              }}
-            >
-              {'\u2022'}&nbsp;{property}
-            </Text>
-        ))}
-        </View>
-
-        <View full style={{position: 'absolute',
-            top: '90%',
-            left: '5%',
-            right: '5%'}}>
-          <Button full onPress={() => navigation.navigate('SignUp')}>
-            {t('sign_up')}
-          </Button>
-        </View>
+    <TouchableOpacity style={[styles.card, style, selected && styles.selected,
+      , { backgroundColor: colors.card }]} onPress={onSelect}>
+      <View style={styles.checkbox}>
+        {selected && (
+          <Icon name="check" size={14} color={colors.primary} />
+        )}
       </View>
+
+      <Text headline style={[styles.title, { color: colors.primary }]}>{item.name.toUpperCase()}</Text>
+      <Text style={styles.price}>{item.price}</Text>
+      <View style={styles.divider} />
+
+      <View style={styles.propertiesGrid}>
+        {item.properties.map((prop, index) => (
+          <View key={index} style={styles.propertyItem}>
+            <Icon name="check" size={14} color={colors.primary} />
+            <Text style={styles.property}>{prop}</Text>
+          </View>
+        ))}
+      </View>
+
+      {selected && <View style={styles.trialBadge}>
+        <Text style={styles.trialText}>{t('trial')}</Text>
+      </View>}
     </TouchableOpacity>
   );
 };

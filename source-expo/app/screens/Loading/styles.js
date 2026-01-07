@@ -9,5 +9,7 @@ export default StyleSheet.create({
   logo: {
     width: 120,
     height: 120,
+    borderRadius: 20,
+    overflow: 'hidden',
   },
 });

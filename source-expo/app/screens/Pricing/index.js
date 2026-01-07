@@ -1,66 +1,51 @@
-import { useEffect, useState } from 'react';
-import { FlatList, RefreshControl, View } from 'react-native';
+import { FlatList, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { CategoryData } from '@/data';
 import {
-  CategoryBlock,
-  CategoryBoxColor,
-  CategoryBoxColor2,
-  CategoryGrid,
-  CategoryIcon,
-  CategoryList,
+  Button,
   Header,
   Icon,
   PriceList,
-  Project02,
   SafeAreaView,
-  Text,
-  TextInput,
 } from '@/components';
-import { BaseColor, BaseStyle, Typography, useTheme } from '@/config';
-import * as Utils from '@/utils';
-
-let timeoutChangeMode = null;
+import { BaseStyle, useTheme } from '@/config';
+import styles from './styles';
+import { useState } from 'react';
 
 const Pricing = (props) => {
   const { navigation } = props;
   const { t } = useTranslation();
   const { colors } = useTheme();
-  const [refreshing] = useState(false);
-  const [search, setSearch] = useState('');
-  const [modeView, setModeView] = useState('bars');
-  const [category, setCategory] = useState(CategoryData);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    setTimeout(() => {
-      setLoading(false);
-    }, 1000);
-  }, []);
+  const [selectedPlanId, setSelectedPlanId] = useState(1);
+  const [loading, setLoading] = useState(false);
 
   const data = [
     {
       id: 1,
       name: t('standard'),
-      description: t('standardDesc'),
-      price: "₺2.250,00",
-      properties: [t('standardProperty1'), t('standardProperty2'), t('standardProperty3')]
+      price: "₺359,00/" + t('year'),
+      properties: [t('standardProperty1'), t('standardProperty2'), t('standardProperty3'), t('standardProperty4')]
     },
     {
       id: 2,
       name: t('premium'),
-      description: t('premiumDesc'),
-      price: "₺3.000,00",
-      properties: [t('premiumProperty1'), t('premiumProperty2'), t('premiumProperty3'), t('premiumProperty4'), t('premiumProperty5')]
+      price: "₺559,00/" + t('year'),
+      properties: [t('premiumProperty1'), t('premiumProperty2'), t('premiumProperty3'), t('premiumProperty4'), t('premiumProperty5'), t('premiumProperty6'), t('premiumProperty7'), t('premiumProperty8')]
     },
     {
       id: 3,
-      name: t('platinum'),
-      description: t('premiumDesc'),
-      price: "₺10.000,00",
-      properties: [t('platinumProperty1'), t('platinumProperty2'), t('platinumProperty3'), t('platinumProperty4'), t('platinumProperty5'), t('platinumProperty6')]
+      name: t('ultra'),
+      price: "₺959,00/" + t('year'),
+      properties: [t('ultraProperty1'), t('ultraProperty2'), t('ultraProperty3'), t('ultraProperty4'), t('ultraProperty5'), t('ultraProperty6'), t('ultraProperty7'), t('ultraProperty8'), t('ultraProperty9')]
     }
   ];
+
+  const continueRegister = () => {
+    setLoading(true);
+      setTimeout(() => {
+        setLoading(false);
+          navigation.navigate('SignUp', { selectedPlanId: selectedPlanId})
+        }, 500);
+  }
 
   const renderContent = () => {
     return (
@@ -76,18 +61,25 @@ const Pricing = (props) => {
 
         <View style={{ flex: 1 }}>
           <FlatList
-            horizontal
+            horizontal={false}
             data={data}
             keyExtractor={(_item, index) => index.toString()}
             renderItem={({ item }) => (
               <PriceList
                 item={item}
+                selected={item.id === selectedPlanId}
+                onSelect={() => setSelectedPlanId(item.id)}
                 style={{
                   margin: 10,
                 }}
               />
             )}
           />
+          <View style={styles.bottomBar}>
+            <Button full loading={loading} onPress={() => continueRegister()}>
+              {t('continue')}
+            </Button>
+          </View>
         </View>
       </SafeAreaView>
     );

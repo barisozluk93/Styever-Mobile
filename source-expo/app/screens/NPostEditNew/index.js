@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Animated, I18nManager, ScrollView, TouchableOpacity, View, StyleSheet } from 'react-native';
+import { Animated, I18nManager, ScrollView, TouchableOpacity, View, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import {
   CardSlide,
   Header,
@@ -41,6 +41,16 @@ const categories = [
   { key: 7, name: 'turtle' }
 ];
 
+const successInit = {
+  text: true,
+  name: true,
+  birthDate: true,
+  deathDate: true,
+  categoryId: true,
+  passwordConfirm: true,
+  address: true,
+};
+
 const NPostEditNew = (props) => {
   const { navigation, route } = props;
   const { t } = useTranslation();
@@ -64,6 +74,8 @@ const NPostEditNew = (props) => {
   const [activeMediaIndex, setActiveMediaIndex] = useState(0);
   const [isImageUploadAllowed, setIsImageUploadAllowed] = useState();
   const [isVideoUploadAllowed, setIsVideoUploadAllowed] = useState();
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(successInit);
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -221,14 +233,14 @@ const NPostEditNew = (props) => {
         });
       }
       else {
-        Toast.error({
+        Toast.show({
           type: 'error',
           text1: t('error'),
           text2: t('error_file_message'),
         });
       }
     }).catch(error => {
-      Toast.error({
+      Toast.show({
         type: 'error',
         text1: t('error'),
         text2: t('error_file_message'),
@@ -401,74 +413,95 @@ const NPostEditNew = (props) => {
     }
   }, [route?.params?.item]);
 
-  const isSaveButtonDisabled = () => {
-    if (isNullOrEmpty(categoryId) || isNullOrEmpty(name) || isNullOrEmpty(text) || isNullOrEmpty(birthDate) || isNullOrEmpty(deathDate)) {
-      return true;
-    }
-
-    return false;
-  }
-
   const onSave = () => {
-    let birth_date = birthDate.includes("T") ? birthDate.split('T')[0] : birthDate;
-    let death_date = deathDate.includes("T") ? deathDate.split('T')[0] : deathDate;
-
-    if (itemData) {
-      editRequest(itemData.id, user.id, birth_date, death_date, isPrivate, isOpenToComment, categoryId, name, text, postDate).then(response => {
-        if (response.isSuccess) {
-          getMemoryRequest(itemData.id).then(response1 => {
-            setItemData(response1.data);
-          })
-
-          Toast.show({
-            type: 'success',
-            text1: t('success'),
-            text2: t('success_message'),
-          });
-        }
-        else {
-          Toast.show({
-            type: 'error',
-            text1: t('error'),
-            text2: t('error_file_message'),
-          });
-        }
-      }).catch(error => {
-        Toast.show({
-          type: 'error',
-          text1: t('error'),
-          text2: t('error_file_message'),
-        });
-      })
+    if (isNullOrEmpty(categoryId) || isNullOrEmpty(name) || isNullOrEmpty(text) || isNullOrEmpty(birthDate) || isNullOrEmpty(deathDate)) {
+      setSuccess({
+        ...success,
+        categoryId: !isNullOrEmpty(categoryId) ? true : false,
+        name: !isNullOrEmpty(name) ? true : false,
+        text: !isNullOrEmpty(text) ? true : false,
+        birthDate: !isNullOrEmpty(birthDate) ? true : false,
+        deathDate: !isNullOrEmpty(deathDate) ? true : false,
+      });
     }
-    else {
-      saveRequest(0, user.id, birth_date, death_date, isPrivate, isOpenToComment, categoryId, name, text, postDate).then(response => {
-        if (response.isSuccess) {
-          getMemoryRequest(response.data.id).then(response1 => {
-            setItemData(response1.data);
-          })
+    else{
 
-          Toast.show({
-            type: 'success',
-            text1: t('success'),
-            text2: t('success_message'),
-          });
-        }
-        else {
+      let birth_date = birthDate.includes("T") ? birthDate.split('T')[0] : birthDate;
+      let death_date = deathDate.includes("T") ? deathDate.split('T')[0] : deathDate;
+
+      setLoading(true);
+      if (itemData) {
+        editRequest(itemData.id, user.id, birth_date, death_date, isPrivate, isOpenToComment, categoryId, name, text, postDate).then(response => {
+          if (response.isSuccess) {
+            getMemoryRequest(itemData.id).then(response1 => {
+              setItemData(response1.data);
+            })
+
+            Toast.show({
+              type: 'success',
+              text1: t('success'),
+              text2: t('success_message'),
+            });
+
+            setTimeout(() => {
+              setLoading(false);
+            }, 500)
+          }
+          else {
+            Toast.show({
+              type: 'error',
+              text1: t('error'),
+              text2: t('error_file_message'),
+            });
+
+            setLoading(false);
+          }
+        }).catch(error => {
           Toast.show({
             type: 'error',
             text1: t('error'),
             text2: t('error_file_message'),
           });
-        }
-      }).catch(error => {
-        console.log(error)
-        Toast.show({
-          type: 'error',
-          text1: t('error'),
-          text2: t('error_file_message'),
-        });
-      })
+
+          setLoading(false);
+        })
+      }
+      else {
+        saveRequest(0, user.id, birth_date, death_date, isPrivate, isOpenToComment, categoryId, name, text, postDate).then(response => {
+          if (response.isSuccess) {
+            getMemoryRequest(response.data.id).then(response1 => {
+              setItemData(response1.data);
+            })
+
+            Toast.show({
+              type: 'success',
+              text1: t('success'),
+              text2: t('success_message'),
+            });
+
+             setTimeout(() => {
+              setLoading(false);
+            }, 500)
+          }
+          else {
+            Toast.show({
+              type: 'error',
+              text1: t('error'),
+              text2: t('error_file_message'),
+            });
+
+            setLoading(false);
+          }
+        }).catch(error => {
+          Toast.show({
+            type: 'error',
+            text1: t('error'),
+            text2: t('error_file_message'),
+          });
+
+          setLoading(false);
+        })
+      }
     }
   }
 
@@ -499,120 +532,131 @@ const NPostEditNew = (props) => {
     useNativeDriver: true,
   });
 
+  const offsetKeyboard = Platform.select({
+    ios: 0,
+    android: 20,
+  });
 
   return (
     <View style={{ flex: 1 }}>
       <SafeAreaView style={[BaseStyle.safeAreaView]} forceInset={{ top: 'always', bottom: 'always' }}>
         <Header title={itemData && itemData.name} />
-        <ScrollView
-          onContentSizeChange={() => {
-            setHeightHeader(Utils.heightHeader());
+
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={offsetKeyboard}
+          style={{
+            flex: 1,
           }}
-          showsHorizontalScrollIndicator={false}
-          showsVerticalScrollIndicator={false}
-          overScrollMode={'never'}
-          style={{ zIndex: 10 }}
-          scrollEventThrottle={16}
-          onScroll={Animated.event(
-            [
-              {
-                nativeEvent: {
-                  contentOffset: { y: scrollY },
-                },
-              },
-            ],
-            {
-              useNativeDriver: false,
-            }
-          )}
         >
-          <View style={{ height: 330 - heightHeader }} />
-          <View
-            style={{
-              marginVertical: 20,
-              paddingHorizontal: 20,
-              width: "100%"
+          <ScrollView
+            onContentSizeChange={() => {
+              setHeightHeader(Utils.heightHeader());
             }}
+            showsHorizontalScrollIndicator={false}
+            showsVerticalScrollIndicator={false}
+            overScrollMode={'never'}
+            style={{ zIndex: 10 }}
+            scrollEventThrottle={16}
+            onScroll={Animated.event(
+              [
+                {
+                  nativeEvent: {
+                    contentOffset: { y: scrollY },
+                  },
+                },
+              ],
+              {
+                useNativeDriver: false,
+              }
+            )}
           >
-            <View style={{ flexDirection: "row", marginBottom: 10 }}>
-              <CheckBox
-                color={colors.primaryLight}
-                title={t('private')}
-                checked={isPrivate === true}
-                onPress={() => setIsPrivate(isPrivate === true ? false : true)}
+            <View style={{ height: 330 - heightHeader }} />
+            <View
+              style={{
+                marginVertical: 20,
+                paddingHorizontal: 20,
+                width: "100%"
+              }}
+            >
+              <View style={{ flexDirection: "row", marginBottom: 10 }}>
+                <CheckBox
+                  color={colors.primaryLight}
+                  title={t('private')}
+                  checked={isPrivate === true}
+                  onPress={() => setIsPrivate(isPrivate === true ? false : true)}
+                />
+
+                <CheckBox
+                  color={colors.primaryLight}
+                  title={t('open_to_comment')}
+                  checked={isOpenToComment === true}
+                  onPress={() => setIsOpenToComment(isOpenToComment === true ? false : true)}
+                />
+              </View>
+
+              <PickerSelect label={t('pets')} value={category} onChange={(v) => { setCategory(v); setCategoryId(v.key) }} options={categories} />
+
+              <View style={styles.contentTitle}>
+                <Text headline>
+                  {t('name')}
+                </Text>
+              </View>
+              <TextInput
+                style={[BaseStyle.textInput]}
+                onChangeText={(text) => setName(text)}
+                autoCorrect={false}
+                placeholder={t('name')}
+                placeholderTextColor={success.name ? BaseColor.grayColor : colors.primary}
+                value={name}
+                selectionColor={colors.primary}
+              />
+              <View style={{ flexDirection: "row", marginTop: 10 }}>
+                <DatePicker
+                  placeholder={t('birth_date')}
+                  formatDisplay="DD/MM/yyyy"
+                  value={new Date(birthDate)}
+                  label={t('birth_date')}
+                  onChange={(value) => { setBirthDate(value.toISOString()) }}
+                  placeholderTextColor={success.birthDate ? BaseColor.grayColor : colors.primary}
+                />
+
+                <DatePicker
+                  placeholder={t('death_date')}
+                  formatDisplay="DD/MM/yyyy"
+                  value={new Date(deathDate)}
+                  label={t('death_date')}
+                  onChange={(value) => setDeathDate(value.toISOString())}
+                  placeholderTextColor={success.deathDate ? BaseColor.grayColor : colors.primary}
+                />
+              </View>
+
+              <View style={styles.contentTitle}>
+                <Text headline>
+                  {t('memory')}
+                </Text>
+              </View>
+              <TextInput
+                style={[BaseStyle.textInput, { height: 250 }]}
+                multiline
+                scrollEnabled
+                onChangeText={(text) => setText(text)}
+                autoCorrect={false}
+                placeholder={t('memory')}
+                placeholderTextColor={success.text ? BaseColor.grayColor : colors.primary}
+                value={text}
+                selectionColor={colors.primary}
               />
 
-              <CheckBox
-                color={colors.primaryLight}
-                title={t('open_to_comment')}
-                checked={isOpenToComment === true}
-                onPress={() => setIsOpenToComment(isOpenToComment === true ? false : true)}
-              />
             </View>
+          </ScrollView>
 
-            <PickerSelect label={t('pets')} value={category} onChange={(v) => { setCategory(v); setCategoryId(v.key) }} options={categories} />
-
-            <View style={styles.contentTitle}>
-              <Text headline>
-                {t('name')}
-              </Text>
-            </View>
-            <TextInput
-              style={[BaseStyle.textInput]}
-              onChangeText={(text) => setName(text)}
-              autoCorrect={false}
-              placeholder={t('name')}
-              placeholderTextColor={BaseColor.grayColor}
-              value={name}
-              selectionColor={colors.primary}
-            />
-            <View style={{ flexDirection: "row", marginTop: 10 }}>
-              <DatePicker
-                placeholder={t('birth_date')}
-                formatDisplay="DD/MM/yyyy"
-                value={new Date(birthDate)}
-                label={t('birth_date')}
-                onChange={(value) => { setBirthDate(value.toISOString()) }}
-                placeholderTextColor={BaseColor.grayColor}
-              />
-
-              <DatePicker
-                placeholder={t('death_date')}
-                formatDisplay="DD/MM/yyyy"
-                value={new Date(deathDate)}
-                label={t('death_date')}
-                onChange={(value) => setDeathDate(value.toISOString())}
-                placeholderTextColor={BaseColor.grayColor}
-              />
-            </View>
-
-            <View style={styles.contentTitle}>
-              <Text headline>
-                {t('memory')}
-              </Text>
-            </View>
-            <TextInput
-              style={[BaseStyle.textInput, { height: 250 }]}
-              multiline
-              scrollEnabled
-              onChangeText={(text) => setText(text)}
-              autoCorrect={false}
-              placeholder={t('memory')}
-              placeholderTextColor={BaseColor.grayColor}
-              value={text}
-              selectionColor={colors.primary}
-            />
-
+          <View style={{ width: '100%', padding: 20 }}>
+            <Button loading={loading} full onPress={() => {onSave()}}>
+              {t('save')}
+            </Button>
           </View>
-        </ScrollView>
-
-        <View style={{ width: '100%', padding: 20 }}>
-          <Button disabled={isSaveButtonDisabled()} full onPress={() => {
-            if (!isSaveButtonDisabled()) { onSave() }
-          }}>
-            {t('save')}
-          </Button>
-        </View>
+        </KeyboardAvoidingView>
       </SafeAreaView>
       <Animated.View
         style={[
@@ -733,7 +777,12 @@ const NPostEditNew = (props) => {
               );
             }}
             onPressLeft={() => {
-              navigation.navigate('NPostDetail', { item: itemData });
+              if(itemData) {
+                navigation.navigate('NPostDetail', { item: itemData });
+              }
+              else{
+                navigation.goBack();
+              }
             }}
           />
         </SafeAreaView>

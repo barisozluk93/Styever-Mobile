@@ -8,14 +8,14 @@ export default StyleSheet.create({
   },
   textInput: {
     height: 46,
-    backgroundColor: BaseColor.fieldColor,
+    // backgroundColor: BaseColor.fieldColor,
     borderRadius: 5,
     padding: 10,
     width: '100%',
   },
   textInputName: {
     height: 46,
-    backgroundColor: BaseColor.fieldColor,
+    // backgroundColor: BaseColor.fieldColor,
     borderRadius: 5,
     padding: 10,
     width: '48.5%',
@@ -23,5 +23,7 @@ export default StyleSheet.create({
   logo: {
     width: 200,
     height: 200,
+    borderRadius: 20,
+    overflow: 'hidden',
   }
 });

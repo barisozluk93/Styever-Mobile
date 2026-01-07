@@ -155,7 +155,7 @@ export default function Index(props) {
   }
 
   return (
-    <Text style={textStyle} numberOfLines={numberOfLines}>
+    <Text allowFontScaling={false} style={textStyle} numberOfLines={numberOfLines}>
       {children}
     </Text>
   );

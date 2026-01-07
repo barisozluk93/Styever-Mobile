@@ -10,48 +10,91 @@ import { removeToken } from '@/utils/storage';
 import Toast from 'react-native-toast-message';
 import { isNullOrEmpty } from '@/utils/utility';
 
+const successInit = {
+  currentPassword: true,
+  password: true,
+  repassword: true,
+};
+
 const ChangePassword = (props) => {
   const dispatch = useDispatch();
   const { navigation } = props;
   const { t } = useTranslation();
   const { colors } = useTheme();
   const { user } = useSelector((state) => state.user);
-  const [ currentPassword, setCurrentPassword] = useState('');
-  const [ password, setPassword] = useState('');
-  const [ repassword, setRepassword] = useState('');
-
-  function isButtonDisabled() {
-    if (isNullOrEmpty(currentPassword) || isNullOrEmpty(password) || isNullOrEmpty(repassword)) {
-      return true;
-    }
-    
-    return false;
-  }
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [password, setPassword] = useState('');
+  const [repassword, setRepassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(successInit);
 
   const onChangePassowrd = () => {
-    changePasswordRequest(user.id, currentPassword, password).then(async (response) => {
-
-      if (response.isSuccess) {
-        await removeToken();
-        dispatch({ type: 'AUTH_LOGOUT' });
-        dispatch({ type: 'USER_INIT' });
-
-        Toast.show({
-          type: 'success',
-          text1: t('success'),
-          text2: t('success_message'),
+    if (isNullOrEmpty(currentPassword) || isNullOrEmpty(password) || isNullOrEmpty(repassword)) {
+      setSuccess({
+        ...success,
+        currentPassword: !isNullOrEmpty(currentPassword) ? true : false,
+        password: !isNullOrEmpty(password) ? true : false,
+        repassword: !isNullOrEmpty(repassword) ? true : false,
+      });
+    }
+    else {
+      if (password !== repassword) {
+        setSuccess({
+          ...success,
+          currentPassword: !isNullOrEmpty(currentPassword) ? true : false,
+          password: false,
+          repassword: false,
         });
 
-        navigation.navigate('SignIn');
-      }
-    })
-      .catch((error) => {
         Toast.show({
           type: 'error',
           text1: t('error'),
-          text2: t('error_file_message'),
+          text2: t('pw_didnt_match_message'),
         });
-      });
+      }
+      else {
+        setLoading(true);
+        changePasswordRequest(user.id, currentPassword, password).then(async (response) => {
+
+          if (response.isSuccess) {
+            await removeToken();
+            dispatch({ type: 'AUTH_LOGOUT' });
+            dispatch({ type: 'USER_INIT' });
+            dispatch({ type: 'MEMORY_INIT' });
+            dispatch({ type: 'ARTICLE_INIT' });
+
+            Toast.show({
+              type: 'success',
+              text1: t('success'),
+              text2: t('success_message'),
+            });
+
+            setTimeout(() => {
+              setLoading(false);
+              navigation.navigate('SignIn');
+            }, 500);
+          }
+          else {
+            Toast.show({
+              type: 'error',
+              text1: t('error'),
+              text2: t('error_file_message'),
+            });
+
+            setLoading(false);
+          }
+        })
+          .catch((error) => {
+            Toast.show({
+              type: 'error',
+              text1: t('error'),
+              text2: t('error_file_message'),
+            });
+
+            setLoading(false);
+          });
+      }
+    }
   };
 
   return (
@@ -78,7 +121,7 @@ const ChangePassword = (props) => {
             autoCorrect={false}
             secureTextEntry={true}
             placeholder={t('current_password')}
-            placeholderTextColor={BaseColor.grayColor}
+            placeholderTextColor={success.currentPassword ? BaseColor.grayColor : colors.primary}
             value={currentPassword}
             selectionColor={colors.primary}
           />
@@ -93,7 +136,7 @@ const ChangePassword = (props) => {
             autoCorrect={false}
             secureTextEntry={true}
             placeholder={t('new_password')}
-            placeholderTextColor={BaseColor.grayColor}
+            placeholderTextColor={success.password ? BaseColor.grayColor : colors.primary}
             value={password}
             selectionColor={colors.primary}
           />
@@ -108,7 +151,7 @@ const ChangePassword = (props) => {
             autoCorrect={false}
             secureTextEntry={true}
             placeholder={t('password_confirm')}
-            placeholderTextColor={BaseColor.grayColor}
+            placeholderTextColor={success.repassword ? BaseColor.grayColor : colors.primary}
             value={repassword}
             selectionColor={colors.primary}
           />
@@ -116,7 +159,7 @@ const ChangePassword = (props) => {
       </ScrollView>
       <View style={{ padding: 20 }}>
         <Button
-          disabled={isButtonDisabled()}
+          loading={loading}
           full
           onPress={() => {
             onChangePassowrd();

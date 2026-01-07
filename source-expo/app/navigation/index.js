@@ -79,6 +79,7 @@ const Navigator = () => {
       dispatch({ type: "AUTH_LOGOUT" });
       dispatch({ type: "USER_INIT" });
       dispatch({ type: "MEMORY_INIT" });
+      dispatch({ type: "ARTICLE_INIT" });
 
       rootNavigation.dispatch(StackActions.replace(intro ? 'NewsMenu' : 'NewsMenu'));
     }

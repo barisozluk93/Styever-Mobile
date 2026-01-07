@@ -10,28 +10,36 @@ import NSearchHistory from '@/screens/NSearchHistory';
 import NHome from '@/screens/NHome';
 import NPost from '@/screens/NPost';
 import Profile from '@/screens/Profile';
-import NCategory from '@/screens/NCategory';
-import NFavourite from '@/screens/NFavourite';
-import { tabBarIcon, tabBarIconHaveNoty, BottomTabNavigatorMazi } from '@/navigation/components';
+import { tabBarIcon, BottomTabNavigatorMazi } from '@/navigation/components';
 import Pricing from '@/screens/Pricing';
 import Payment from '@/screens/Payment';
 import NPostEditNew from '@/screens/NPostEditNew';
+import NArticle from '@/screens/NArticle';
+import NSearchFilter from '@/screens/NSearchFilter';
+import NArticleDetail from '@/screens/NArticleDetail';
 
 export const NewsTabScreens = {
   NHome: {
+    component: NHome,
+    options: {
+      title: 'home',
+      tabBarIcon: ({ color }) => tabBarIcon({ color, name: 'home' }),
+    },
+  },
+  NPost: {
     component: NPost,
     options: {
       title: 'memories',
       tabBarIcon: ({ color }) => tabBarIcon({ color, name: 'photo-video' }),
     },
   },
-  // NCategory: {
-  //   component: Pricing,
-  //   options: {
-  //     title: 'pricing',
-  //     tabBarIcon: ({ color }) => tabBarIcon({ color, name: 'dollar-sign' }),
-  //   },
-  // },
+  NArticle: {
+    component: NArticle,
+    options: {
+      title: 'support',
+      tabBarIcon: ({ color }) => tabBarIcon({ color, name: 'question-circle' }),
+    },
+  },
   Profile: {
     component: Profile,
     options: {
@@ -62,6 +70,12 @@ export default {
       title: 'filtering',
     },
   },
+  NSearchFilter: {
+    component: NSearchFilter,
+    options: {
+      title: 'filtering',
+    },
+  },
   NMessages: {
     component: NMessages,
     options: {
@@ -84,6 +98,12 @@ export default {
     component: NPostDetail,
     options: {
       title: 'post_detail',
+    },
+  },
+  NArticleDetail: {
+    component: NArticleDetail,
+    options: {
+      title: 'article_detail',
     },
   },
   NPostEditNew: {

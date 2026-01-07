@@ -39,3 +39,9 @@ export const resetPasswordRequest = async (email) => {
 
   return response.data;
 };
+
+export const registerRequest = async (user) => {
+  const response = await authApi.post("Auth/Register", user);
+
+  return response.data;
+};

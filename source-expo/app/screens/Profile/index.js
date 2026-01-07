@@ -93,6 +93,23 @@ const Profile = (props) => {
                 <TouchableOpacity
                   style={styleItem}
                   onPress={() => {
+                    navigation.navigate('MyAddresses');
+                  }}
+                >
+                  <Text body1>{t('my_addresses')}</Text>
+                  <Icon
+                    name="angle-right"
+                    size={18}
+                    color={colors.primary}
+                    style={{ marginLeft: 5 }}
+                    enableRTL={true}
+                  />
+                </TouchableOpacity>
+              )}
+              {user && (
+                <TouchableOpacity
+                  style={styleItem}
+                  onPress={() => {
                     navigation.navigate('ChangePassword');
                   }}
                 >

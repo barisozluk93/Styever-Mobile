@@ -7,8 +7,27 @@ export const getById = async (userId) => {
 };
 
 
-export const getUserAddresses = async (userId) => {
+export const getUserAddressesRequest = async (userId) => {
   const response = await authApi.get(`User/UserAddressList/${userId}`);
+
+  return response.data;
+};
+
+export const saveUserAddressRequest = async (data) => {
+  const response = await authApi.post(`User/UserAddressSave`, data);
+
+  return response.data;
+};
+
+
+export const updateUserAddressRequest = async (data) => {
+  const response = await authApi.post(`User/UserAddressUpdate`, data);
+
+  return response.data;
+};
+
+export const deleteUserAddressRequest = async (id) => {
+  const response = await authApi.delete(`User/UserAddressDelete/${id}`);
 
   return response.data;
 };

@@ -65,6 +65,8 @@ export { default as NewsList } from './News/List';
 export { default as NewsWishlist } from './News/Wishlist';
 export { default as News169 } from './News/169';
 export { default as News43 } from './News/43';
+export { default as News44 } from './News/44';
+export { default as News45 } from './News/45';
 export { default as NewsGrid } from './News/Grid';
 export { default as NewsGrid2 } from './News/Grid2';
 
@@ -181,6 +183,7 @@ export { default as PButtonAddUser } from './PButtonAddUser';
 export { default as Ticket } from './Ticket';
 
 export { default as PriceList } from './PriceList';
+export { default as AddressList } from './AddressList';
 
 
 // List
