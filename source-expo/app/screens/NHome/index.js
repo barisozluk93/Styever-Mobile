@@ -72,7 +72,7 @@ const NHome = (props) => {
               </Text>
 
               <View style={[styles.buttonRow, { borderTopColor: colors.border }]}>
-                <Button full style={{ marginTop: 20, backgroundColor: colors.primaryLight }} loading={loading} onPress={() => craeteMemory()}>
+                <Button full style={{ marginTop: 20, backgroundColor: colors.primary }} loading={loading} onPress={() => craeteMemory()}>
                   <Icon name="photo-video" size={20} color={colors.whiteColor} enableRTL={true} />&nbsp;{t('create')}
                 </Button>
               </View>

@@ -7,5 +7,6 @@ export default StyleSheet.create({
     flexDirection: 'row',
     borderTopWidth: StyleSheet.hairlineWidth,
     alignItems: 'center',
+    bottom: 20
   },
 });

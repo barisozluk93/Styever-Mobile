@@ -3,6 +3,7 @@ const initialState = {
   loading: false,
   error: null,
   initialized: false,
+  isPaymentRequired: false
 };
 
 
@@ -21,6 +22,7 @@ export default function authReducer(state = initialState, action) {
         ...state,
         loading: false,
         token: action.payload.accessToken,
+        isPaymentRequired: action.payload.isPaymentRequired
       };
 
 

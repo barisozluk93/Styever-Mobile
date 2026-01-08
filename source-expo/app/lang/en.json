@@ -145,7 +145,7 @@
   "proceed": "Proceed",
   "confirmed": "Confirmed",
   "continue_shopping": "Continue Shopping",
-  "name_on_card": "Name on card",
+  "name_on_card": "Name on Credit Card",
   "credit_card_number": "Credit Card Number",
   "digit_num": "3-Digit CCV",
   "credit_card_information": "Credit Card Information",
@@ -443,5 +443,6 @@
   "my_addresses": "My Addresses",
   "create_address": "New",
   "membership": "Membership",
-  "trial_end_date": "Trial Expire Date"
+  "trial_end_date": "Trial Expire Date",
+  "trial_end_message": "Your 7-day trial period has ended.To continue your Styever experience, please make a payment."
 } 

@@ -10,4 +10,17 @@ export default StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  trialBadge: {
+    paddingHorizontal: 14,
+    paddingVertical: 5,
+    borderRadius: 14,
+    backgroundColor: BaseColor.darkgreenColor,
+    borderWidth: 1,
+    borderColor: BaseColor.darkgreenColor,
+    marginBottom: 20
+  },
+  trialText: {
+    color: BaseColor.whiteColor,
+    textAlign: 'center',
+  },
 });

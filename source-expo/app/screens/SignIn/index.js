@@ -24,7 +24,7 @@ const SignIn = (props) => {
   const [id, setId] = useState();
   const [password, setPassword] = useState();
   const [success, setSuccess] = useState(successInit);
-  const { error, token } = useSelector((state) => state.auth);
+  const { error, token, isPaymentRequired } = useSelector((state) => state.auth);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -41,7 +41,13 @@ const SignIn = (props) => {
 
       setTimeout(() => {
         setLoading(false);
-        navigation.navigate('NHome');
+
+        if(isPaymentRequired) {
+          navigation.navigate('Payment');
+        }
+        else{
+          navigation.navigate('NHome');
+        }
       }, 500)
     }
   }, [token]);

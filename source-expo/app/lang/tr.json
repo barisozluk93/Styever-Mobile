@@ -444,6 +444,6 @@
   "membership": "Üyelik",
   "trial_end_date": "Deneme Süresi Bitiş Tarihi",
   "start_date": "Başlangıç Tarihi",
-  "end_date": "Bitiş Tarihi"
-
+  "end_date": "Bitiş Tarihi",
+  "trial_end_message": "7 günlük deneme süreniz sona ermiştir.Styever deneyiminizi devam ettirmek için lütfen ödeme yapınız."
 }
