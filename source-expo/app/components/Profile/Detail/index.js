@@ -8,8 +8,8 @@ import styles from './styles';
 
 export default function ProfileDetail({
   style = {},
-  fileResult = '',
   image = '',
+  isAvatarExist = false,
   textFirst = '',
   point = '',
   textSecond = '',
@@ -26,8 +26,8 @@ export default function ProfileDetail({
     <TouchableOpacity style={[styles.contain, style]} onPress={onPress} activeOpacity={0.9}>
       <View style={[styles.contentLeft, styleLeft]}>
         <View>
-          {fileResult && <Image source={{ uri: `data:image/*;base64,${image}` }} style={[styles.thumb, styleThumb]} borderRadius={30} />}
-          {!fileResult && <Image source={image} style={[styles.thumb, styleThumb]} borderRadius={30} />}
+          {isAvatarExist && <Image source={{ uri: image }} style={[styles.thumb, styleThumb]} borderRadius={30} />}
+          {!isAvatarExist && <Image source={image} style={[styles.thumb, styleThumb]} borderRadius={30} />}
         </View>
         <View style={{ alignItems: 'flex-start' }}>
           <Text headline semibold numberOfLines={1}>

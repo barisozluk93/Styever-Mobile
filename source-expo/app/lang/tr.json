@@ -308,8 +308,6 @@
   "on_going": "On Going",
   "edit": "Edit",
   "project_view": "Project View",
-  "start_date": "Start Date",
-  "end_date": "End Date",
   "budget": "Budget",
   "team_members": "Team Members",
   "project_overview": "Project Overview",
@@ -442,5 +440,10 @@
   "address_info": "Adres Bilgileri",
   "trial": "7 Günlük Deneme Sürümü",
   "my_addresses": "Adreslerim",
-  "create_address": "Yeni"
+  "create_address": "Yeni",
+  "membership": "Üyelik",
+  "trial_end_date": "Deneme Süresi Bitiş Tarihi",
+  "start_date": "Başlangıç Tarihi",
+  "end_date": "Bitiş Tarihi"
+
 }

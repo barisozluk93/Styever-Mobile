@@ -24,6 +24,7 @@ import styles from './styles';
 import { useSelector } from 'react-redux';
 import { dislikeRequest, getMemoryRequest, likeRequest } from '@/apis/memoryApi';
 import Toast from 'react-native-toast-message';
+import { memoryUploadFolderUrl } from '@/utils/utility';
 
 const NPostDetail = (props) => {
   const { navigation, route } = props;
@@ -47,12 +48,12 @@ const NPostDetail = (props) => {
     for (let i = 0; i < files.length; i++) {
       const f = files[i];
 
-      if (!(f.fileResult.contentType.includes('image'))) {
+      if (!(f.file.contentType.includes('image'))) {
         prepared.push({
           id: f.id,
           fileId: f.fileId,
           type: 'video',
-          uri: `data:video/mp4;base64,${f.fileResult.fileContents}`,
+          uri: memoryUploadFolderUrl + `${f.file.path.split("\\")[f.file.path.split("\\").length-1]}`,
           isPrimary: false
         });
       } else {
@@ -60,7 +61,7 @@ const NPostDetail = (props) => {
           id: f.id,
           fileId: f.fileId,
           type: 'image',
-          uri: `data:image/*;base64,${f.fileResult.fileContents}`,
+          uri: memoryUploadFolderUrl + `${f.file.path.split("\\")[f.file.path.split("\\").length-1]}`,
           isPrimary: f.isPrimary
         });
       }
@@ -142,14 +143,16 @@ const NPostDetail = (props) => {
   }
 
   const openLikedList = () => {
-    setLikes([]);
-    setLikes([...itemData.likes]);
-    setShowLikesAction(true);
+    if (itemData.likesCount > 0) {
+      setLikes([]);
+      setLikes([...itemData.likes]);
+      setShowLikesAction(true);
+    }
   };
 
   const like = () => {
     if (user) {
-      if (itemData.likesCount > 0 && itemData.likes.filter(f => f.userId === user.id)) {
+      if (itemData.likes.filter(f => f.userId === user.id)?.length > 0) {
         dislikeRequest(itemData.id, user.id).then(response => {
           if (response.isSuccess) {
             getMemoryRequest(itemData.id).then(response1 => {

@@ -9,6 +9,10 @@ export default StyleSheet.create({
     borderRadius: 20,
     padding: 10,
   },
+  selected: {
+    borderWidth: StyleSheet.hairlineWidth + 1,
+    borderColor: BaseColor.darkgreenColor,
+  },
   title: {
     textAlign: 'center',
     marginVertical: 10,

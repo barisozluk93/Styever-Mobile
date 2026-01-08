@@ -29,7 +29,7 @@ import DatePicker from '../Components/Common/DatePicker';
 import { editRequest, getMemoryRequest, memoryFileAddRequest, memoryFileDeleteRequest, saveRequest, setMemoryFileIsPrimaryRequest } from '@/apis/memoryApi';
 import * as ImagePicker from 'expo-image-picker';
 import { deleteFileRequest, uploadRequest } from '@/apis/fileApi';
-import { isNullOrEmpty } from '@/utils/utility';
+import { isNullOrEmpty, memoryUploadFolderUrl } from '@/utils/utility';
 
 const categories = [
   { key: 1, name: 'bird' },
@@ -93,6 +93,8 @@ const NPostEditNew = (props) => {
         type: file.mimeType,
         uri: file.uri
       });
+
+      formData.append("type", 2);
 
       uploadRequest(formData).then(response => {
         if (response.isSuccess) {
@@ -162,6 +164,8 @@ const NPostEditNew = (props) => {
           type: file.mimeType,
           uri: file.uri
         });
+
+        formData.append("type", 2);
 
         uploadRequest(formData).then(response => {
           if (response.isSuccess) {
@@ -253,13 +257,13 @@ const NPostEditNew = (props) => {
 
     for (let i = 0; i < files.length; i++) {
       const f = files[i];
-
-      if (!(f.fileResult.contentType.includes('image'))) {
+      console.log("contentType : " + f.file.contentType)
+      if (!(f.file.contentType.includes('image'))) {
         prepared.push({
           id: f.id,
           fileId: f.fileId,
           type: 'video',
-          uri: "data:" + f.fileResult.contentType + ";base64," + f.fileResult.fileContentS,
+          uri: memoryUploadFolderUrl + `${f.file.path.split("\\")[f.file.path.split("\\").length-1]}`,
           isPrimary: false
         });
       } else {
@@ -267,7 +271,7 @@ const NPostEditNew = (props) => {
           id: f.id,
           fileId: f.fileId,
           type: 'image',
-          uri: `data:image/*;base64,${f.fileResult.fileContents}`,
+          uri: memoryUploadFolderUrl + `${f.file.path.split("\\")[f.file.path.split("\\").length-1]}`,
           isPrimary: f.isPrimary
         });
       }
@@ -349,7 +353,11 @@ const NPostEditNew = (props) => {
 
 
   const controlUploadPermissions = (medias) => {
-    if (user.roles.includes(2)) {
+    if (user.roles.includes(1)) {
+      setIsVideoUploadAllowed(true);
+      setIsImageUploadAllowed(true);
+    }
+    else if (user.roles.includes(2)) {
       setIsVideoUploadAllowed(false);
 
       if (medias.filter(f => f.type === "image").length >= 1) {

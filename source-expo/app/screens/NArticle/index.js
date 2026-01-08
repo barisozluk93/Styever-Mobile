@@ -7,6 +7,7 @@ import { BaseColor, BaseStyle, Images, useTheme } from '@/config';
 import { useDispatch, useSelector } from 'react-redux';
 import { listArticle } from '@/actions/article';
 import styles from './styles';
+import { articleUploadFolderUrl } from '@/utils/utility';
 
 export const modes = {
   square: 'square',
@@ -57,15 +58,14 @@ const NArticle = ({ mode = modes.square }) => {
 
 
   const renderItem = ({ item, index }) => {
-    switch (modeView) {
+    switch (modeView) {      
       case 'square':
         return (
           <News44
             loading={loading}
             style={{ marginVertical: 8 }}
             title={language === 'tr' ? item.header : item.headerEn}
-            image={item.fileResult ? item.fileResult?.fileContents : Images.avata6}
-            fileResult={item.fileResult ? item.fileResult?.fileContents : undefined}
+            image={item.file ? articleUploadFolderUrl + `${item.file.path.split("\\")[item.file.path.split("\\").length-1]}` : Images.avata6}
             onPress={goPostDetail(item)}
           />
         );

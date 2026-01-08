@@ -7,6 +7,7 @@ import { BaseColor, BaseStyle, Images, useTheme } from '@/config';
 import { useDispatch, useSelector } from 'react-redux';
 import { listMemory } from '@/actions/memory';
 import { dislikeRequest, getMemoryCountRequest, likeRequest } from '@/apis/memoryApi';
+import { avatarUploadFolderUrl, memoryUploadFolderUrl } from '@/utils/utility';
 
 export const modes = {
   square: 'square',
@@ -63,14 +64,16 @@ const NPost = ({ mode = modes.square }) => {
   };
 
   const openLikedList = (item) => {
-    setLikes([]);
-    setLikes([...item.likes]);
-    setShowLikesAction(true);
+    if(item.likesCount > 0) {
+      setLikes([]);
+      setLikes([...item.likes]);
+      setShowLikesAction(true);
+    }
   };
 
-  const like = (item) => {
+  const like = (item) => {    
     if (user) {
-      if (item.likesCount > 0 && item.likes.filter(f => f.userId === user.id)) {
+      if (item.likes.filter(f => f.userId === user.id)?.length > 0) {
         dislikeRequest(item.id, user.id).then(response => {
           if (response.isSuccess) {
             fetchData();
@@ -172,16 +175,16 @@ const NPost = ({ mode = modes.square }) => {
           <News45
             loading={loading}
             style={{ marginVertical: 8 }}
-            avatar={item.userAvatar ? item.userAvatar?.fileContents : Images.avata5}
+            avatar={item.userAvatar ? avatarUploadFolderUrl + item.userAvatar.path.split("\\")[item.userAvatar.path.split("\\").length-1] : Images.avata5}
             isAvatarExist={item.userAvatar ? true : false}
-            image={(item.files && item.files.length > 0) ? item.files.filter(f => f.isPrimary)[0]?.fileResult?.fileContents : Images.avata6}
-            fileResult={(item.files && item.files.length > 0) ? item.files.filter(f => f.isPrimary)[0]?.fileResult?.fileContents : undefined}
+            image={(item.files && item.files.length > 0) ? memoryUploadFolderUrl + item.files.filter(f => f.isPrimary)[0]?.file.path.split("\\")[item.files.filter(f => f.isPrimary)[0]?.file.path.split("\\").length-1] : Images.avata6}
+            isImageExist={(item.files && item.files.length > 0) ? true : false}
             username={item.userName}
             title={item.name}
             postDate={item.postDate}
             commentCount={item.commentsCount}
             likeCount={item.likesCount}
-            isLiked={login ? (item.likesCount > 0 ? (item.likes.filter(f => f.userId === user.id) ? true : false) : false) : false}
+            isLiked={login ? (item.likesCount > 0 ? (item.likes.filter(f => f.userId === user.id)?.length > 0 ? true : false) : false) : false}
             onPress={goPostDetail(item)}
             onLikePress={() => like(item)}
             onLikeListPress={() => openLikedList(item)}

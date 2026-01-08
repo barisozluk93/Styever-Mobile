@@ -13,7 +13,7 @@ import { heightTabView } from '@/utils';
 import { useDispatch, useSelector } from 'react-redux';
 import { addCommentRequest, commentAllRequest, deleteCommentRequest } from '@/apis/memoryApi';
 import Toast from 'react-native-toast-message';
-import { isNullOrEmpty } from '@/utils/utility';
+import { avatarUploadFolderUrl, isNullOrEmpty } from '@/utils/utility';
 
 const ModalComment = (props) => {
   const { colors } = useTheme();
@@ -141,19 +141,8 @@ const ModalComment = (props) => {
                 key={item.id}
               >
                 <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
-                  {item.userAvatar ? (
-                    <Image
-                      source={{ uri: `data:image/*;base64,${item.userAvatar.fileContents}` }}
-                      style={styles.thumb}
-                      borderRadius={50}
-                    />
-                  ) : (
-                    <Image
-                      source={Images.avata5}
-                      style={styles.thumb}
-                      borderRadius={50}
-                    />
-                  )}
+                  {item.userAvatar && <Image source={{ uri: avatarUploadFolderUrl + `${item.userAvatar.path.split("\\")[item.userAvatar.path.split("\\").length-1]}`}} style={styles.thumb} borderRadius={50} />}
+                  {!item.userAvatar && <Image source={ Images.avata5 } style={styles.thumb} borderRadius={50} />}
 
                   <View style={{ flex: 1 }}>
                     <Text semibold>

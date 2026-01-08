@@ -10,6 +10,7 @@ import Icon from '@/components/Icon';
 import styles from './styles';
 import Header from '../Header/Header';
 import { heightTabView } from '@/utils';
+import { avatarUploadFolderUrl } from '@/utils/utility';
 
 const ModalLike = (props) => {
   const { colors } = useTheme();
@@ -91,9 +92,9 @@ const ModalLike = (props) => {
                   justifyContent: 'center',
                 }}
               >
-                {item.userAvatar && <Image source={{ uri: `data:image/*;base64,${item.userAvatar.fileContents}` }} style={styles.thumb} borderRadius={50} />}
-                {!item.userAvatar && <Image source={Images.avata5} style={styles.thumb} borderRadius={50} />}
-                
+                  {item.userAvatar && <Image source={{ uri: avatarUploadFolderUrl + `${item.userAvatar.path.split("\\")[item.userAvatar.path.split("\\").length-1]}`}} style={styles.thumb} borderRadius={50} />}
+                  {!item.userAvatar && <Image source={ Images.avata5 } style={styles.thumb} borderRadius={50} />}
+                                  
                 <Text semibold>
                   {t(item.userName)}
                 </Text>

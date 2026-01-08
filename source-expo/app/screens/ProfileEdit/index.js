@@ -7,7 +7,7 @@ import styles from './styles';
 import { useDispatch, useSelector } from 'react-redux';
 import { profileEdit } from '@/apis/userApi';
 import { getUserById } from '@/actions/auth';
-import { isNullOrEmpty } from '@/utils/utility';
+import { avatarUploadFolderUrl, isNullOrEmpty } from '@/utils/utility';
 import Toast from 'react-native-toast-message';
 
 const successInit = {
@@ -29,7 +29,7 @@ const ProfileEdit = (props) => {
   const [surname, setSurname] = useState(user.surname);
   const [email, setEmail] = useState(user.email);
   const [phone, setPhone] = useState(user.phone);
-  const [image] = useState(user.fileResult ? user.fileResult.fileContents : Images.avata5);
+  const [image] = useState(user.file ? avatarUploadFolderUrl + user.file.path.split("\\")[user.file.path.split("\\").length-1] : Images.avata5);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(successInit);
 
@@ -112,8 +112,8 @@ const ProfileEdit = (props) => {
         <ScrollView>
           <View style={styles.contain}>
             <View>
-              {user.fileResult && <Image source={{ uri: `data:image/*;base64,${image}` }} style={styles.thumb} borderRadius={50} />}
-              {!user.fileResult && <Image source={image} style={styles.thumb} borderRadius={50} />}
+              {user.file && <Image source={{uri :image}} style={styles.thumb} borderRadius={50} />}
+              {!user.file && <Image source={image} style={styles.thumb} borderRadius={50} />}
             </View>
             <View style={styles.contentTitle}>
               <Text headline semibold>

@@ -78,8 +78,8 @@ export default function MediaSlider({ media, activeMediaIndex, onIndexChange }) 
                 resizeMode="cover"
                 shouldPlay={true}
                 isLooping
-                onError={(error) => console.log(error)}
-                onLoadStart={() => setLoading(index, true)}
+                onError={(error) =>  console.log(error) }
+                onLoadStart={() => setLoading(index, true) }
                 onReadyForDisplay={() => setLoading(index, false)}
               />
             </View>

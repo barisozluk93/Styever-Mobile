@@ -10,6 +10,7 @@ import { AuthActions } from '@/actions';
 import styles from './styles';
 import { useFocusEffect } from '@react-navigation/native';
 import { logout } from '@/actions/auth';
+import { avatarUploadFolderUrl } from '@/utils/utility';
 
 const { authentication } = AuthActions;
 
@@ -53,11 +54,11 @@ const Profile = (props) => {
           <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
             {user && (
               <ProfileDetail
-                image={user.fileResult ? user.fileResult.fileContents : Images.avata5}
+                image={user.file ? avatarUploadFolderUrl + user.file.path.split("\\")[user.file.path.split("\\").length-1] : Images.avata5}
+                isAvatarExist={user.file ? true : false}
                 textFirst={user.name + " " + user.surname}
                 textSecond={user.username}
                 textThird={user.email}
-                fileResult={user.fileResult}
                 onPress={() => {}}
               />
             )}
@@ -123,7 +124,23 @@ const Profile = (props) => {
                   />
                 </TouchableOpacity>
               )}
-              
+              {user && !user.roles.includes(1) && (
+                <TouchableOpacity
+                  style={styleItem}
+                  onPress={() => {
+                    navigation.navigate('Membership');
+                  }}
+                >
+                  <Text body1>{t('membership')}</Text>
+                  <Icon
+                    name="angle-right"
+                    size={18}
+                    color={colors.primary}
+                    style={{ marginLeft: 5 }}
+                    enableRTL={true}
+                  />
+                </TouchableOpacity>
+              )}
               
             </View>
           </ScrollView>

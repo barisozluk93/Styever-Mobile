@@ -14,6 +14,7 @@ import * as Utils from '@/utils';
 import styles from './styles';
 import { useSelector } from 'react-redux';
 import RenderHTML from 'react-native-render-html';
+import { articleUploadFolderUrl } from '@/utils/utility';
 
 const NArticleDetail = (props) => {
   const { navigation, route } = props;
@@ -81,6 +82,7 @@ const NArticleDetail = (props) => {
           <Text
             body2
             style={{
+              color: colors.text,
               lineHeight: 20,
               paddingTop: 10,
             }}
@@ -91,6 +93,7 @@ const NArticleDetail = (props) => {
                 ? itemData.content
                 : itemData.contentEn
             }}
+            baseStyle={{color: colors.text}}
               tagsStyles={{
                 p: {
                   marginBottom: 12,
@@ -156,15 +159,10 @@ const NArticleDetail = (props) => {
             },
           ]}
         >
-          {!itemData.fileResult ? <Image
-            source={Images.avata6}
-            style={{ height: '100%', width: '100%' }}
-          /> :
             <Image
-              source={{ uri: `data:image/*;base64,${itemData.fileResult.fileContents}` }}
+              source={{ uri: itemData.file ? articleUploadFolderUrl + itemData.file.path.split("\\")[itemData.file.path.split("\\").length-1] : Images.avata6 }}
               style={{ height: '100%', width: '100%' }}
             />
-          }
 
           <View style={styles.imageOverlay}>
             <Text title3 whiteColor bold style={{marginBottom: 10}}>

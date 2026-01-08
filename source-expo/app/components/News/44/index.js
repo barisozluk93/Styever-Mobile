@@ -9,7 +9,6 @@ import styles from './styles';
 const News44 = ({
   style = {},
   image = Images.news,
-  fileResult = undefined,
   title = '',
   onPress = () => {},
   loading,
@@ -20,21 +19,13 @@ const News44 = ({
 
   return (
     <TouchableOpacity style={style} onPress={onPress}>
-      {fileResult ? <ImageBackground source={{ uri: `data:image/*;base64,${image}` }} style={styles.imageBackground} borderRadius={8}>
+      <ImageBackground source={{ uri: image }} style={styles.imageBackground} borderRadius={8}>
         <View style={styles.viewBackground}>
           <Text title3 whiteColor semibold>
             {title}
           </Text>
         </View>
       </ImageBackground> :
-      <ImageBackground source={image} style={styles.imageBackground} borderRadius={8}>
-        <View style={styles.viewBackground}>
-          <Text title3 whiteColor semibold>
-            {title}
-          </Text>
-        </View>
-      </ImageBackground>
-      }
     </TouchableOpacity>
   );
 };
@@ -43,7 +34,6 @@ News44.propTypes = {
   style: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
   image: PropTypes.node.isRequired,
   title: PropTypes.string,
-  fileResult: PropTypes.object,
   onPress: PropTypes.func,
   loading: PropTypes.bool,
 };

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Button, Header, Icon, Image, SafeAreaView, Text, TextInput } from '@/components';
+import { Button, Header, Icon, Image, SafeAreaView, Text, TextInput, CheckBox } from '@/components';
 import { BaseColor, BaseStyle, Images, useTheme } from '@/config';
 import styles from './styles';
 import { isNullOrEmpty } from '@/utils/utility';
@@ -21,7 +21,8 @@ const Address = (props) => {
   const { navigation, route } = props;
   const { t } = useTranslation();
   const { colors } = useTheme();
-  const [success, setSuccess] = useState(successInit);
+  const [success, setSuccess] = useState(successInit);  
+  const [isPrimary, setIsPrimary] = useState();
   const [city, setCity] = useState('');
   const [country, setCountry] = useState('');
   const [district, setDistrict] = useState('');
@@ -38,6 +39,7 @@ const Address = (props) => {
     else if (route?.params?.item) {
       setItem(route?.params?.item);
 
+      setIsPrimary(route?.params?.item.isPrimary)
       setCountry(route?.params?.item.country)
       setCity(route?.params?.item.city)
       setDistrict(route?.params?.item.district)
@@ -93,7 +95,7 @@ const Address = (props) => {
       setLoading(true);
 
       if (user) {
-        var userAddress = { id: 0, isDeleted: false, city: city, country: country, district: district, address: address, addressHeader: addressHeader };
+        var userAddress = { id: 0, isDeleted: false, city: city, country: country, district: district, address: address, addressHeader: addressHeader, isPrimary: isPrimary };
         user.userAddress = userAddress;
 
         registerRequest(user).then(response => {
@@ -135,6 +137,7 @@ const Address = (props) => {
           item.city = city;
           item.address = address;
           item.addressHeader = addressHeader;
+          item.isPrimary = isPrimary;
 
           updateUserAddressRequest(item).then(response => {
             if (response.isSuccess) {
@@ -249,6 +252,13 @@ const Address = (props) => {
 
         <ScrollView>
           <View style={styles.contain}>
+            <CheckBox
+                  color={colors.primaryLight}
+                  title={t('primary')}
+                  checked={isPrimary === true}
+                  onPress={() => setIsPrimary(isPrimary === true ? false : true)}
+                />
+
             <TextInput
               style={[styles.textInput, { marginTop: 10 }]}
               onChangeText={(text) => setCountry(text)}

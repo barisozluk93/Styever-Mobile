@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 const News45 = ({
   style = {},
   image = Images.news,
-  fileResult = undefined,
+  isImageExist = false,
   avatar = '',
   isAvatarExist = false,
   username = '',
@@ -28,7 +28,7 @@ const News45 = ({
 }) => {
   const { colors } = useTheme();
   const { t } = useTranslation();
-
+  
   const formatDate = (date, isDateTime) => {
     if (isDateTime) {
       return date.toLocaleDateString('tr-TR', {
@@ -53,12 +53,13 @@ const News45 = ({
 
   return (
     <TouchableOpacity style={style} onPress={onPress}>
-      <ImageBackground source={fileResult ? { uri: `data:image/*;base64,${image}` } : image} style={styles.imageBackground} borderRadius={8}>
+      <ImageBackground source={isImageExist ? { uri: image } : image} style={styles.imageBackground} borderRadius={8}>
         <View style={styles.viewBackground}>
           <View style={styles.viewItem}>
             <ProfileAuthor
               styleThumb={styles.styleThumb}
-              image={isAvatarExist ? { uri: `data:image/*;base64,${avatar}` } : avatar}
+              image={avatar}
+              isAvatarExist={isAvatarExist}
               styleName={{ color: BaseColor.whiteColor }}
               styleDescription={{
                 color: BaseColor.whiteColor,
@@ -101,7 +102,6 @@ News45.propTypes = {
   name: PropTypes.string,
   postDate: PropTypes.string,
   title: PropTypes.string,
-  fileResult: PropTypes.object,
   onPress: PropTypes.func,
   onLikePress: PropTypes.func,
   onLikeListPress: PropTypes.func,

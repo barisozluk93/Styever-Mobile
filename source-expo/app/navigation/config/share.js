@@ -16,6 +16,7 @@ import SliderIntro from '@/screens/SliderIntro';
 import component from './component';
 import Address from '@/screens/Address';
 import MyAddresses from '@/screens/MyAddresses';
+import Membership from '@/screens/Membership';
 
 export default {
   Loading: {
@@ -80,6 +81,12 @@ export default {
     options: {
       title: 'sign_out',
     },
+  },
+  Membership: {
+    component: Membership,
+    options: {
+      title: 'membership'
+    }
   },
   MyAddresses: {
     component: MyAddresses,

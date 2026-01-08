@@ -16,7 +16,7 @@ const AddressList = ({
   const { t } = useTranslation();
   
   return (
-    <TouchableOpacity style={[styles.card, style, { backgroundColor: colors.card }]} onPress={onSelect}>
+    <TouchableOpacity style={[styles.card, style, item.isPrimary && styles.selected, { backgroundColor: colors.card }]} onPress={onSelect}>
       <Text headline style={[styles.title, { color: colors.primary }]}>{item.addressHeader}</Text>
       <View style={styles.divider} />
 

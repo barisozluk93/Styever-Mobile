@@ -309,7 +309,7 @@
   "edit": "Edit",
   "project_view": "Project View",
   "start_date": "Start Date",
-  "end_date": "End Date",
+  "end_date": "Expire Date",
   "budget": "Budget",
   "team_members": "Team Members",
   "project_overview": "Project Overview",
@@ -441,5 +441,7 @@
   "address_info": "Address Informations",
   "trial": "7-Day Free Trial",
   "my_addresses": "My Addresses",
-  "create_address": "New"
+  "create_address": "New",
+  "membership": "Membership",
+  "trial_end_date": "Trial Expire Date"
 } 

@@ -8,6 +8,7 @@ import Loading from './Loading';
 export default function ProfileAuthor({
   style = {},
   image = '',
+  isAvatarExist = false,
   styleLeft = {},
   styleThumb = {},
   styleRight = {},
@@ -26,7 +27,7 @@ export default function ProfileAuthor({
   return (
     <TouchableOpacity style={[styles.contain, style]} onPress={onPress} activeOpacity={0.9}>
       <View style={[styles.contentLeft, styleLeft]}>
-        <Image source={image} style={[styles.thumb, styleThumb]} borderRadius={20} />
+        <Image source={ isAvatarExist ? { uri: image } : image} style={[styles.thumb, styleThumb]} borderRadius={20} />
         <View>
           <Text headline semibold numberOfLines={1} style={styleName}>
             {name}
