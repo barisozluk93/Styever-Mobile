@@ -4,7 +4,7 @@ import { refreshTokenRequest } from './authApi';
 import * as rootNavigation from '.././navigation/rootNavigation';
 
 const api = axios.create({
-  baseURL: 'http://178.251.42.243:5058/api2',
+  baseURL: 'https://styever.com/api',
 });
 
 let isRefreshing = false;

@@ -1,17 +1,24 @@
 import api from "./axiosClient";
 
 export const listMemoryRequest = async (page, pageSize, searchTerm, categoryId) => {
+  try {
+    const response = await api.get("Memory/Paginate", {
+      params: {
+        PageNumber: page,
+        PageSize: pageSize,
+        FilterText: searchTerm ? searchTerm : '',
+        CategoryId: categoryId ? categoryId : ''
+      },
+    });
 
-  const response = await api.get("Memory/Paginate", {
-    params: {
-      PageNumber: page,
-      PageSize: pageSize,
-      FilterText: searchTerm ? searchTerm : '',
-      CategoryId: categoryId ? categoryId : ''
-    },
-  });
-
-  return response.data;
+    return response.data;
+  } catch (error) {
+    console.log("AXIOS ERROR");
+    console.log("message:", error.message);
+    console.log("code:", error.code);
+    console.log("response:", error.response);
+    console.log("request:", error.request);
+  }
 };
 
 export const getMemoryRequest = async (memoryId) => {

@@ -52,7 +52,7 @@ const Membership = (props) => {
 
         <View style={{ flex: 1 }}>
           <TouchableOpacity style={[styles.card, styles.selected, { backgroundColor: colors.card }]} disabled={true}>
-            <Text headline style={[styles.title, { color: colors.primary }]}>{user.roles.includes(2) ? t('standard') : user.roles.includes(3) ? t('premium') : t('ultra')}</Text>
+            <Text headline style={[styles.title, { color: colors.primary }]}>{user.roles.includes(1) ? t('standard') : user.roles.includes(2) ? t('premium') : t('ultra')}</Text>
 
             <View style={styles.divider} />
 

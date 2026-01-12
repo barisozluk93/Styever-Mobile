@@ -230,7 +230,7 @@ const Address = (props) => {
           navigation.goBack();
         }}
         renderRight={() => {
-          if (route?.params?.item.id > 0) {
+          if (route?.params?.item && route?.params?.item.id > 0) {
             return <Text headline primaryColor>{t('remove')}</Text>;
           }
         }}

@@ -124,7 +124,7 @@ const Profile = (props) => {
                   />
                 </TouchableOpacity>
               )}
-              {user && !user.roles.includes(1) && (
+              {user && (
                 <TouchableOpacity
                   style={styleItem}
                   onPress={() => {

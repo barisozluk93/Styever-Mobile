@@ -142,7 +142,7 @@ const NPost = ({ mode = modes.square }) => {
   const controlIsNewMemoryVisible = () => {
     getMemoryCountRequest(user.id).then(response => {
       if (response.isSuccess) {
-        if (user.roles.includes(2) || user.roles.includes(3)) {
+        if (user.roles.includes(1) || user.roles.includes(2)) {
           if (response.data >= 1) {
             setIsNewMemoryVisible(false);
           }
@@ -150,7 +150,7 @@ const NPost = ({ mode = modes.square }) => {
             setIsNewMemoryVisible(true);
           }
         }
-        else if (user.roles.includes(4)) {
+        else if (user.roles.includes(3)) {
           if (response.data >= 4) {
             setIsNewMemoryVisible(false);
           }

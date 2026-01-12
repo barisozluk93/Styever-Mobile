@@ -444,5 +444,7 @@
   "create_address": "New",
   "membership": "Membership",
   "trial_end_date": "Trial Expire Date",
-  "trial_end_message": "Your 7-day trial period has ended.To continue your Styever experience, please make a payment."
+  "trial_end_message": "Your 7-day trial period has ended.To continue your Styever experience, please make a payment.",
+  "upgrade": "Upgrade"
+
 } 

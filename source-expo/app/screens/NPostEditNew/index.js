@@ -382,21 +382,6 @@ const NPostEditNew = (props) => {
         setIsVideoUploadAllowed(true);
       }
     }
-    else if (user.roles.includes(4)) {
-      if (medias.filter(f => f.type === "image").length >= 2) {
-        setIsImageUploadAllowed(false);
-      }
-      else {
-        setIsImageUploadAllowed(true);
-      }
-
-      if (medias.filter(f => f.type === "video").length === 1) {
-        setIsVideoUploadAllowed(false);
-      }
-      else {
-        setIsVideoUploadAllowed(true);
-      }
-    }
   }
 
   useEffect(() => {

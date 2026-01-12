@@ -10,7 +10,6 @@ import { BaseStyle, useTheme } from '@/config';
 import { Button, CardBooking, Header, Icon, MonthYearPicker, SafeAreaView, Text, TextInput } from '@/components';
 import styles from './styles';
 import { useDispatch, useSelector } from 'react-redux';
-import { authentication } from '@/actions/auth';
 
 const Payment = (props) => {
   const { navigation } = props;
@@ -112,7 +111,7 @@ const Payment = (props) => {
         <CardBooking
           loading={loading}
           description={t('total_price')}
-          price={user.roles.includes(2) ? '₺359,00' : user.roles.includes(3) ? '₺559,00' : '₺959,00'}
+          price={user.roles.includes(1) ? '₺359,00' : user.roles.includes(2) ? '₺559,00' : '₺959,00'}
           textButton={t('pay')}
           onPress={() => onPay()}
         />
