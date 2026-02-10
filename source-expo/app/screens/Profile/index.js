@@ -73,7 +73,34 @@ const Profile = (props) => {
                 <Text body1>{t('system')}</Text>
                 <Icon name="angle-right" size={18} color={colors.primary} style={{ marginLeft: 5 }} enableRTL={true} />
               </TouchableOpacity>
-              {user && (
+              {(user && user.isActive) || !user && <TouchableOpacity
+                style={styleItem}
+                onPress={() => {
+                  navigation.navigate('Pricing', { isStandByPage: true });
+                }}
+              >
+                <Text body1>{t('purchase_voucher')}</Text>
+                <Icon name="angle-right" size={18} color={colors.primary} style={{ marginLeft: 5 }} enableRTL={true} />
+              </TouchableOpacity>}
+              <TouchableOpacity
+                style={styleItem}
+                onPress={() => {
+                  navigation.navigate('Faqs');
+                }}
+              >
+                <Text body1>{t('faqs')}</Text>
+                <Icon name="angle-right" size={18} color={colors.primary} style={{ marginLeft: 5 }} enableRTL={true} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styleItem}
+                onPress={() => {
+                  navigation.navigate('ContactUs');
+                }}
+              >
+                <Text body1>{t('contact_us')}</Text>
+                <Icon name="angle-right" size={18} color={colors.primary} style={{ marginLeft: 5 }} enableRTL={true} />
+              </TouchableOpacity>
+              {user && user.isActive && (
                 <TouchableOpacity
                   style={styleItem}
                   onPress={() => {
@@ -90,7 +117,7 @@ const Profile = (props) => {
                   />
                 </TouchableOpacity>
               )}
-              {user && (
+              {user && user.isActive && (
                 <TouchableOpacity
                   style={styleItem}
                   onPress={() => {
@@ -107,7 +134,7 @@ const Profile = (props) => {
                   />
                 </TouchableOpacity>
               )}
-              {user && (
+              {(user && user.isActive) && (
                 <TouchableOpacity
                   style={styleItem}
                   onPress={() => {

@@ -43,7 +43,7 @@ const SignIn = (props) => {
         setLoading(false);
 
         if(isPaymentRequired) {
-          navigation.navigate('Payment');
+          navigation.navigate('Payment', { item: { typeId: 1 }});
         }
         else{
           navigation.navigate('NHome');
@@ -139,7 +139,7 @@ const SignIn = (props) => {
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => navigation.navigate('Pricing')}>
+            <TouchableOpacity onPress={() => navigation.navigate('Pricing',  { isStandByPage: false, isProfilePage: false })}>
               <Text body2 primaryColor>
                 {t('not_have_account')}
               </Text>

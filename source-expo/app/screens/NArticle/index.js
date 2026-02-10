@@ -102,7 +102,7 @@ const NArticle = ({ mode = modes.square }) => {
                   fontSize: 15,
                   color: BaseColor.whiteColor,
                 }}
-                icon={<Icon name="sliders-h" color={BaseColor.whiteColor} size={15} />}
+                icon={<Icon name="filter" color={BaseColor.whiteColor} size={15} />}
                 onPress={() => onFilter()}
               >
                 {t("filter")}

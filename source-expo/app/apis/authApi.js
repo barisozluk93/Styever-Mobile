@@ -45,3 +45,9 @@ export const registerRequest = async (user) => {
 
   return response.data;
 };
+
+export const registerWithVoucherRequest = async (user) => {
+  const response = await authApi.post("Auth/RegisterWithVoucher", user);
+
+  return response.data;
+};

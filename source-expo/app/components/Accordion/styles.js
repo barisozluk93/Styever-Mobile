@@ -1,14 +1,26 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform, Dimensions } from 'react-native';
+import * as Utils from '@/utils';
 import { BaseColor } from '@/config';
-import { getWidthDevice } from '@/utils';
 
 export default StyleSheet.create({
   card: {
     position: 'relative',
-    width: getWidthDevice() - 20,
+    width: Utils.getWidthDevice() - 20,
+    height: (Utils.heightTabView() - 60) / 4 + 35,
     borderRadius: 20,
     padding: 10,
-    marginHorizontal: 10
+  },
+  checkbox: {
+    position: 'absolute',
+    top: 12,
+    left: 12,
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: BaseColor.darkgreenColor,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   selected: {
     borderWidth: StyleSheet.hairlineWidth + 1,
@@ -16,7 +28,11 @@ export default StyleSheet.create({
   },
   title: {
     textAlign: 'center',
-    marginVertical: 10,
+  },
+  price: {
+    textAlign: 'center',
+    marginVertical: 5,
+    color: BaseColor.darkgreenColor,
   },
   divider: {
     height: StyleSheet.hairlineWidth,
@@ -26,30 +42,22 @@ export default StyleSheet.create({
   propertiesGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginTop: 20,
-    textAlign: 'center',
+    marginTop: 5,
   },
   propertyItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    width: '50%',
-    paddingHorizontal: 30,
-    marginBottom: 10,
-  },
-  propertyItem2: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    textAlign: 'center',
-    marginBottom: 10,
+    width: '50%',        // 👈 satır başına 2 tane
+    marginBottom: 5,
   },
   property: {
-    // marginLeft: 10,
+    marginLeft: 6,
     flexShrink: 1,
   },
   trialBadge: {
     position: 'absolute',
     bottom: -16,                   
-    alignSelf: 'center', 
+    alignSelf: 'center',           
     paddingHorizontal: 14,
     paddingVertical: 5,
     borderRadius: 14,
@@ -59,22 +67,6 @@ export default StyleSheet.create({
     zIndex: 10,
   },
   trialText: {
-    color: BaseColor.whiteColor,
-    textAlign: 'center',
-  },
-  expireBadge: {
-    position: 'absolute',
-    bottom: -16,                   
-    alignSelf: 'center', 
-    paddingHorizontal: 14,
-    paddingVertical: 5,
-    borderRadius: 14,
-    backgroundColor: BaseColor.pinkDarkColor,
-    borderWidth: 1,
-    borderColor: BaseColor.pinkDarkColor,
-    zIndex: 10,
-  },
-  expireText: {
     color: BaseColor.whiteColor,
     textAlign: 'center',
   },

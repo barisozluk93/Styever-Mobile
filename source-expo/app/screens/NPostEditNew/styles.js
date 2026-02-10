@@ -152,6 +152,16 @@ export default StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  viewIconMostLeft: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    position: 'absolute',
+    bottom: 0,
+    right: 140,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   viewIconLeastLeft: {
     width: 40,
     height: 40,

@@ -72,7 +72,7 @@ const NSearchFilter = (props) => {
               value={search}
               onChangeText={(val) => setSearch(val)}
               placeholder={t('search')}
-              iconLeft={<Icon name="search" color={colors.border} style={{ marginRight: 8 }} size={18} />}
+              iconLeft={<Icon name="magnifying-glass" color={colors.border} style={{ marginRight: 8 }} size={18} />}
             />
           </View>
         </View>

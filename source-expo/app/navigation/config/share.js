@@ -17,6 +17,7 @@ import component from './component';
 import Address from '@/screens/Address';
 import MyAddresses from '@/screens/MyAddresses';
 import Membership from '@/screens/Membership';
+import Faqs from '@/screens/Faqs';
 
 export default {
   Loading: {
@@ -62,6 +63,12 @@ export default {
     component: ContactUs,
     options: {
       title: 'contact_us',
+    },
+  },
+  Faqs: {
+    component: Faqs,
+    options: {
+      title: 'faqs',
     },
   },
   Setting: {

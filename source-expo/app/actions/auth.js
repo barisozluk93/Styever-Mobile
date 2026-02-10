@@ -11,7 +11,6 @@ export const login = (username, password) => async (dispatch) => {
 
     dispatch({ type: 'AUTH_LOGIN_SUCCESS', payload: response.data });
   } catch (error) {
-    console.log("error123 + " + response.data.message)
     dispatch({ type: 'AUTH_LOGIN_FAIL', payload: error.response?.data?.message || error.message });
   }
 };

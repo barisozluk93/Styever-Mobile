@@ -118,6 +118,11 @@ export default StyleSheet.create({
   stats: {
     flexDirection: "row",
   },
+  statItemLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginRight: 20
+  },
   statItem: {
     flexDirection: "row",
     alignItems: "center",
@@ -145,5 +150,47 @@ export default StyleSheet.create({
   icon: {
     width: 20,
     height: 20,
+  },
+  candleInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  candleInfoText: {
+    marginLeft: 12,
+  },
+  candleWrapper: {
+    width: 15,
+    height: 50,
+    position: 'relative',
+  },
+
+  wax: {
+    width: '100%',
+    height: 50,
+    backgroundColor: BaseColor.darkgreenColor,
+    borderRadius: 6,
+  },
+
+  wick: {
+    position: 'absolute',
+    top: -6,
+    left: '50%',
+    width: 2,
+    height: 6,
+    backgroundColor: '#333',
+    transform: [{ translateX: -1 }],
+  },
+
+  flame: {
+    position: 'absolute',
+    top: -20,
+    left: '50%',
+    width: 10,
+    height: 20,
+    backgroundColor: '#ff8c00',
+    borderRadius: 10,
+    transform: [{ translateX: -5 }],
+    opacity: 0.9,
   },
 });

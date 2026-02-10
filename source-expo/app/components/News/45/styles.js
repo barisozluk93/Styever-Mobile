@@ -54,4 +54,21 @@ export default StyleSheet.create({
     marginLeft: 6,
     fontSize: 16
   },
+  topLeftIcon: {
+    position: "absolute",
+    top: 10,
+    left: 6,
+    padding: 6,
+    borderRadius: 20,
+    zIndex: 10,
+  },
+  topRightQr: {
+    position: "absolute",
+    top: 10,
+    right: 6,
+    padding: 4,
+    borderRadius: 6,
+    zIndex: 10,
+    backgroundColor: BaseColor.whiteColor
+  },
 });

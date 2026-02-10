@@ -346,7 +346,7 @@ const PreviewComponent = (props) => {
                 return <Icon name="angle-left" size={20} color={colors.primary} enableRTL={true} />;
               }}
               renderRight={() => {
-                return <Icon name="search" size={20} color={colors.primary} />;
+                return <Icon name="magnifying-glass" size={20} color={colors.primary} />;
               }}
             />
             <Text body1 style={styles.title}>

@@ -23,6 +23,9 @@ export { PlaceholderLine, Placeholder } from './Placeholder';
 export { default as ModalOption } from './ModalOption';
 export { default as ModalLike } from './ModalLike';
 export { default as ModalComment } from './ModalComment';
+export { default as ModalYoutubeLink } from './ModalYoutubeLink';
+export { default as ModalCandle } from './ModalCandle';
+export { default as ModalCandleLighters } from './ModalCandleLighters';
 export { default as MediaSlider } from './MediaSlider';
 
 // Card components
@@ -184,6 +187,7 @@ export { default as Ticket } from './Ticket';
 
 export { default as PriceList } from './PriceList';
 export { default as AddressList } from './AddressList';
+export { default as Accordion } from './Accordion';
 
 
 // List

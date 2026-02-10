@@ -132,7 +132,7 @@ export default function FChooseLocation() {
             value={keywork}
             icon={
               <TouchableOpacity onPress={() => setKeywork('')}>
-                <Icon name="search" size={16} color={BaseColor.grayColor} />
+                <Icon name="magnifying-glass" size={16} color={BaseColor.grayColor} />
               </TouchableOpacity>
             }
           />

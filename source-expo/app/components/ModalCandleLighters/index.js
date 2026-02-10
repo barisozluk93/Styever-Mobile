@@ -12,7 +12,7 @@ import Header from '../Header/Header';
 import { heightTabView } from '@/utils';
 import { avatarUploadFolderUrl } from '@/utils/utility';
 
-const ModalLike = (props) => {
+const ModalCandleLighters = (props) => {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const cardColor = colors.card;
@@ -61,7 +61,7 @@ const ModalLike = (props) => {
         </View>
 
         <Header style={{ borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.border }}
-          title={t('like')} />
+          title={t('candle_lighters')} />
 
         <ScrollView showsVerticalScrollIndicator={false}
           style={{ height: heightTabView() - 350 }}>
@@ -117,10 +117,10 @@ const ModalLike = (props) => {
   );
 };
 
-ModalLike.propTypes = {
+ModalCandleLighters.propTypes = {
   options: PropTypes.array,
   onBackdropPress: PropTypes.func,
   isMulti: PropTypes.bool,
 };
 
-export default ModalLike;
+export default ModalCandleLighters;

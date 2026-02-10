@@ -19,6 +19,7 @@ import {
   MediaSlider,
   PickerSelect,
   Button,
+  ModalComment,
 } from '@/components';
 import { BaseColor, BaseStyle, useTheme, Images } from '@/config';
 import * as Utils from '@/utils';
@@ -26,10 +27,11 @@ import styles from './styles';
 import { useSelector } from 'react-redux';
 import Toast from 'react-native-toast-message';
 import DatePicker from '../Components/Common/DatePicker';
-import { editRequest, getMemoryRequest, memoryFileAddRequest, memoryFileDeleteRequest, saveRequest, setMemoryFileIsPrimaryRequest } from '@/apis/memoryApi';
+import { editRequest, getMemoryRequest, memoryFileAddRequest, memoryFileDeleteRequest, saveRequest, setMemoryFileIsPrimaryRequest, youtubelinkDeleteRequest } from '@/apis/memoryApi';
 import * as ImagePicker from 'expo-image-picker';
 import { deleteFileRequest, uploadRequest } from '@/apis/fileApi';
 import { isNullOrEmpty, memoryUploadFolderUrl } from '@/utils/utility';
+import ModalYoutubeLink from '@/components/ModalYoutubeLink';
 
 const categories = [
   { key: 1, name: 'bird' },
@@ -74,8 +76,11 @@ const NPostEditNew = (props) => {
   const [activeMediaIndex, setActiveMediaIndex] = useState(0);
   const [isImageUploadAllowed, setIsImageUploadAllowed] = useState();
   const [isVideoUploadAllowed, setIsVideoUploadAllowed] = useState();
+  const [isYoutubeLinkAllowed, setIsYoutubeLinkAllowed] = useState();
+  const [allowedCharacterCount, setAllowedCharacterCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(successInit);
+  const [showYoutubeLinkModal, setShowYoutubeLinkModal] = useState(false);
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -146,6 +151,21 @@ const NPostEditNew = (props) => {
       })
     }
   };
+
+  const onProccessSuccess = () => {
+    getMemoryRequest(itemData.id).then(response => {
+      setShowYoutubeLinkModal(false);
+      setItemData(response.data);
+
+      setTimeout(() => {
+        setActiveMediaIndex(mediaFiles.length)
+      }, 250)
+    });
+  }
+
+  const openYoutubeLinkModal = async () => {
+    setShowYoutubeLinkModal(true);
+  }
 
   const pickVideo = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -220,50 +240,82 @@ const NPostEditNew = (props) => {
 
   const deleteFile = () => {
     var mediaFile = mediaFiles[activeMediaIndex];
-    deleteFileRequest(mediaFile.fileId).then(response => {
-      if (response.isSuccess) {
-        memoryFileDeleteRequest(mediaFile.id).then(response1 => {
-          if (response1.isSuccess) {
-            getMemoryRequest(itemData.id).then(response2 => {
-              setItemData(response2.data);
 
-              Toast.show({
-                type: 'success',
-                text1: t('success'),
-                text2: t('success_message'),
-              });
-            })
-          }
-        });
-      }
-      else {
+    if (mediaFile.type !== "youtube") {
+      deleteFileRequest(mediaFile.fileId).then(response => {
+        if (response.isSuccess) {
+          memoryFileDeleteRequest(mediaFile.id).then(response1 => {
+            if (response1.isSuccess) {
+              getMemoryRequest(itemData.id).then(response2 => {
+                setItemData(response2.data);
+
+                Toast.show({
+                  type: 'success',
+                  text1: t('success'),
+                  text2: t('success_message'),
+                });
+              })
+            }
+          });
+        }
+        else {
+          Toast.show({
+            type: 'error',
+            text1: t('error'),
+            text2: t('error_file_message'),
+          });
+        }
+      }).catch(error => {
         Toast.show({
           type: 'error',
           text1: t('error'),
           text2: t('error_file_message'),
         });
-      }
-    }).catch(error => {
-      Toast.show({
-        type: 'error',
-        text1: t('error'),
-        text2: t('error_file_message'),
+      })
+    }
+    else {
+      youtubelinkDeleteRequest(mediaFile.id).then(response1 => {
+        if (response1.isSuccess) {
+          getMemoryRequest(itemData.id).then(response2 => {
+            setItemData(response2.data);
+
+            Toast.show({
+              type: 'success',
+              text1: t('success'),
+              text2: t('success_message'),
+            });
+          })
+        }
       });
-    })
+    }
   }
 
-  const prepareMediaFiles = async (files) => {
+  const getYoutubeId = (url) => {
+    const regExp =
+            /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+    const match = url.match(regExp);
+    return match ? match[1] : null;
+  };
+
+  const getPriority = (item) => {
+    if (item.type === "image" && item.isPrimary) return 1;
+    if (item.type === "image") return 2;
+    if (item.type === "video") return 3;
+    if (item.type === "youtube") return 4;
+    return 99;
+  };
+
+  const prepareMediaFiles = async (files, youtubeLinks) => {
     const prepared = [];
 
     for (let i = 0; i < files.length; i++) {
       const f = files[i];
-      console.log("contentType : " + f.file.contentType)
       if (!(f.file.contentType.includes('image'))) {
         prepared.push({
           id: f.id,
           fileId: f.fileId,
           type: 'video',
-          uri: memoryUploadFolderUrl + `${f.file.path.split("\\")[f.file.path.split("\\").length-1]}`,
+          uri: memoryUploadFolderUrl + `${f.file.path.split("\\")[f.file.path.split("\\").length - 1]}`,
           isPrimary: false
         });
       } else {
@@ -271,34 +323,32 @@ const NPostEditNew = (props) => {
           id: f.id,
           fileId: f.fileId,
           type: 'image',
-          uri: memoryUploadFolderUrl + `${f.file.path.split("\\")[f.file.path.split("\\").length-1]}`,
+          uri: memoryUploadFolderUrl + `${f.file.path.split("\\")[f.file.path.split("\\").length - 1]}`,
           isPrimary: f.isPrimary
         });
       }
+    }
+
+
+    for (let i = 0; i < youtubeLinks.length; i++) {
+      const f = youtubeLinks[i];
+      prepared.push({
+        id: f.id,
+        fileId: undefined,
+        type: 'youtube',
+        uri: getYoutubeId(f.link),
+        isPrimary: false
+      });
     }
 
     if (prepared.length === 0) {
       return prepared;
     }
 
-    const sortedList = [...prepared].sort((a, b) => {
-      if (a.type === 'image' && a.isPrimary && !(b.type === 'image' && b.isPrimary)) {
-        return -1;
-      }
-      if (!(a.type === 'image' && a.isPrimary) && b.type === 'image' && b.isPrimary) {
-        return 1;
-      }
+    const sortedList = [...prepared].sort(
+      (a, b) => getPriority(a) - getPriority(b)
+    );
 
-      // Öncelik 2: image olanlar
-      if (a.type === 'image' && b.type !== 'image') {
-        return -1;
-      }
-      if (a.type !== 'image' && b.type === 'image') {
-        return 1;
-      }
-
-      return 0;
-    });
 
     return sortedList;
   };
@@ -331,8 +381,8 @@ const NPostEditNew = (props) => {
     }
 
     const prepare = async () => {
-      if (itemData.files?.length > 0) {
-        const result = await prepareMediaFiles(itemData.files);
+      if (itemData.files?.length > 0 || itemData.youtubeLinks?.length > 0) {
+        const result = await prepareMediaFiles(itemData.files, itemData.youtubeLinks);
         setMediaFiles(result);
         controlUploadPermissions(result);
       }
@@ -342,7 +392,7 @@ const NPostEditNew = (props) => {
       }
     };
 
-    if (itemData && itemData.files) {
+    if (itemData && (itemData.files || itemData.youtubeLinks)) {
       prepare();
     }
     else {
@@ -351,14 +401,17 @@ const NPostEditNew = (props) => {
     }
   }, [itemData])
 
-
   const controlUploadPermissions = (medias) => {
     if (user.roles.includes(1)) {
       setIsVideoUploadAllowed(true);
       setIsImageUploadAllowed(true);
+      setIsYoutubeLinkAllowed(true);
+      setAllowedCharacterCount(20000);
     }
     else if (user.roles.includes(2)) {
       setIsVideoUploadAllowed(false);
+      setAllowedCharacterCount(1000);
+      setIsYoutubeLinkAllowed(false);
 
       if (medias.filter(f => f.type === "image").length >= 1) {
         setIsImageUploadAllowed(false);
@@ -367,7 +420,9 @@ const NPostEditNew = (props) => {
         setIsImageUploadAllowed(true);
       }
     }
-    else if (user.roles.includes(3)) {
+    else if (user.roles.includes(3) || user.roles.includes(4)) {
+      setAllowedCharacterCount(5000);
+
       if (medias.filter(f => f.type === "image").length >= 4) {
         setIsImageUploadAllowed(false);
       }
@@ -380,6 +435,13 @@ const NPostEditNew = (props) => {
       }
       else {
         setIsVideoUploadAllowed(true);
+      }
+
+      if (medias.filter(f => f.type === "youtube").length === 2) {
+        setIsYoutubeLinkAllowed(false);
+      }
+      else {
+        setIsYoutubeLinkAllowed(true);
       }
     }
   }
@@ -417,7 +479,7 @@ const NPostEditNew = (props) => {
         deathDate: !isNullOrEmpty(deathDate) ? true : false,
       });
     }
-    else{
+    else {
 
       let birth_date = birthDate.includes("T") ? birthDate.split('T')[0] : birthDate;
       let death_date = deathDate.includes("T") ? deathDate.split('T')[0] : deathDate;
@@ -472,7 +534,7 @@ const NPostEditNew = (props) => {
               text2: t('success_message'),
             });
 
-             setTimeout(() => {
+            setTimeout(() => {
               setLoading(false);
             }, 500)
           }
@@ -638,6 +700,7 @@ const NPostEditNew = (props) => {
                 placeholder={t('memory')}
                 placeholderTextColor={success.text ? BaseColor.grayColor : colors.primary}
                 value={text}
+                maxLength={allowedCharacterCount}
                 selectionColor={colors.primary}
               />
 
@@ -645,7 +708,7 @@ const NPostEditNew = (props) => {
           </ScrollView>
 
           <View style={{ width: '100%', padding: 20 }}>
-            <Button loading={loading} full onPress={() => {onSave()}}>
+            <Button loading={loading} full onPress={() => { onSave() }}>
               {t('save')}
             </Button>
           </View>
@@ -693,6 +756,17 @@ const NPostEditNew = (props) => {
             size={20}
             color={BaseColor.whiteColor}
             onPress={pickVideo}
+          />
+        </TouchableOpacity>}
+        {itemData && isYoutubeLinkAllowed && <TouchableOpacity
+          style={[styles.viewIconMostLeft, { backgroundColor: colors.primaryLight }]}
+        >
+          <Icon
+            solid
+            name="youtube"
+            size={20}
+            color={BaseColor.whiteColor}
+            onPress={openYoutubeLinkModal}
           />
         </TouchableOpacity>}
         {itemData && mediaFiles && mediaFiles.length > 0 && <TouchableOpacity
@@ -770,16 +844,28 @@ const NPostEditNew = (props) => {
               );
             }}
             onPressLeft={() => {
-              if(itemData) {
+              if (itemData) {
                 navigation.navigate('NPostDetail', { item: itemData });
               }
-              else{
+              else {
                 navigation.goBack();
               }
             }}
           />
         </SafeAreaView>
       </Animated.View>
+
+      {showYoutubeLinkModal && <ModalYoutubeLink
+        isProccessSuccess={() => onProccessSuccess()}
+        memoryId={itemData.id}
+        isVisible={showYoutubeLinkModal}
+        onSwipeComplete={() => {
+          setShowYoutubeLinkModal(false);
+        }}
+        onBackdropPress={() => {
+          setShowYoutubeLinkModal(false)
+        }}
+      />}
     </View>
   );
 };

@@ -1,24 +1,17 @@
 import api from "./axiosClient";
 
-export const listMemoryRequest = async (page, pageSize, searchTerm, categoryId) => {
-  try {
+export const listMemoryRequest = async (page, pageSize, searchTerm, categoryId, userId) => {
     const response = await api.get("Memory/Paginate", {
       params: {
         PageNumber: page,
         PageSize: pageSize,
         FilterText: searchTerm ? searchTerm : '',
-        CategoryId: categoryId ? categoryId : ''
+        CategoryId: categoryId ? categoryId : '',
+        UserId: userId ? userId : ''
       },
     });
 
     return response.data;
-  } catch (error) {
-    console.log("AXIOS ERROR");
-    console.log("message:", error.message);
-    console.log("code:", error.code);
-    console.log("response:", error.response);
-    console.log("request:", error.request);
-  }
 };
 
 export const getMemoryRequest = async (memoryId) => {
@@ -70,13 +63,21 @@ export const commentAllRequest = async (memoryId) => {
   return response.data;
 };
 
-export const addCommentRequest = async (id, memoryId, userId, comment) => {
+export const addCommentRequest = async (id, memoryId, userId, comment, nameSurname, isApproved) => {
   const response = await api.post(`Memory/AddComment`, {
     id: id,
     memoryId: memoryId,
     comment: comment,
-    userId: userId
+    userId: userId,
+    nameSurname: nameSurname,
+    isApproved: isApproved
   });
+
+  return response.data;
+};
+
+export const approveCommentRequest = async (commentId) => {
+  const response = await api.get(`Memory/ApproveComment/${commentId}`);
 
   return response.data;
 };
@@ -99,6 +100,23 @@ export const likeRequest = async (id, memoryId, userId) => {
     memoryId: memoryId,
     userId: userId
   });
+
+  return response.data;
+};
+
+export const addYoutubeLinkRequest = async (id, memoryId, youtubeLink) => {
+  const response = await api.post(`Memory/MemoryYoutubeLinkAdd`, {
+    id: id,
+    memoryId: memoryId,
+    link: youtubeLink,
+    isDeleted: false
+  });
+
+  return response.data;
+};
+
+export const youtubelinkDeleteRequest = async (id) => {
+  const response = await api.delete(`Memory/MemoryYoutubeLinkDelete/${id}`);
 
   return response.data;
 };
@@ -127,4 +145,22 @@ export const getMemoryCountRequest = async (id) => {
   return response.data;
 }
 
+export const lightCandleRequest = async (id, memoryId, userId) => {
+  let data = {
+    id: id,
+    userId: userId,
+    memoryId: memoryId,
+    isDeleted: false
+  }
+
+  const response = await api.post(`Memory/LightCandle`, data);
+
+  return response.data;
+};
+
+export const updateCandleRequest = async (data) => {
+  const response = await api.post(`Memory/UpdateCandle`, data);
+
+  return response.data;
+};
 

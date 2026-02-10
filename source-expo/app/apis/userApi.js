@@ -48,3 +48,41 @@ export const profileEdit = async (id, email, fileId, name, surname, username, ph
   return response.data;
 }
 
+export const addGiftRequest = async (fullname, cardNo, expiryDate, cvv, userId, senderEmail, receiverEmail, message, planId, price) => {
+  let data = {
+    receiverEmail: receiverEmail,
+    senderEmail: senderEmail,
+    fullname: fullname,
+    cardNo: cardNo,
+    expiryDate: expiryDate,
+    message: message,
+    cvv: cvv,
+    userId: userId,
+    planId: planId,
+    price: price
+  }
+
+  console.log(data.price)
+
+  const response = await authApi.post(`User/BuyGiftPackage`, data);
+
+  return response.data;
+};
+
+export const buyPackageRequest = async (userId, planId, memoryId) => {
+  const response = await authApi.get(`User/BuyPackage/${userId}/${planId}/${memoryId}`);
+
+  return response.data;
+};
+
+export const payRequest = async (userId) => {
+  const response = await authApi.get(`User/Pay/${userId}`);
+
+  return response.data;
+};
+
+export const voucherControlRequest = async (voucher) => {
+  const response = await authApi.get(`User/VoucherControl/${voucher}`);
+
+  return response.data;
+}

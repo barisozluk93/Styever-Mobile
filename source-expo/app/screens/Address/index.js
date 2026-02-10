@@ -6,7 +6,7 @@ import { BaseColor, BaseStyle, Images, useTheme } from '@/config';
 import styles from './styles';
 import { isNullOrEmpty } from '@/utils/utility';
 import Toast from 'react-native-toast-message';
-import { registerRequest } from '@/apis/authApi';
+import { registerRequest, registerWithVoucherRequest } from '@/apis/authApi';
 import { deleteUserAddressRequest, saveUserAddressRequest, updateUserAddressRequest } from '@/apis/userApi';
 
 const successInit = {
@@ -21,7 +21,7 @@ const Address = (props) => {
   const { navigation, route } = props;
   const { t } = useTranslation();
   const { colors } = useTheme();
-  const [success, setSuccess] = useState(successInit);  
+  const [success, setSuccess] = useState(successInit);
   const [isPrimary, setIsPrimary] = useState();
   const [city, setCity] = useState('');
   const [country, setCountry] = useState('');
@@ -98,20 +98,31 @@ const Address = (props) => {
         var userAddress = { id: 0, isDeleted: false, city: city, country: country, district: district, address: address, addressHeader: addressHeader, isPrimary: isPrimary };
         user.userAddress = userAddress;
 
-        registerRequest(user).then(response => {
-          if (response.isSuccess) {
-            setTimeout(() => {
-              setLoading(false);
+        console.log(user.voucher)
+        if (user.voucher) {
+          registerWithVoucherRequest(user).then(response => {
+            if (response.isSuccess) {
+              setTimeout(() => {
+                setLoading(false);
+                Toast.show({
+                  type: 'success',
+                  text1: t('success'),
+                  text2: t('success_message'),
+                });
+
+                navigation.navigate('SignIn');
+              }, 500);
+            }
+            else {
               Toast.show({
-                type: 'success',
-                text1: t('success'),
-                text2: t('success_message'),
+                type: 'error',
+                text1: t('error'),
+                text2: t('error_message'),
               });
 
-              navigation.navigate('SignIn');
-            }, 500);
-          }
-          else {
+              setLoading(false);
+            }
+          }).catch(error => {
             Toast.show({
               type: 'error',
               text1: t('error'),
@@ -119,16 +130,41 @@ const Address = (props) => {
             });
 
             setLoading(false);
-          }
-        }).catch(error => {
-          Toast.show({
-            type: 'error',
-            text1: t('error'),
-            text2: t('error_message'),
-          });
+          })
+        }
+        else {
+          registerRequest(user).then(response => {
+            if (response.isSuccess) {
+              setTimeout(() => {
+                setLoading(false);
+                Toast.show({
+                  type: 'success',
+                  text1: t('success'),
+                  text2: t('success_message'),
+                });
 
-          setLoading(false);
-        })
+                navigation.navigate('SignIn');
+              }, 500);
+            }
+            else {
+              Toast.show({
+                type: 'error',
+                text1: t('error'),
+                text2: t('error_message'),
+              });
+
+              setLoading(false);
+            }
+          }).catch(error => {
+            Toast.show({
+              type: 'error',
+              text1: t('error'),
+              text2: t('error_message'),
+            });
+
+            setLoading(false);
+          })
+        }
       }
       else {
         if (item.id > 0) {
@@ -253,11 +289,12 @@ const Address = (props) => {
         <ScrollView>
           <View style={styles.contain}>
             <CheckBox
-                  color={colors.primaryLight}
-                  title={t('primary')}
-                  checked={isPrimary === true}
-                  onPress={() => setIsPrimary(isPrimary === true ? false : true)}
-                />
+              color={colors.primaryLight}
+              title={t('primary')}
+              checked={user ? true : (isPrimary === true)}
+              disabled={user ? true : false}
+              onPress={() => setIsPrimary(isPrimary === true ? false : true)}
+            />
 
             <TextInput
               style={[styles.textInput, { marginTop: 10 }]}

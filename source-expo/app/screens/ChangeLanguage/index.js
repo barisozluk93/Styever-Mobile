@@ -83,7 +83,7 @@ export default function ChangeLanguage({ navigation }) {
             onChangeText={filterLanguage}
             placeholder={t('search_language')}
             value={country}
-            iconLeft={<Icon name="search" color={colors.border} style={{ marginRight: 8 }} size={18} />}
+            iconLeft={<Icon name="magnifying-glass" color={colors.border} style={{ marginRight: 8 }} size={18} />}
             icon={
               country ? (
                 <TouchableOpacity onPress={() => filterLanguage('')}>

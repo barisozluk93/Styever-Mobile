@@ -1,16 +1,26 @@
 import { StyleSheet } from 'react-native';
 import { BaseColor } from '@/config';
+import { heightTabView } from '@/utils';
 
 export default StyleSheet.create({
   bottomModal: {
     justifyContent: 'flex-end',
     margin: 0,
   },
+  thumb: {
+    width: 50,
+    height: 50,
+    marginRight: 10
+  },
+  wrapContent: {
+    flexWrap: 'wrap',
+    flexDirection: 'row',
+  },
   contentFilterBottom: {
     paddingVertical: 16,
     width: '100%',
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
     paddingHorizontal: 20,
   },
   contentSwipeDown: {
@@ -32,18 +42,5 @@ export default StyleSheet.create({
     height: 18,
     marginRight: 8,
     paddingTop: 2,
-  },
-  trialBadge: {
-    marginVertical: 20,
-    paddingHorizontal: 14,
-    paddingVertical: 5,
-    borderRadius: 14,
-    backgroundColor: BaseColor.darkgreenColor,
-    borderWidth: 1,
-    borderColor: BaseColor.darkgreenColor,
-  },
-  trialText: {
-    color: BaseColor.whiteColor,
-    textAlign: 'center',
   },
 });

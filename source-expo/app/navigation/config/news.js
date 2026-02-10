@@ -23,14 +23,14 @@ export const NewsTabScreens = {
     component: NHome,
     options: {
       title: 'home',
-      tabBarIcon: ({ color }) => tabBarIcon({ color, name: 'home' }),
+      tabBarIcon: ({ color }) => tabBarIcon({ color, name: 'house' }),
     },
   },
   NPost: {
     component: NPost,
     options: {
       title: 'memories',
-      tabBarIcon: ({ color }) => tabBarIcon({ color, name: 'photo-video' }),
+      tabBarIcon: ({ color }) => tabBarIcon({ color, name: 'photo-film' }),
     },
   },
   NArticle: {

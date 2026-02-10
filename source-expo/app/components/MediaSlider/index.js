@@ -5,11 +5,13 @@ import {
   View,
   Dimensions,
   Image,
-  StyleSheet,
   ActivityIndicator,
+  TouchableOpacity,
 } from 'react-native';
 import { Video } from 'expo-av';
 import styles from './styles';
+import { Linking } from "react-native";
+import Icon from '@/components/Icon';
 
 const { width } = Dimensions.get('window');
 
@@ -45,6 +47,11 @@ export default function MediaSlider({ media, activeMediaIndex, onIndexChange }) 
     }
   }, [activeMediaIndex])
 
+  const openYoutube = (videoId) => {
+    Linking.openURL(`https://www.youtube.com/watch?v=${videoId}`);
+  };
+
+
   return (
     <FlatList
       ref={flatListRef}
@@ -64,7 +71,7 @@ export default function MediaSlider({ media, activeMediaIndex, onIndexChange }) 
               style={{ width: '100%', height: '100%' }}
               resizeMode="cover"
             />
-          ) : (
+          ) : item.type === 'video' ? (
             <View style={styles.videoWrapper}>
               {loadingMap[index] !== false && (
                 <View style={styles.loader}>
@@ -78,10 +85,29 @@ export default function MediaSlider({ media, activeMediaIndex, onIndexChange }) 
                 resizeMode="cover"
                 shouldPlay={true}
                 isLooping
-                onError={(error) =>  console.log(error) }
-                onLoadStart={() => setLoading(index, true) }
+                onError={(error) => console.log(error)}
+                onLoadStart={() => setLoading(index, true)}
                 onReadyForDisplay={() => setLoading(index, false)}
               />
+            </View>
+          ) : (
+            <View style={styles.youtubeContainer}>
+              <Image
+                source={{ uri: `https://img.youtube.com/vi/${item.uri}/hqdefault.jpg` }}
+                style={styles.youtubeImage}
+                resizeMode="cover"
+              />
+
+              <View style={styles.youtubeOverlay} />
+
+              {/* SADECE PLAY BUTONU TIKLANABİLİR */}
+              <TouchableOpacity
+                style={styles.youtubePlay}
+                activeOpacity={0.8}
+                onPress={() => openYoutube(item.uri)}
+              >
+                <Icon name="play" size={26} color="#fff" />
+              </TouchableOpacity>
             </View>
           )}
         </View>

@@ -7,6 +7,8 @@ import Loading from './Loading';
 import styles from './styles';
 import { Icon } from '@/components';
 import { useTranslation } from 'react-i18next';
+import QRCode from "react-native-qrcode-svg";
+import { useEffect } from 'react';
 
 const News45 = ({
   style = {},
@@ -19,6 +21,7 @@ const News45 = ({
   title = '',
   commentCount = 0,
   likeCount = 0,
+  qrData = null,
   isLiked = false,
   onPress = () => { },
   onLikePress = () => { },
@@ -54,6 +57,18 @@ const News45 = ({
   return (
     <TouchableOpacity style={style} onPress={onPress}>
       <ImageBackground source={isImageExist ? { uri: image } : image} style={styles.imageBackground} borderRadius={8}>
+        <View style={styles.topLeftIcon}>
+          <Icon name="ribbon" size={20} color={BaseColor.whiteColor} />
+        </View>
+
+        {qrData != null && <View style={styles.topRightQr}>
+          <QRCode
+            value={`${qrData}`}
+            size={50}
+            backgroundColor="transparent"
+          />
+        </View>}
+
         <View style={styles.viewBackground}>
           <View style={styles.viewItem}>
             <ProfileAuthor

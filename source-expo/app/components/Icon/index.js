@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import { StyleSheet } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome5';
+// import Icon from 'react-native-vector-icons/FontAwesome5';
+import Icon from 'react-native-vector-icons/FontAwesome6';
 import styles from './styles';
 
 export default function Index({ style = {}, enableRTL = false, ...rest }) {

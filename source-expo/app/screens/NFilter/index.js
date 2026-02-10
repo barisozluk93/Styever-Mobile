@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { ScrollView, TouchableOpacity, View } from 'react-native';
 import { BaseColor, BaseStyle, useTheme } from '@/config';
 import * as Utils from '@/utils';
-import { Button, Header, Icon, SafeAreaView, Tag, Text, TextInput } from '@/components';
+import { Button, CheckBox, Header, Icon, SafeAreaView, Tag, Text, TextInput } from '@/components';
 import styles from './styles';
 import { useDispatch, useSelector } from 'react-redux';
 import { isNullOrEmpty } from '@/utils/utility';
@@ -25,8 +25,10 @@ const NFilter = (props) => {
   const dispatch = useDispatch();
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState();
+  const [isMine, setIsMine] = useState(false);
   const [scrollEnabled, setScrollEnabled] = useState(true);
-  const { categoryId, searchTerm } = useSelector(state => state.memory);
+  const { categoryId, searchTerm, isMyList } = useSelector(state => state.memory);
+  const { user } = useSelector(state => state.user);
 
   const renderItem = ({ item, checked, onPress }) => {
     return (
@@ -55,12 +57,18 @@ const NFilter = (props) => {
 
     if(categoryId && !isNullOrEmpty(categoryId) && !isNaN(categoryId)) {
       setCategory(categoryId);
-    }        
-  }, [categoryId, searchTerm]);
+    } 
+    
+    if(isMyList && !isNullOrEmpty(isMyList) && !isNaN(isMyList)) {
+      setIsMine(isMyList);
+    }
+
+  }, [categoryId, searchTerm, isMyList]);
 
   const onClear = () => {
-    setSearch();
+    setSearch('');
     setCategory();
+    setIsMine(false);
   };
 
   const onFilter = () => {
@@ -77,6 +85,13 @@ const NFilter = (props) => {
     }
     else{
       filter.categoryId = undefined;
+    }
+
+    if(user) {
+      filter.isMyList = isMine;
+    }
+    else{
+      filter.isMyList = false;
     }
 
     dispatch({ type: 'MEMORY_SET_FILTER', payload: filter ? filter : null });
@@ -107,7 +122,17 @@ const NFilter = (props) => {
         }
       >
         <View style={{ paddingHorizontal: 20, paddingTop: 10 }}>
-          <Text headline semibold>
+          {user && <View style={[styles.wrapContent, { marginTop: 8 }]}>
+            <CheckBox
+              color={BaseColor.darkgreenColor}
+              title={t('my_memories')}
+              checked={isMine}
+              onPress={() => {
+                setIsMine(!isMine);              
+              }}
+            />
+          </View>}
+          <Text headline semibold style={{ marginTop: 20 }}>
             {t('search')}
           </Text>
           <View style={[styles.wrapContent, { marginTop: 8 }]}>
@@ -115,7 +140,7 @@ const NFilter = (props) => {
               value={search}
               onChangeText={(val) => setSearch(val)}
               placeholder={t('search')}
-              iconLeft={<Icon name="search" color={colors.border} style={{ marginRight: 8 }} size={18} />}
+              iconLeft={<Icon name="magnifying-glass" color={colors.border} style={{ marginRight: 8 }} size={18} />}
             />
           </View>
           <Text headline semibold style={{ marginTop: 20 }}>

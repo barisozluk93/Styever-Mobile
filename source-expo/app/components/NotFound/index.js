@@ -13,7 +13,7 @@ const NotFound = () => {
     <View style={styles.container}>
       <View style={[styles.viewCart, { backgroundColor: parseHexTransparency(colors.card, 80) }]}>
         <Icon
-          name={'exclamation-triangle'}
+          name={'triangle-exclamation'}
           style={{
             fontSize: 32,
             color: parseHexTransparency(colors.text, 30),

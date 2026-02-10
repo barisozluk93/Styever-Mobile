@@ -20,7 +20,7 @@ export default StyleSheet.create({
   },
   textBox: {
     maxWidth: 420,
-    backgroundColor: 'rgba(0,0,0,0.55)',
+    backgroundColor: 'rgba(0,0,0,0.10)',
     padding: 24,
     borderRadius: 12,
   },

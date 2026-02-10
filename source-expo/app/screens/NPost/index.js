@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Animated, RefreshControl, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
@@ -7,7 +7,7 @@ import { BaseColor, BaseStyle, Images, useTheme } from '@/config';
 import { useDispatch, useSelector } from 'react-redux';
 import { listMemory } from '@/actions/memory';
 import { dislikeRequest, getMemoryCountRequest, likeRequest } from '@/apis/memoryApi';
-import { avatarUploadFolderUrl, memoryUploadFolderUrl } from '@/utils/utility';
+import { appUrl, avatarUploadFolderUrl, memoryUploadFolderUrl } from '@/utils/utility';
 
 export const modes = {
   square: 'square',
@@ -21,30 +21,50 @@ const NPost = ({ mode = modes.square }) => {
   const navigation = useNavigation();
   const { t } = useTranslation();
   const { colors } = useTheme();
-  const { loading, memories, page, totalPages, searchTerm, categoryId } = useSelector(state => state.memory);
+  const { memories, page, totalPages, searchTerm, categoryId, isMyList } = useSelector(state => state.memory);
   const [currentPage, setCurrentPage] = useState(1);
   const [likes, setLikes] = useState([]);
   const [showLikesAction, setShowLikesAction] = useState(false);
-  const [memoryId, setMemoryId] = useState();
+  const [memory, setMemory] = useState();
   const [showCommentsAction, setShowCommentsAction] = useState(false);
   const [refreshing] = useState(false);
   const [modeView, setModeView] = useState(mode);
   const scrollAnim = useRef(new Animated.Value(0)).current;
   const [isNewMemoryVisible, setIsNewMemoryVisible] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
+      setLoading(true);
       fetchData();
 
       return () => {
         dispatch({ type: 'MEMORY_INIT' });
       };
-    }, [currentPage, searchTerm, categoryId])
+    }, [currentPage, searchTerm, categoryId, isMyList])
   );
 
   const fetchData = () => {
-    dispatch(listMemory(currentPage, 4, searchTerm, categoryId));
+    dispatch(listMemory(currentPage, 4, searchTerm, categoryId, isMyList ? user.id : undefined));
   }
+
+  useFocusEffect(
+    useCallback(() => {
+      if (memories && memories.length > 0) {
+        memories.forEach(item => {
+          if (!item.isPrivate || (user && item.userId === user.id)) {
+            item.qrData = `${appUrl}/#/memories/${item.id}`;
+          }
+          else {
+            item.qrData = null;
+          }
+        });
+
+        setLoading(false);
+      }
+    }, [memories])
+  );
+
 
   const onFilter = () => {
     navigation.navigate('NFilter');
@@ -60,19 +80,21 @@ const NPost = ({ mode = modes.square }) => {
   };
 
   const goPostDetail = (item) => () => {
-    navigation.navigate('NPostDetail', { item: item });
+    if (!item.isPrivate || (login && item.userId === user.id)) {
+      navigation.navigate('NPostDetail', { item: item });
+    }
   };
 
   const openLikedList = (item) => {
-    if(item.likesCount > 0) {
+    if (item.likesCount > 0) {
       setLikes([]);
       setLikes([...item.likes]);
       setShowLikesAction(true);
     }
   };
 
-  const like = (item) => {    
-    if (user) {
+  const like = (item) => {
+    if (user?.isActive) {
       if (item.likes.filter(f => f.userId === user.id)?.length > 0) {
         dislikeRequest(item.id, user.id).then(response => {
           if (response.isSuccess) {
@@ -128,31 +150,40 @@ const NPost = ({ mode = modes.square }) => {
   }
 
   const openCommentList = (item) => {
-    if (item.isOpenToComment && ((!login && item.commentCount > 0) || login)) {
-      setMemoryId();
-      setMemoryId(item.id);
+    if (item.isOpenToComment) {
+      setMemory();
+      setMemory(item);
       setShowCommentsAction(true);
     }
   };
 
   const onProccessSuccess = () => {
+    setShowCommentsAction(false);
     fetchData();
   }
 
   const controlIsNewMemoryVisible = () => {
-    getMemoryCountRequest(user.id).then(response => {
-      if (response.isSuccess) {
-        if (user.roles.includes(1) || user.roles.includes(2)) {
-          if (response.data >= 1) {
-            setIsNewMemoryVisible(false);
+    if (!user.isActive) {
+      setIsNewMemoryVisible(false);
+    }
+    else {
+      getMemoryCountRequest(user.id).then(response => {
+        if (response.isSuccess) {
+          if (user.roles.includes(2) || user.roles.includes(3)) {
+            if (response.data >= 1) {
+              setIsNewMemoryVisible(false);
+            }
+            else {
+              setIsNewMemoryVisible(true);
+            }
           }
-          else {
-            setIsNewMemoryVisible(true);
-          }
-        }
-        else if (user.roles.includes(3)) {
-          if (response.data >= 4) {
-            setIsNewMemoryVisible(false);
+          else if (user.roles.includes(4)) {
+            if (response.data >= 4) {
+              setIsNewMemoryVisible(false);
+            }
+            else {
+              setIsNewMemoryVisible(true);
+            }
           }
           else {
             setIsNewMemoryVisible(true);
@@ -161,11 +192,8 @@ const NPost = ({ mode = modes.square }) => {
         else {
           setIsNewMemoryVisible(true);
         }
-      }
-      else {
-        setIsNewMemoryVisible(true);
-      }
-    })
+      })
+    }
   }
 
   const renderItem = ({ item, index }) => {
@@ -175,15 +203,16 @@ const NPost = ({ mode = modes.square }) => {
           <News45
             loading={loading}
             style={{ marginVertical: 8 }}
-            avatar={item.userAvatar ? avatarUploadFolderUrl + item.userAvatar.path.split("\\")[item.userAvatar.path.split("\\").length-1] : Images.avata5}
+            avatar={item.userAvatar ? avatarUploadFolderUrl + item.userAvatar.path.split("\\")[item.userAvatar.path.split("\\").length - 1] : Images.avata5}
             isAvatarExist={item.userAvatar ? true : false}
-            image={(item.files && item.files.length > 0) ? memoryUploadFolderUrl + item.files.filter(f => f.isPrimary)[0]?.file.path.split("\\")[item.files.filter(f => f.isPrimary)[0]?.file.path.split("\\").length-1] : Images.avata6}
+            image={(item.files && item.files.length > 0) ? memoryUploadFolderUrl + item.files.filter(f => f.isPrimary)[0]?.file.path.split("\\")[item.files.filter(f => f.isPrimary)[0]?.file.path.split("\\").length - 1] : Images.avata6}
             isImageExist={(item.files && item.files.length > 0) ? true : false}
             username={item.userName}
             title={item.name}
             postDate={item.postDate}
-            commentCount={item.commentsCount}
+            commentCount={item.userId === user?.id ? item.commentsCount : item.comments.filter(c => c.isApproved).length}
             likeCount={item.likesCount}
+            qrData={item.qrData}
             isLiked={login ? (item.likesCount > 0 ? (item.likes.filter(f => f.userId === user.id)?.length > 0 ? true : false) : false) : false}
             onPress={goPostDetail(item)}
             onLikePress={() => like(item)}
@@ -225,7 +254,7 @@ const NPost = ({ mode = modes.square }) => {
                   fontSize: 15,
                   color: BaseColor.whiteColor,
                 }}
-                icon={<Icon name="sliders-h" color={BaseColor.whiteColor} size={15} />}
+                icon={<Icon name="filter" color={BaseColor.whiteColor} size={15} />}
                 onPress={() => onFilter()}
               >
                 {t("filter")}
@@ -319,7 +348,7 @@ const NPost = ({ mode = modes.square }) => {
 
         {showCommentsAction && <ModalComment
           isProccessSuccess={() => onProccessSuccess()}
-          memoryId={memoryId}
+          memory={memory}
           isVisible={showCommentsAction}
           onSwipeComplete={() => {
             setShowCommentsAction(false);
@@ -349,7 +378,7 @@ const NPost = ({ mode = modes.square }) => {
           }
         }}
         onPressLeft={() => {
-          if (!login) { navigation.navigate('Pricing') }
+          if (!login) { navigation.navigate('Pricing', { isStandByPage: false, isProfilePage: false }); }
           else {
             navigation.navigate('NPostEditNew')
           }

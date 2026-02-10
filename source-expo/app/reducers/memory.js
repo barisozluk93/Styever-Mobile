@@ -2,6 +2,7 @@ const initialState = {
   memories: null,
   categoryId: null,
   searchTerm: null,
+  isMyList: null,
   page: null,
   pageSize: null,
   totalPages: null,
@@ -36,7 +37,8 @@ export default function MemoryReducer(state = initialState, action) {
       return {
         ...state,
         searchTerm: action.payload.searchTerm,
-        categoryId: action.payload.categoryId
+        categoryId: action.payload.categoryId,
+        isMyList: action.payload.isMyList
       };
 
     case 'MEMORY_INIT':

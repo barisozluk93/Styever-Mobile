@@ -62,6 +62,9 @@ const ModalOption = (props) => {
         <View style={styles.contentSwipeDown}>
           <View style={styles.lineSwipeDown} />
         </View>
+        {<View style={styles.trialBadge}>
+          <Text headline style={styles.trialText}>{t('downgrade_package')}</Text>
+        </View>}
         {optionCustom.map((item, index) => (
           <TouchableOpacity
             style={[

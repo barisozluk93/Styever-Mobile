@@ -33,17 +33,17 @@ const SignUp = (props) => {
 
   useEffect(() => {
     if (route?.params?.selectedPlanId) {
-      if (route?.params?.selectedPlanId === 1) {
-        setRoles([1]);
-      }
-      else if (route?.params?.selectedPlanId === 2) {
+      if (route?.params?.selectedPlanId === 2) {
         setRoles([2]);
       }
       else if (route?.params?.selectedPlanId === 3) {
         setRoles([3]);
       }
+      else if (route?.params?.selectedPlanId === 4) {
+        setRoles([4]);
+      }
     }
-  }, [route?.params?.item])
+  }, [route?.params])
 
   const continueRegister = () => {
     if (isNullOrEmpty(name) || isNullOrEmpty(surname) || isNullOrEmpty(email) || isNullOrEmpty(password) || isNullOrEmpty(passwordConfirm) || isNullOrEmpty(phone)) {
@@ -78,7 +78,11 @@ const SignUp = (props) => {
         setLoading(true);
         setTimeout(() => {
           setLoading(false);
-          var user = { id: 0, agree: true, roles: roles, name: name, surname: surname, email: email, username: email, password: password, phone: phone };
+          var user = { id: 0, agree: true, roles: roles, name: name, surname: surname, email: email, username: email, password: password, phone: phone,
+            voucher: route?.params?.voucher
+          };
+          console.log(user);
+          
           navigation.navigate('Address', { user: user })
         }, 500);
       }

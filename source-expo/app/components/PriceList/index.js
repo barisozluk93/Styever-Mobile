@@ -11,6 +11,8 @@ const PriceList = ({
   onSelect = () => { },
   disabled = true,
   item = {},
+  isStandByPage = false,
+  isProfilePage = false,
   selected
 }) => {
   const { colors } = useTheme();
@@ -38,7 +40,7 @@ const PriceList = ({
         ))}
       </View>
 
-      {selected && <View style={styles.trialBadge}>
+      {selected && !isProfilePage && !isStandByPage && <View style={styles.trialBadge}>
         <Text style={styles.trialText}>{t('trial')}</Text>
       </View>}
     </TouchableOpacity>
