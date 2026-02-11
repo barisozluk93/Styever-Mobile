@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import Modal from 'react-native-modal';
 import { BaseColor, BaseStyle, Images, useTheme } from '@/config';
-import { Image, NotFound, TextInput } from '@/components';
+import { Button, Image, NotFound, TextInput } from '@/components';
 import Text from '@/components/Text';
 import Icon from '@/components/Icon';
 import styles from './styles';
@@ -41,10 +41,10 @@ const ModalComment = (props) => {
           item.isMine = user ? (item.userId === user.id ? true : false) : false;
         })
 
-        if(memory.userId === user?.id) {
+        if (memory.userId === user?.id) {
           setOptionCustom(response.data)
         }
-        else{
+        else {
           setOptionCustom(response.data.filter(x => x.isApproved))
         }
       }
@@ -220,7 +220,7 @@ const ModalComment = (props) => {
                       </Text>
                     </View>
                   </View>
-                  
+
                   {user?.isActive && !item.isMine && isMemoryMine && !item.isApproved && <TouchableOpacity
                     onPress={() => onCommentApprove(item.id)}
                     style={{
@@ -255,29 +255,28 @@ const ModalComment = (props) => {
 
             ))}
           </ScrollView>
-          
+
           {(!user || (user && user.isActive)) && <View style={{ paddingVertical: 15, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border }}>
             {!user &&
-            <TextInput
-              style={{ borderRadius: 20, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.primary, marginBottom: 10 }}
-              onChangeText={(text) => setFullname(text)}
-              autoCorrect={false}
-              placeholder={t('fullname')}
-              placeholderTextColor={BaseColor.grayColor}
-              value={fullname}
-            />
-          }
+              <TextInput
+                style={{ borderRadius: 20, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.primary, marginBottom: 10 }}
+                onChangeText={(text) => setFullname(text)}
+                autoCorrect={false}
+                placeholder={t('fullname')}
+                placeholderTextColor={BaseColor.grayColor}
+                value={fullname}
+              />
+            }
 
             <TextInput style={{ borderRadius: 20, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.primary }}
               value={comment}
               onChangeText={(val) => setComment(val)}
               placeholder={t('comment')}
-              returnKeyType="send"
-              icon={
-                <TouchableOpacity disabled={isNullOrEmpty(comment)} onPress={addComment}>
-                  <Icon name="paper-plane" size={16} color={colors.primary} />
-                </TouchableOpacity>
-              } />
+            />
+
+            <Button style={{ height: 45, marginTop: 15 }} onPress={addComment}>
+              {t('add_comment')}
+            </Button>
           </View>}
         </View>
       </KeyboardAvoidingView>

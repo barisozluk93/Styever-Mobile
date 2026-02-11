@@ -465,7 +465,9 @@
   "light_candle": "Bir Mum Yak",
   "candle_count": "Bu anı için yakılan mum sayısı",
   "candle_message_start": " anısına ",
-  "candle_message_end": " derneğine bağış yapılacaktır."
+  "candle_message_end": " derneğine bağış yapılacaktır.",
+  "add_comment": "Yorum Yap",
+  "link_only": "Yalnızca Bağlantı"
 
 
 }

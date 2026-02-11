@@ -13,7 +13,7 @@ import { isNullOrEmpty } from '@/utils/utility';
 import { addGiftRequest, buyPackageRequest, payRequest } from '@/apis/userApi';
 import Toast from 'react-native-toast-message';
 import { logout } from '@/actions/auth';
-import { updateCandleRequest } from '@/apis/memoryApi';
+import { lightCandleRequest, updateCandleRequest } from '@/apis/memoryApi';
 
 const Payment = (props) => {
   const { navigation, route } = props;
@@ -175,41 +175,52 @@ const Payment = (props) => {
         });
       } else {
         setLoading(true);
-        updateCandleRequest(item.data).then(response => {
-          if (response.isSuccess) {
+        console.log(item.data)
+        if(item.data.id > 0) { 
+          updateCandleRequest(item.data).then(response => {
+            if (response.isSuccess) {
 
-            setFullname('');
-            setCardNo('');
-            setExpiryDate('');
-            setCvv('');
-            setSenderEmail('');
-            setReceiverEmail('');
-            setMessage('');
+              setFullname('');
+              setCardNo('');
+              setExpiryDate('');
+              setCvv('');
+              setSenderEmail('');
+              setReceiverEmail('');
+              setMessage('');
 
-            setSuccess({
-              ...success,
-              cardNo: true,
-              fullname: true,
-              message: true,
-              senderEmail: true,
-              receiverEmail: true,
-              expiryDate: true,
-              cvv: true
-            });
+              setSuccess({
+                ...success,
+                cardNo: true,
+                fullname: true,
+                message: true,
+                senderEmail: true,
+                receiverEmail: true,
+                expiryDate: true,
+                cvv: true
+              });
 
-            Toast.show({
-              type: 'success',
-              text1: t('success'),
-              text2: t('success_message'),
-            });
+              Toast.show({
+                type: 'success',
+                text1: t('success'),
+                text2: t('success_message'),
+              });
 
 
-            setTimeout(() => {
+              setTimeout(() => {
+                setLoading(false);
+                navigation.goBack();
+              }, 500)
+            }
+            else {
+              Toast.show({
+                type: 'error',
+                text1: t('error'),
+                text2: t('error_file_message'),
+              });
+
               setLoading(false);
-              navigation.goBack();
-            }, 500)
-          }
-          else {
+            }
+          }).catch(error => {
             Toast.show({
               type: 'error',
               text1: t('error'),
@@ -217,16 +228,62 @@ const Payment = (props) => {
             });
 
             setLoading(false);
-          }
-        }).catch(error => {
-          Toast.show({
-            type: 'error',
-            text1: t('error'),
-            text2: t('error_file_message'),
-          });
+          })
+        }
+        else{
+          lightCandleRequest(item.data).then(response => {
+            if (response.isSuccess) {
 
-          setLoading(false);
-        })
+              setFullname('');
+              setCardNo('');
+              setExpiryDate('');
+              setCvv('');
+              setSenderEmail('');
+              setReceiverEmail('');
+              setMessage('');
+
+              setSuccess({
+                ...success,
+                cardNo: true,
+                fullname: true,
+                message: true,
+                senderEmail: true,
+                receiverEmail: true,
+                expiryDate: true,
+                cvv: true
+              });
+
+              Toast.show({
+                type: 'success',
+                text1: t('success'),
+                text2: t('success_message'),
+              });
+
+
+              setTimeout(() => {
+                setLoading(false);
+                navigation.goBack();
+              }, 500)
+            }
+            else {
+              Toast.show({
+                type: 'error',
+                text1: t('error'),
+                text2: t('error_file_message'),
+              });
+
+              setLoading(false);
+            }
+          }).catch(error => {
+            Toast.show({
+              type: 'error',
+              text1: t('error'),
+              text2: t('error_file_message'),
+            });
+
+            setLoading(false);
+          })
+        }
       }
     }
     else if (item.typeId === 3) {

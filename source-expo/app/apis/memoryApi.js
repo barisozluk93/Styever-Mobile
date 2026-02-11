@@ -20,13 +20,14 @@ export const getMemoryRequest = async (memoryId) => {
   return response.data;
 };
 
-export const editRequest = async (id, userId, birthDate, deathDate, isPrivate, isOpenToComment, categoryId, name, text) => {
+export const editRequest = async (id, userId, birthDate, deathDate, isPrivate, isLinkOnly, isOpenToComment, categoryId, name, text) => {
   let data = {
     id: id,
     userId: userId,
     birthDate: birthDate,
     deathDate: deathDate,
     isPrivate: isPrivate,
+    isLinkOnly: isLinkOnly,
     isOpenToComment: isOpenToComment,
     categoryId: categoryId,
     name: name,
@@ -39,13 +40,14 @@ export const editRequest = async (id, userId, birthDate, deathDate, isPrivate, i
   return response.data;
 };
 
-export const saveRequest = async (id, userId, birthDate, deathDate, isPrivate, isOpenToComment, categoryId, name, text) => {
+export const saveRequest = async (id, userId, birthDate, deathDate, isPrivate, isLinkOnly, isOpenToComment, categoryId, name, text) => {
   let data = {
     id: id,
     userId: userId,
     birthDate: birthDate,
     deathDate: deathDate,
     isPrivate: isPrivate,
+    isLinkOnly: isLinkOnly,
     isOpenToComment: isOpenToComment,
     categoryId: categoryId,
     name: name,
@@ -145,14 +147,7 @@ export const getMemoryCountRequest = async (id) => {
   return response.data;
 }
 
-export const lightCandleRequest = async (id, memoryId, userId) => {
-  let data = {
-    id: id,
-    userId: userId,
-    memoryId: memoryId,
-    isDeleted: false
-  }
-
+export const lightCandleRequest = async (data) => {
   const response = await api.post(`Memory/LightCandle`, data);
 
   return response.data;

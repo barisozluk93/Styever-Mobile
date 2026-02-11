@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { KeyboardAvoidingView, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 import Modal from 'react-native-modal';
 import { useTheme } from '@/config';
-import { TextInput } from '@/components';
+import { Button, TextInput } from '@/components';
 import Icon from '@/components/Icon';
 import styles from './styles';
 import Header from '../Header/Header';
@@ -27,19 +27,19 @@ const ModalYoutubeLink = (props) => {
   }
 
   const addYoutubeLink = () => {
-    if(user) {
-      if(user.isActive && !isNullOrEmpty(youtubeLink)) {
+    if (user) {
+      if (user.isActive && !isNullOrEmpty(youtubeLink)) {
         addYoutubeLinkRequest(0, memoryId, youtubeLink).then(response => {
           if (response.isSuccess) {
-            
+
             setYoutubeLink('');
             isProccessSuccess();
 
             Toast.show({
-                type: 'success',
-                text1: t('success'),
-                text2: t('success_message'),
-              });
+              type: 'success',
+              text1: t('success'),
+              text2: t('success_message'),
+            });
           }
           else {
             Toast.show({
@@ -58,8 +58,8 @@ const ModalYoutubeLink = (props) => {
         })
       }
     }
-    else{
-      
+    else {
+
     }
   }
 
@@ -75,17 +75,16 @@ const ModalYoutubeLink = (props) => {
           <Header style={{ borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.border }}
             title={t('add_youtubelink')} />
 
-          {!user || (user && user.isActive) && <View style={{paddingVertical: 15, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border}}>
-          <TextInput style={{ borderRadius: 20, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.primary }}
-            value={youtubeLink}
-            onChangeText={(val) => setYoutubeLink(val)}
-            placeholder={t('youtube_link')}
-            returnKeyType="send"
-            icon={
-              <TouchableOpacity disabled={isNullOrEmpty(youtubeLink)} onPress={addYoutubeLink}>
-                <Icon name="paper-plane" size={16} color={colors.primary} />
-              </TouchableOpacity>
-            } />
+          {!user || (user && user.isActive) && <View style={{ paddingVertical: 15, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border }}>
+            <TextInput style={{ borderRadius: 20, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.primary }}
+              value={youtubeLink}
+              onChangeText={(val) => setYoutubeLink(val)}
+              placeholder={t('youtube_link')}
+            />
+
+            <Button style={{ height: 45, marginTop: 15 }} onPress={addYoutubeLink}>
+              {t('save')}
+            </Button>
           </View>}
         </View>
       </KeyboardAvoidingView>

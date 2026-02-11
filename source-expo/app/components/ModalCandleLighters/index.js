@@ -96,7 +96,7 @@ const ModalCandleLighters = (props) => {
                   {!item.userAvatar && <Image source={ Images.avata5 } style={styles.thumb} borderRadius={50} />}
                                   
                 <Text semibold>
-                  {t(item.userName)}
+                  {t(item.userName ? item.userName : item.nameSurname)}
                 </Text>
               </View>
               <View style={{

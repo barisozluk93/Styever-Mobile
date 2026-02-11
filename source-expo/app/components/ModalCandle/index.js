@@ -13,7 +13,7 @@ import { heightTabView } from '@/utils';
 import { useSelector } from 'react-redux';
 import Toast from 'react-native-toast-message';
 import { avatarUploadFolderUrl, isNullOrEmpty } from '@/utils/utility';
-import { updateCandleRequest } from '@/apis/memoryApi';
+import { lightCandleRequest, updateCandleRequest } from '@/apis/memoryApi';
 
 const ModalCandle = (props) => {
   const { colors } = useTheme();
@@ -23,6 +23,7 @@ const ModalCandle = (props) => {
   const { user } = useSelector(state => state.user);
   const [donation, setDonation] = useState();
   const [shelter, setShelter] = useState("xxxxxxxxxx xxxxx xxxxxx");
+  const [fullname, setFullname] = useState('');
   const { language } = useSelector(state => state.application);
 
   const onBackdropPressApply = () => {
@@ -30,35 +31,69 @@ const ModalCandle = (props) => {
   }
 
   const updateCandle = () => {
-    const data = { id: candleId, userId: user.id, memoryId: memory.id, donation: donation, shelter: shelter, isDeleted: false };
+    console.log(candleId)
+    const data = { id: candleId, userId: user ? user.id : undefined, memoryId: memory.id, nameSurname: fullname, donation: donation, shelter: shelter, isDeleted: false };
     if (donation > 0) {
       navigation.navigate('Payment', { item: { typeId: 2, data: data } })
       onBackdropPress();
     }
     else {
-      updateCandleRequest(data).then(response => {
-        if (response.isSuccess) {
-          Toast.show({
-            type: 'success',
-            text1: t('success'),
-            text2: t('success_message'),
-          });
-          isProccessSuccess();
-        }
-        else {
+      if(candleId > 0) {
+        updateCandleRequest(data).then(response => {
+          if (response.isSuccess) {
+            Toast.show({
+              type: 'success',
+              text1: t('success'),
+              text2: t('success_message'),
+            });
+            setDonation('')
+            isProccessSuccess();
+          }
+          else {
+            Toast.show({
+              type: 'error',
+              text1: t('error'),
+              text2: t('candle_update_error_message'),
+            });
+          }
+        }).catch(error => {
           Toast.show({
             type: 'error',
             text1: t('error'),
-            text2: t('candle_update_error_message'),
+            text2: t('candle_update_error_message')
+          });
+        });
+      }
+      else{
+        if(!isNullOrEmpty(fullname)) {
+          lightCandleRequest(data).then(response => {
+            if (response.isSuccess) {
+              Toast.show({
+                type: 'success',
+                text1: t('success'),
+                text2: t('success_message'),
+              });
+              setDonation('')
+              setFullname('')
+              isProccessSuccess();
+            }
+            else {
+              Toast.show({
+                type: 'error',
+                text1: t('error'),
+                text2: t('candle_update_error_message'),
+              });
+            }
+          }).catch(error => {
+            console.log(error)
+            Toast.show({
+              type: 'error',
+              text1: t('error'),
+              text2: t('candle_update_error_message')
+            });
           });
         }
-      }).catch(error => {
-        Toast.show({
-          type: 'error',
-          text1: t('error'),
-          text2: t('candle_update_error_message')
-        });
-      });
+      }
     }
   }
 
@@ -75,13 +110,24 @@ const ModalCandle = (props) => {
             title={t('light_candle')} />
 
 
-          <View style={{ paddingVertical: 15, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border }}>
+          {(!user || (user && user.isActive)) && <View style={{ paddingVertical: 15, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border }}>
             <View style={styles.trialBadge}>
               <Text headline style={styles.trialText}>
                 {language === 'tr' ? memory?.name + t('candle_message_start') + shelter + t('candle_message_end') :
                   t('candle_message_start') + memory?.name + t('candle_message_mid') + shelter + t('candle_message_end')}
               </Text>
             </View>
+            
+            {!user &&
+            <TextInput
+              style={{ borderRadius: 20, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.primary, marginBottom: 10 }}
+              onChangeText={(text) => setFullname(text)}
+              autoCorrect={false}
+              placeholder={t('fullname')}
+              placeholderTextColor={BaseColor.grayColor}
+              value={fullname}
+            />
+          }
 
             <TextInput style={{ borderRadius: 20, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.primary }}
               value={donation}
@@ -92,7 +138,7 @@ const ModalCandle = (props) => {
             <Button style={{ height: 45, marginTop: 15 }} onPress={updateCandle}>
               {t('light_candle')}
             </Button>
-          </View>
+          </View>}
         </View>
       </KeyboardAvoidingView>
     </Modal>

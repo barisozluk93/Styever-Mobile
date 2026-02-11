@@ -70,6 +70,7 @@ const NPostEditNew = (props) => {
   const [categoryId, setCategoryId] = useState();
   const [category, setCategory] = useState();
   const [isPrivate, setIsPrivate] = useState();
+  const [isLinkOnly, setIsLinkOnly] = useState();
   const [isOpenToComment, setIsOpenToComment] = useState();
 
   const [mediaFiles, setMediaFiles] = useState([]);
@@ -452,6 +453,7 @@ const NPostEditNew = (props) => {
 
       setIsOpenToComment(route?.params?.item.isOpenToComment);
       setIsPrivate(route?.params?.item.isPrivate);
+      setIsLinkOnly(route?.params?.item.isLinkOnly);
       setCategoryId(route?.params?.item.categoryId);
       setBirthDate(route?.params?.item.birthDate);
       setDeathDate(route?.params?.item.deathDate);
@@ -462,6 +464,7 @@ const NPostEditNew = (props) => {
     else {
       setIsOpenToComment(true);
       setIsPrivate(false);
+      setIsLinkOnly(false);
       setBirthDate(new Date().toISOString());
       setDeathDate(new Date().toISOString());
       setPostDate(new Date().toISOString());
@@ -486,7 +489,7 @@ const NPostEditNew = (props) => {
 
       setLoading(true);
       if (itemData) {
-        editRequest(itemData.id, user.id, birth_date, death_date, isPrivate, isOpenToComment, categoryId, name, text, postDate).then(response => {
+        editRequest(itemData.id, user.id, birth_date, death_date, isPrivate, isLinkOnly, isOpenToComment, categoryId, name, text, postDate).then(response => {
           if (response.isSuccess) {
             getMemoryRequest(itemData.id).then(response1 => {
               setItemData(response1.data);
@@ -522,7 +525,7 @@ const NPostEditNew = (props) => {
         })
       }
       else {
-        saveRequest(0, user.id, birth_date, death_date, isPrivate, isOpenToComment, categoryId, name, text, postDate).then(response => {
+        saveRequest(0, user.id, birth_date, death_date, isPrivate, isLinkOnly, isOpenToComment, categoryId, name, text, postDate).then(response => {
           if (response.isSuccess) {
             getMemoryRequest(response.data.id).then(response1 => {
               setItemData(response1.data);
@@ -637,9 +640,16 @@ const NPostEditNew = (props) => {
               <View style={{ flexDirection: "row", marginBottom: 10 }}>
                 <CheckBox
                   color={colors.primaryLight}
+                  title={t('link_only')}
+                  checked={isLinkOnly === true}
+                  onPress={() => { setIsLinkOnly(!isLinkOnly); setIsPrivate(!isLinkOnly ? false : isPrivate);}}
+                />
+
+                <CheckBox
+                  color={colors.primaryLight}
                   title={t('private')}
                   checked={isPrivate === true}
-                  onPress={() => setIsPrivate(isPrivate === true ? false : true)}
+                  onPress={() => { setIsPrivate(!isPrivate); setIsLinkOnly(!isPrivate ? false : isLinkOnly);}}
                 />
 
                 <CheckBox

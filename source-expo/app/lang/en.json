@@ -299,7 +299,7 @@
   "pending": "Pending",
   "todo": "Everything",
   "done": "Done",
-  "create": "Mew",
+  "create": "New",
   "status": "Status",
   "process": "Process",
   "sort": "Sort",
@@ -463,6 +463,9 @@
   "candle_message_start": "In memory of ",
   "candle_message_mid": " will be donated to the ",
   "candle_message_end": " association.",
-  "candle_count": "Number of candles lit for this memory"
+  "candle_count": "Number of candles lit for this memory",
+  "add_comment": "Comment",
+  "link_only": "Link Only"
+
 
 }

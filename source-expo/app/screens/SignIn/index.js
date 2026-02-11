@@ -112,7 +112,7 @@ const SignIn = (props) => {
             style={[BaseStyle.textInput]}
             onChangeText={(text) => setId(text)}
             autoCorrect={false}
-            placeholder={t('input_id')}
+            placeholder={t('email_address')}
             placeholderTextColor={success.id ? BaseColor.grayColor : colors.primary}
             value={id}
             selectionColor={colors.primary}
@@ -121,7 +121,7 @@ const SignIn = (props) => {
             style={[BaseStyle.textInput, { marginTop: 10 }]}
             onChangeText={(text) => setPassword(text)}
             autoCorrect={false}
-            placeholder={t('input_password')}
+            placeholder={t('password')}
             secureTextEntry={true}
             placeholderTextColor={success.password ? BaseColor.grayColor : colors.primary}
             value={password}

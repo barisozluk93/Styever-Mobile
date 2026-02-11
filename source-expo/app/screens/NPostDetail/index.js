@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useRef, useState } from 'react';
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Animated, I18nManager, ScrollView, TouchableOpacity, View, StyleSheet } from 'react-native';
 import {
@@ -29,6 +29,7 @@ import Toast from 'react-native-toast-message';
 import { appUrl, memoryUploadFolderUrl } from '@/utils/utility';
 import QRCode from 'react-native-qrcode-svg';
 import { Linking } from "react-native";
+import { useFocusEffect } from '@react-navigation/native';
 
 const NPostDetail = (props) => {
   const { navigation, route } = props;
@@ -140,11 +141,20 @@ const NPostDetail = (props) => {
     }
   }, [route?.params?.item])
 
-  useEffect(() => {
-    setTimeout(() => {
-      setLoading(false);
-    }, 1000);
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      setTimeout(() => {
+        setLoading(false);
+      }, 1000);
+
+      if(route?.params?.item) {
+        getMemoryRequest(route?.params?.item.id).then(response => {
+          setItemData(response.data);
+        });
+      }
+    }, [])
+  );
+
 
   const openUrl = async (url) => {
     const supported = await Linking.canOpenURL(url);
@@ -200,7 +210,7 @@ const NPostDetail = (props) => {
       setCandles([]);
       setCandles([...itemData.candles]);
       setShowCandleLightersAction(true);
-    } 
+    }
   }
 
   const openLikedList = () => {
@@ -293,29 +303,35 @@ const NPostDetail = (props) => {
   }
 
   const lightCandle = () => {
-    lightCandleRequest(0, itemData.id, user.id).then(response => {
-      if (response.isSuccess) {
-        setCandleId(response.data.id);
-        getMemoryRequest(itemData.id).then(response1 => {
-          setItemData(response1.data);
+    if (user) {
+      lightCandleRequest({ id: 0, memoryId: itemData.id, userId: user.id }).then(response => {
+        if (response.isSuccess) {
+          setCandleId(response.data.id);
+          getMemoryRequest(itemData.id).then(response1 => {
+            setItemData(response1.data);
 
-          setShowCandlesAction(true);
-        })
-      }
-      else {
+            setShowCandlesAction(true);
+          })
+        }
+        else {
+          Toast.show({
+            type: 'error',
+            text1: t('error'),
+            text2: t('error_file_message'),
+          });
+        }
+      }).catch(error => {
         Toast.show({
           type: 'error',
           text1: t('error'),
           text2: t('error_file_message'),
         });
-      }
-    }).catch(error => {
-      Toast.show({
-        type: 'error',
-        text1: t('error'),
-        text2: t('error_file_message'),
       });
-    });
+    }
+    else {
+      setCandleId(0);
+      setShowCandlesAction(true);
+    }
   }
 
   //For header background color from transparent to header color
@@ -387,7 +403,7 @@ const NPostDetail = (props) => {
               </TouchableOpacity>
             </View>
             <View style={styles.stats}>
-              {user && user.isActive && <TouchableOpacity style={styles.statItem} onPress={() => lightCandle()}>
+              {(!user || (user && user.isActive)) && <TouchableOpacity style={styles.statItem} onPress={() => lightCandle()}>
                 <Icon name="hanukiah" size={20} color={colors.primaryLight} />
               </TouchableOpacity>}
 
@@ -407,7 +423,7 @@ const NPostDetail = (props) => {
             </View>
           </View>
         </View>
-            
+
         {showCandleLightersAction && candles && candles.length > 0 && <ModalCandleLighters
           options={candles}
           isVisible={showCandleLightersAction}
