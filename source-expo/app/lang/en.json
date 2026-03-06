@@ -465,7 +465,7 @@
   "candle_message_end": " association.",
   "candle_count": "Number of candles lit for this memory",
   "add_comment": "Comment",
-  "link_only": "Link Only"
-
-
+  "link_only": "Link Only",
+  "English": "English", 
+  "Turkish": "Turkish"
 }

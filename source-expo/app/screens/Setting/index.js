@@ -111,7 +111,7 @@ export default function Setting({ isShowHeader = true }) {
               }}
               ComponentRight={
                 <Text body1 grayColor>
-                  {Utils.languageFromCode(i18n.language)}
+                  {t(Utils.languageFromCode(i18n.language))}
                 </Text>
               }
             />

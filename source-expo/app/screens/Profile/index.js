@@ -29,6 +29,8 @@ const Profile = (props) => {
   const onLogOut = () => {
     dispatch(logout());
     dispatch({type: "USER_INIT"});
+    dispatch({type: "MEMORY_INIT"});
+    dispatch({type: "ARTICLE_INIT"});
 
     navigation.navigate('NHome');
   };

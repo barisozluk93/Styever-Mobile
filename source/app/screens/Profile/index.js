@@ -6,10 +6,9 @@ import { BaseStyle, useTheme } from '@/config';
 // Load sample data
 import { UserData } from '@/data';
 import { Button, Icon, ProfileDetail, ProfilePerformance, SafeAreaView, Tag, Text } from '@/components';
-import { AuthActions } from '@/actions';
 import styles from './styles';
+import { logout } from '@/actions/auth';
 
-const { authentication } = AuthActions;
 
 const Profile = (props) => {
   const { colors } = useTheme();
@@ -27,12 +26,12 @@ const Profile = (props) => {
    * @date 2019-09-01
    */
   const onLogOut = () => {
-    setLoading(true);
-    dispatch(
-      authentication(false, () => {
-        setLoading(false);
-      })
-    );
+    dispatch(logout());
+    dispatch({type: "USER_INIT"});
+    dispatch({type: "MEMORY_INIT"});
+    dispatch({type: "ARTICLE_INIT"});
+
+    navigation.navigate('SignIn');
   };
 
   const onLogIn = () => {
