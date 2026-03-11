@@ -193,4 +193,52 @@ export default StyleSheet.create({
     transform: [{ translateX: -5 }],
     opacity: 0.9,
   },
+  modal: {
+    justifyContent: 'flex-end',
+    margin: 0,
+  },
+  modalContent: {
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 24,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  modalHandle: {
+    width: 50,
+    height: 5,
+    borderRadius: 999,
+    backgroundColor: '#CFCFCF',
+    alignSelf: 'center',
+    marginBottom: 16,
+  },
+  modalTitle: {
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  linkBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingLeft: 12,
+    paddingRight: 8,
+    paddingVertical: 10,
+    marginBottom: 15,
+  },
+  linkText: {
+    flex: 1,
+    marginRight: 10,
+  },
+  copyButton: {
+    padding: 6,
+  },
+  shareOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+  },
+  shareOptionText: {
+    marginLeft: 12,
+  },
 });

@@ -21,12 +21,20 @@ export default StyleSheet.create({
     marginRight: 2,
   },
   badge: {
-    width: 10,
-    height: 10,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: BaseColor.whiteColor,
-    position: 'absolute',
-    right: -2,
+    position: "absolute",
+    top: -6,
+    right: -6,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 3
   },
+
+  badgeText: {
+    color: "#fff",
+    fontSize: 10,
+    fontWeight: "600"
+  }
 });

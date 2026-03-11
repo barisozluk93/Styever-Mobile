@@ -467,5 +467,15 @@
   "add_comment": "Comment",
   "link_only": "Link Only",
   "English": "English", 
-  "Turkish": "Turkish"
+  "Turkish": "Turkish",
+  "copy_link": "Copy Link",
+  "share": "Share",
+  "now": "Now",
+  "h": "h",
+  "min": "min",
+  "comment_not": "Comment",
+  "lighting_candle": "Lighting a Candle",
+  "birthdate_anniversary": "Birthdate",
+  "deathdate_anniversary": "Death Anniversary",
+  "notifications": "Notifications"
 }

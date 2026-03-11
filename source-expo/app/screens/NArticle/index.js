@@ -1,13 +1,15 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Animated, RefreshControl, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import { Header, Icon, News44, NotFound, SafeAreaView, Tag, TextInput } from '@/components';
+import { Header, HeaderLargeTitleBadge, Icon, News44, NotFound, SafeAreaView, Tag, TextInput } from '@/components';
 import { BaseColor, BaseStyle, Images, useTheme } from '@/config';
 import { useDispatch, useSelector } from 'react-redux';
 import { listArticle } from '@/actions/article';
 import styles from './styles';
 import { articleUploadFolderUrl } from '@/utils/utility';
+import * as Notifications from 'expo-notifications';
+import { unReadCount } from '@/apis/notificationApi';
 
 export const modes = {
   square: 'square',
@@ -21,19 +23,74 @@ const NArticle = ({ mode = modes.square }) => {
   const [search, setSearch] = useState('');
   const { loading, articles, searchTerm } = useSelector(state => state.article);
   const { language } = useSelector(state => state.application);
+  const { user } = useSelector(state => state.user);
+  const login = !!user;
   const [refreshing] = useState(false);
   const [modeView, setModeView] = useState(mode);
   const scrollAnim = useRef(new Animated.Value(0)).current;
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const fetchUnreadCount = useCallback(async () => {
+      try {
+        if (!user?.id) {
+          setUnreadCount(0);
+          return;
+        }
+  
+        const response = await unReadCount(user.id);
+  
+        let count = 0;
+  
+        if (typeof response === 'number') {
+          count = response;
+        } else if (typeof response?.data === 'number') {
+          count = response.data;
+        } else if (typeof response?.count === 'number') {
+          count = response.count;
+        } else if (typeof response?.data?.count === 'number') {
+          count = response.data.count;
+        }
+  
+        setUnreadCount(count);
+      } catch (error) {
+        console.log('fetchUnreadCount error:', error);
+      }
+    }, [user?.id]);
+
+  const goToPage = (pageName) => () => navigation.navigate(pageName);
 
   useFocusEffect(
     useCallback(() => {
       fetchData();
 
+
+      if(login) {
+        fetchUnreadCount();
+      }
       return () => {
         dispatch({ type: 'ARTICLE_INIT' });
       };
-    }, [searchTerm, language])
+    }, [searchTerm, language, fetchUnreadCount])
   );
+
+  useEffect(() => {
+      if (!login) return;
+  
+      const foregroundListener = Notifications.addNotificationReceivedListener((notification) => {
+        console.log('Foreground notification:', notification);
+  
+        setUnreadCount((prev) => prev + 1);
+      });
+  
+      const responseListener = Notifications.addNotificationResponseReceivedListener(() => {
+        fetchUnreadCount();
+      });
+  
+      return () => {
+        foregroundListener.remove();
+        responseListener.remove();
+      };
+    }, [login, fetchUnreadCount]);
 
   const fetchData = () => {
     dispatch(listArticle(searchTerm, language));
@@ -58,14 +115,14 @@ const NArticle = ({ mode = modes.square }) => {
 
 
   const renderItem = ({ item, index }) => {
-    switch (modeView) {      
+    switch (modeView) {
       case 'square':
         return (
           <News44
             loading={loading}
             style={{ marginVertical: 8 }}
             title={language === 'tr' ? item.header : item.headerEn}
-            image={item.file ? articleUploadFolderUrl + `${item.file.path.split("\\")[item.file.path.split("\\").length-1]}` : Images.avata6}
+            image={item.file ? articleUploadFolderUrl + `${item.file.path.split("\\")[item.file.path.split("\\").length - 1]}` : Images.avata6}
             onPress={goPostDetail(item)}
           />
         );
@@ -158,7 +215,17 @@ const NArticle = ({ mode = modes.square }) => {
     <SafeAreaView style={BaseStyle.safeAreaView} edges={['right', 'top', 'left']}>
       <Header
         title={t('support')}
+        renderRight={() => {
+          if(user) {
+            return (
+              <View style={{ position: 'relative' }}>
+                <HeaderLargeTitleBadge onPress={goToPage('MNotification')} count={unreadCount}  />
+              </View>
+            );
+          }
+        }}
       />
+
       {renderList()}
     </SafeAreaView>
   );

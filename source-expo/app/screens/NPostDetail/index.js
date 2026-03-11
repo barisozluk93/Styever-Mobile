@@ -1,6 +1,16 @@
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Animated, I18nManager, ScrollView, TouchableOpacity, View, StyleSheet } from 'react-native';
+import {
+  Animated,
+  I18nManager,
+  ScrollView,
+  TouchableOpacity,
+  View,
+  StyleSheet,
+  Linking,
+} from 'react-native';
+import Modal from 'react-native-modal';
+import * as Clipboard from 'expo-clipboard';
 import {
   CardSlide,
   Header,
@@ -19,6 +29,7 @@ import {
   MediaSlider,
   ModalCandle,
   ModalCandleLighters,
+  Button,
 } from '@/components';
 import { BaseColor, BaseStyle, useTheme, Images } from '@/config';
 import * as Utils from '@/utils';
@@ -28,7 +39,6 @@ import { dislikeRequest, getMemoryRequest, lightCandleRequest, likeRequest } fro
 import Toast from 'react-native-toast-message';
 import { appUrl, memoryUploadFolderUrl } from '@/utils/utility';
 import QRCode from 'react-native-qrcode-svg';
-import { Linking } from "react-native";
 import { useFocusEffect } from '@react-navigation/native';
 
 const NPostDetail = (props) => {
@@ -41,12 +51,12 @@ const NPostDetail = (props) => {
   const [heightHeader, setHeightHeader] = useState(Utils.heightHeader());
   const scrollY = useRef(new Animated.Value(0)).current;
   const { user } = useSelector((state) => state.user);
-  const login = user ? true : false;
   const [likes, setLikes] = useState([]);
   const [showLikesAction, setShowLikesAction] = useState(false);
   const [showCommentsAction, setShowCommentsAction] = useState(false);
   const [showCandlesAction, setShowCandlesAction] = useState(false);
   const [showCandleLightersAction, setShowCandleLightersAction] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
   const [candles, setCandles] = useState([]);
   const [candleId, setCandleId] = useState();
   const [mediaFiles, setMediaFiles] = useState([]);
@@ -60,10 +70,10 @@ const NPostDetail = (props) => {
   };
 
   const getPriority = (item) => {
-    if (item.type === "image" && item.isPrimary) return 1;
-    if (item.type === "image") return 2;
-    if (item.type === "video") return 3;
-    if (item.type === "youtube") return 4;
+    if (item.type === 'image' && item.isPrimary) return 1;
+    if (item.type === 'image') return 2;
+    if (item.type === 'video') return 3;
+    if (item.type === 'youtube') return 4;
     return 99;
   };
 
@@ -72,25 +82,25 @@ const NPostDetail = (props) => {
 
     for (let i = 0; i < files.length; i++) {
       const f = files[i];
-      if (!(f.file.contentType.includes('image'))) {
+
+      if (!f.file.contentType.includes('image')) {
         prepared.push({
           id: f.id,
           fileId: f.fileId,
           type: 'video',
-          uri: memoryUploadFolderUrl + `${f.file.path.split("\\")[f.file.path.split("\\").length - 1]}`,
-          isPrimary: false
+          uri: memoryUploadFolderUrl + `${f.file.path.split('\\')[f.file.path.split('\\').length - 1]}`,
+          isPrimary: false,
         });
       } else {
         prepared.push({
           id: f.id,
           fileId: f.fileId,
           type: 'image',
-          uri: memoryUploadFolderUrl + `${f.file.path.split("\\")[f.file.path.split("\\").length - 1]}`,
-          isPrimary: f.isPrimary
+          uri: memoryUploadFolderUrl + `${f.file.path.split('\\')[f.file.path.split('\\').length - 1]}`,
+          isPrimary: f.isPrimary,
         });
       }
     }
-
 
     for (let i = 0; i < youtubeLinks.length; i++) {
       const f = youtubeLinks[i];
@@ -99,7 +109,7 @@ const NPostDetail = (props) => {
         fileId: undefined,
         type: 'youtube',
         uri: getYoutubeId(f.link),
-        isPrimary: false
+        isPrimary: false,
       });
     }
 
@@ -107,11 +117,7 @@ const NPostDetail = (props) => {
       return prepared;
     }
 
-    const sortedList = [...prepared].sort(
-      (a, b) => getPriority(a) - getPriority(b)
-    );
-
-
+    const sortedList = [...prepared].sort((a, b) => getPriority(a) - getPriority(b));
     return sortedList;
   };
 
@@ -120,16 +126,14 @@ const NPostDetail = (props) => {
       if (itemData.files?.length > 0 || itemData.youtubeLinks?.length > 0) {
         const result = await prepareMediaFiles(itemData.files, itemData.youtubeLinks);
         setMediaFiles(result);
-      }
-      else {
+      } else {
         setMediaFiles([]);
       }
     };
 
     if (itemData && (itemData.files || itemData.youtubeLinks)) {
       prepare();
-    }
-    else {
+    } else {
       setMediaFiles([]);
     }
   }, [itemData]);
@@ -139,51 +143,62 @@ const NPostDetail = (props) => {
       setItemData(route?.params?.item);
       setShareLink(`${appUrl}/#/memories/${route?.params?.item.id}`);
     }
-  }, [route?.params?.item])
+  }, [route?.params?.item]);
 
   useFocusEffect(
     useCallback(() => {
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         setLoading(false);
       }, 1000);
 
-      if(route?.params?.item) {
-        getMemoryRequest(route?.params?.item.id).then(response => {
+      if (route?.params?.item) {
+        getMemoryRequest(route?.params?.item.id).then((response) => {
           setItemData(response.data);
         });
       }
-    }, [])
-  );
 
+      return () => clearTimeout(timer);
+    }, [route?.params?.item])
+  );
 
   const openUrl = async (url) => {
     const supported = await Linking.canOpenURL(url);
     if (supported) {
       await Linking.openURL(url);
     } else {
-      console.warn("Uygulama bulunamadı");
+      console.warn('Uygulama bulunamadı');
     }
+  };
+
+  const copyShareLink = async () => {
+    await Clipboard.setStringAsync(shareLink);
+
+    Toast.show({
+      type: 'success',
+      text1: t('success'),
+      text2: 'Bağlantı kopyalandı',
+    });
   };
 
   const shareToLinkedin = () => {
     const url = encodeURIComponent(shareLink);
     const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${url}`;
-
+    setShowShareModal(false);
     openUrl(linkedInUrl);
-  }
+  };
 
   const shareToX = () => {
     const text = encodeURIComponent('Anısı bizimle yaşıyor 🐾\n');
     const url = encodeURIComponent(shareLink);
-
     const xUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
+    setShowShareModal(false);
     openUrl(xUrl);
   };
 
   const shareToFacebook = () => {
-    const url = encodeURIComponent("https://example.com/post/123");
-
+    const url = encodeURIComponent(shareLink);
     const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+    setShowShareModal(false);
     openUrl(fbUrl);
   };
 
@@ -194,39 +209,39 @@ const NPostDetail = (props) => {
         month: '2-digit',
         year: 'numeric',
         hour: '2-digit',
-        minute: '2-digit'
+        minute: '2-digit',
       });
     }
 
     return date.toLocaleDateString('tr-TR', {
       day: '2-digit',
       month: '2-digit',
-      year: 'numeric'
+      year: 'numeric',
     });
-  }
+  };
 
   const openCandleLightersList = () => {
     if (itemData.candlesCount > 0) {
-      setCandles([]);
       setCandles([...itemData.candles]);
       setShowCandleLightersAction(true);
     }
-  }
+  };
 
   const openLikedList = () => {
     if (itemData.likesCount > 0) {
-      setLikes([]);
       setLikes([...itemData.likes]);
       setShowLikesAction(true);
     }
   };
 
   const like = () => {
-    if (user?.isActive) {
-      if (itemData.likes.filter(f => f.userId === user.id)?.length > 0) {
-        dislikeRequest(itemData.id, user.id).then(response => {
+    if (!user?.isActive) return;
+
+    if (itemData.likes.filter((f) => f.userId === user.id)?.length > 0) {
+      dislikeRequest(itemData.id, user.id)
+        .then((response) => {
           if (response.isSuccess) {
-            getMemoryRequest(itemData.id).then(response1 => {
+            getMemoryRequest(itemData.id).then((response1) => {
               setItemData(response1.data);
 
               Toast.show({
@@ -234,27 +249,27 @@ const NPostDetail = (props) => {
                 text1: t('success'),
                 text2: t('success_message'),
               });
-            })
-          }
-          else {
+            });
+          } else {
             Toast.show({
               type: 'error',
               text1: t('error'),
               text2: t('error_file_message'),
             });
           }
-        }).catch(error => {
+        })
+        .catch(() => {
           Toast.show({
             type: 'error',
             text1: t('error'),
             text2: t('error_file_message'),
           });
-        })
-      }
-      else {
-        likeRequest(0, itemData.id, user.id).then(response => {
+        });
+    } else {
+      likeRequest(0, itemData.id, user.id)
+        .then((response) => {
           if (response.isSuccess) {
-            getMemoryRequest(itemData.id).then(response1 => {
+            getMemoryRequest(itemData.id).then((response1) => {
               setItemData(response1.data);
 
               Toast.show({
@@ -262,25 +277,24 @@ const NPostDetail = (props) => {
                 text1: t('success'),
                 text2: t('success_message'),
               });
-            })
-          }
-          else {
+            });
+          } else {
             Toast.show({
               type: 'error',
               text1: t('error'),
               text2: t('error_file_message'),
             });
           }
-        }).catch(error => {
+        })
+        .catch(() => {
           Toast.show({
             type: 'error',
             text1: t('error'),
             text2: t('error_file_message'),
           });
-        })
-      }
+        });
     }
-  }
+  };
 
   const openCommentList = () => {
     if (itemData.isOpenToComment) {
@@ -290,75 +304,69 @@ const NPostDetail = (props) => {
 
   const onProccessSuccess = () => {
     setShowCommentsAction(false);
-    getMemoryRequest(itemData.id).then(response => {
+    getMemoryRequest(itemData.id).then((response) => {
       setItemData(response.data);
-    })
-  }
+    });
+  };
 
   const onCandleProccessSuccess = () => {
     setShowCandlesAction(false);
-    getMemoryRequest(itemData.id).then(response => {
+    getMemoryRequest(itemData.id).then((response) => {
       setItemData(response.data);
-    })
-  }
+    });
+  };
 
   const lightCandle = () => {
     if (user) {
-      lightCandleRequest({ id: 0, memoryId: itemData.id, userId: user.id }).then(response => {
-        if (response.isSuccess) {
-          setCandleId(response.data.id);
-          getMemoryRequest(itemData.id).then(response1 => {
-            setItemData(response1.data);
-
-            setShowCandlesAction(true);
-          })
-        }
-        else {
+      lightCandleRequest({ id: 0, memoryId: itemData.id, userId: user.id })
+        .then((response) => {
+          if (response.isSuccess) {
+            setCandleId(response.data.id);
+            getMemoryRequest(itemData.id).then((response1) => {
+              setItemData(response1.data);
+              setShowCandlesAction(true);
+            });
+          } else {
+            Toast.show({
+              type: 'error',
+              text1: t('error'),
+              text2: t('error_file_message'),
+            });
+          }
+        })
+        .catch(() => {
           Toast.show({
             type: 'error',
             text1: t('error'),
             text2: t('error_file_message'),
           });
-        }
-      }).catch(error => {
-        Toast.show({
-          type: 'error',
-          text1: t('error'),
-          text2: t('error_file_message'),
         });
-      });
-    }
-    else {
+    } else {
       setCandleId(0);
       setShowCandlesAction(true);
     }
-  }
+  };
 
-  //For header background color from transparent to header color
   const headerBackgroundColor = scrollY.interpolate({
     inputRange: [0, 140],
     outputRange: [BaseColor.whiteColor, colors.primary],
     extrapolate: 'clamp',
-    useNativeDriver: true,
   });
 
-  //For header image opacity
   const headerImageOpacity = scrollY.interpolate({
     inputRange: [0, 350 - heightHeader - 20],
     outputRange: [1, 0],
     extrapolate: 'clamp',
-    useNativeDriver: true,
   });
 
-  //artist profile image position from top
   const heightViewImg = scrollY.interpolate({
     inputRange: [0, 350 - heightHeader],
     outputRange: [350, heightHeader],
-    useNativeDriver: true,
+    extrapolate: 'clamp',
   });
 
   const renderPlaceholder = () => {
-    let holders = Array.from(Array(5));
+    const holders = Array.from(Array(5));
 
     return (
       <Placeholder>
@@ -371,7 +379,69 @@ const NPostDetail = (props) => {
     );
   };
 
+  const renderShareModal = () => {
+    return (
+      <Modal
+        isVisible={showShareModal}
+        onBackdropPress={() => setShowShareModal(false)}
+        onBackButtonPress={() => setShowShareModal(false)}
+        onSwipeComplete={() => setShowShareModal(false)}
+        swipeDirection={['down']}
+        style={styles.modal}
+      >
+        <View style={[styles.modalContent, { backgroundColor: colors.card }]}>
+          <View style={styles.modalHandle} />
+
+          <Text title3 semibold style={styles.modalTitle}>
+            {t('share')}
+          </Text>
+
+          <TouchableOpacity style={styles.shareOption} onPress={shareToLinkedin}>
+            <Icon name="linkedin" size={20} color={colors.primaryLight} />
+            <Text body2 style={styles.shareOptionText}>
+              LinkedIn
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.shareOption} onPress={shareToX}>
+            <Icon name="x-twitter" size={20} color={colors.primaryLight} />
+            <Text body2 style={styles.shareOptionText}>
+              X
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.shareOption} onPress={shareToFacebook}>
+            <Icon name="facebook" size={20} color={colors.primaryLight} />
+            <Text body2 style={styles.shareOptionText}>
+              Facebook
+            </Text>
+          </TouchableOpacity>
+
+          <View style={[styles.linkBox, { borderColor: colors.border }]}>
+            <Text
+              body2
+              numberOfLines={1}
+              style={[styles.linkText, { color: colors.text }]}
+            >
+              {t('copy_link')}
+            </Text>
+
+            <TouchableOpacity onPress={copyShareLink} style={styles.copyButton}>
+              <Icon name="copy" size={18} color={colors.primaryLight} />
+            </TouchableOpacity>
+          </View>
+
+          <Button style={{ height: 45, marginTop: 15 }} onPress={() => setShowShareModal(false)}>
+            {t('close')}
+          </Button>
+        </View>
+      </Modal>
+    );
+  };
+
   const renderContent = () => {
+    const isLikedByUser = !!user && itemData.likes?.some((f) => f.userId === user.id);
+
     return (
       <Fragment>
         <View style={styles.contentDescription}>
@@ -388,128 +458,149 @@ const NPostDetail = (props) => {
         </View>
 
         <View style={styles.content}>
-          <View style={[styles.header]}>
+          <View style={styles.header}>
+            <View style={styles.stats} />
+
             <View style={styles.stats}>
-              <TouchableOpacity style={styles.statItemLeft} onPress={() => shareToLinkedin()}>
-                <Icon name="linkedin" size={20} color={colors.primaryLight} />
+              {(!user || (user && user.isActive)) && (
+                <TouchableOpacity style={styles.statItem} onPress={lightCandle}>
+                  <Icon name="hanukiah" size={20} color={colors.primaryLight} />
+                </TouchableOpacity>
+              )}
+
+              <TouchableOpacity style={styles.statItem} onPress={() => setShowShareModal(true)}>
+                <Icon name="share-nodes" size={20} color={colors.primaryLight} />
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.statItemLeft} onPress={() => shareToX()}>
-                <Icon name="x-twitter" size={20} color={colors.primaryLight} />
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.statItemLeft} onPress={() => shareToFacebook()}>
-                <Icon name="facebook" size={20} color={colors.primaryLight} />
-              </TouchableOpacity>
-            </View>
-            <View style={styles.stats}>
-              {(!user || (user && user.isActive)) && <TouchableOpacity style={styles.statItem} onPress={() => lightCandle()}>
-                <Icon name="hanukiah" size={20} color={colors.primaryLight} />
-              </TouchableOpacity>}
-
-              <TouchableOpacity style={styles.statItem} onPress={() => openCommentList()}>
+              <TouchableOpacity style={styles.statItem} onPress={openCommentList}>
                 <Icon name="comment" size={20} color={colors.primaryLight} />
-                <Text bold style={[styles.statText, { color: colors.text }]} >{itemData.userId === user?.id ? itemData.commentsCount : itemData.comments.filter(c => c.isApproved).length}</Text>
+                <Text bold style={[styles.statText, { color: colors.text }]}>
+                  {itemData.userId === user?.id
+                    ? itemData.commentsCount
+                    : itemData.comments.filter((c) => c.isApproved).length}
+                </Text>
               </TouchableOpacity>
 
               <View style={styles.statItem}>
-                <TouchableOpacity onPress={() => like()}>
-                  {user && itemData.likesCount > 0 && itemData.likes.filter(f => f.userId === user.id) ? <Icon name="heart" size={20} color={colors.primaryLight} solid /> : <Icon name="heart" size={20} color={colors.primaryLight} />}
+                <TouchableOpacity onPress={like}>
+                  {isLikedByUser ? (
+                    <Icon name="heart" size={20} color={colors.primaryLight} solid />
+                  ) : (
+                    <Icon name="heart" size={20} color={colors.primaryLight} />
+                  )}
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => openLikedList()}>
-                  <Text bold style={[styles.statText, { color: colors.text }]}>{itemData.likesCount}</Text>
+
+                <TouchableOpacity onPress={openLikedList}>
+                  <Text bold style={[styles.statText, { color: colors.text }]}>
+                    {itemData.likesCount}
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
           </View>
         </View>
 
-        {showCandleLightersAction && candles && candles.length > 0 && <ModalCandleLighters
-          options={candles}
-          isVisible={showCandleLightersAction}
-          onSwipeComplete={() => {
-            setShowCandleLightersAction(false);
-          }}
-          onBackdropPress={() => {
-            setShowCandleLightersAction(false)
-          }}
-        />}
+        {renderShareModal()}
 
-        {showLikesAction && likes && likes.length > 0 && <ModalLike
-          options={likes}
-          isVisible={showLikesAction}
-          onSwipeComplete={() => {
-            setShowLikesAction(false);
-          }}
-          onBackdropPress={() => {
-            setShowLikesAction(false)
-          }}
-        />}
+        {showCandleLightersAction && candles && candles.length > 0 && (
+          <ModalCandleLighters
+            options={candles}
+            isVisible={showCandleLightersAction}
+            onSwipeComplete={() => {
+              setShowCandleLightersAction(false);
+            }}
+            onBackdropPress={() => {
+              setShowCandleLightersAction(false);
+            }}
+          />
+        )}
 
-        {showCandlesAction && <ModalCandle
-          isProccessSuccess={() => onCandleProccessSuccess()}
-          navigation={navigation}
-          memory={itemData}
-          candleId={candleId}
-          isVisible={showCandlesAction}
-          onSwipeComplete={() => {
-            setShowCandlesAction(false);
-          }}
-          onBackdropPress={() => {
-            setShowCandlesAction(false)
-          }}
-        />}
+        {showLikesAction && likes && likes.length > 0 && (
+          <ModalLike
+            options={likes}
+            isVisible={showLikesAction}
+            onSwipeComplete={() => {
+              setShowLikesAction(false);
+            }}
+            onBackdropPress={() => {
+              setShowLikesAction(false);
+            }}
+          />
+        )}
 
-        {showCommentsAction && itemData.isOpenToComment && <ModalComment
-          isProccessSuccess={() => onProccessSuccess()}
-          memory={itemData}
-          isVisible={showCommentsAction}
-          onSwipeComplete={() => {
-            setShowCommentsAction(false);
-          }}
-          onBackdropPress={() => {
-            setShowCommentsAction(false)
-          }}
-        />}
+        {showCandlesAction && (
+          <ModalCandle
+            isProccessSuccess={onCandleProccessSuccess}
+            navigation={navigation}
+            memory={itemData}
+            candleId={candleId}
+            isVisible={showCandlesAction}
+            onSwipeComplete={() => {
+              setShowCandlesAction(false);
+            }}
+            onBackdropPress={() => {
+              setShowCandlesAction(false);
+            }}
+          />
+        )}
+
+        {showCommentsAction && itemData.isOpenToComment && (
+          <ModalComment
+            isProccessSuccess={onProccessSuccess}
+            memory={itemData}
+            isVisible={showCommentsAction}
+            onSwipeComplete={() => {
+              setShowCommentsAction(false);
+            }}
+            onBackdropPress={() => {
+              setShowCommentsAction(false);
+            }}
+          />
+        )}
       </Fragment>
     );
   };
 
-  if (itemData) {
-    return (
-      <View style={{ flex: 1 }}>
-        <SafeAreaView style={[BaseStyle.safeAreaView]} forceInset={{ top: 'always', bottom: 'always' }}>
-          <Header title={itemData.name} />
-          <ScrollView
-            onContentSizeChange={() => {
-              setHeightHeader(Utils.heightHeader());
-            }}
-            showsHorizontalScrollIndicator={false}
-            showsVerticalScrollIndicator={false}
-            overScrollMode={'never'}
-            style={{ zIndex: 10 }}
-            scrollEventThrottle={16}
-            onScroll={Animated.event(
-              [
-                {
-                  nativeEvent: {
-                    contentOffset: { y: scrollY },
-                  },
-                },
-              ],
+  if (!itemData) {
+    return null;
+  }
+
+  return (
+    <View style={{ flex: 1 }}>
+      <SafeAreaView style={BaseStyle.safeAreaView} forceInset={{ top: 'always', bottom: 'always' }}>
+        <Header title={itemData.name} />
+        <ScrollView
+          onContentSizeChange={() => {
+            setHeightHeader(Utils.heightHeader());
+          }}
+          showsHorizontalScrollIndicator={false}
+          showsVerticalScrollIndicator={false}
+          overScrollMode="never"
+          style={{ zIndex: 10 }}
+          scrollEventThrottle={16}
+          onScroll={Animated.event(
+            [
               {
-                useNativeDriver: false,
-              }
-            )}
+                nativeEvent: {
+                  contentOffset: { y: scrollY },
+                },
+              },
+            ],
+            {
+              useNativeDriver: false,
+            }
+          )}
+        >
+          <View style={{ height: 330 - heightHeader }} />
+
+          <View
+            style={{
+              marginVertical: 20,
+              paddingHorizontal: 20,
+            }}
           >
-            <View style={{ height: 330 - heightHeader }} />
-            <View
-              style={{
-                marginVertical: 20,
-                paddingHorizontal: 20,
-              }}
-            >
-              {itemData.candlesCount > 0 && <TouchableOpacity onPress={openCandleLightersList} style={styles.candleInfoRow}>
+            {itemData.candlesCount > 0 && (
+              <TouchableOpacity onPress={openCandleLightersList} style={styles.candleInfoRow}>
                 <View style={styles.candleWrapper}>
                   <View style={styles.flame} />
                   <View style={styles.wick} />
@@ -519,148 +610,136 @@ const NPostDetail = (props) => {
                 <Text headline style={[styles.candleInfoText, { color: colors.primary }]}>
                   {t('candle_count')}: {itemData.candlesCount}
                 </Text>
-              </TouchableOpacity>}
+              </TouchableOpacity>
+            )}
 
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'flex-start',
+                justifyContent: 'space-between',
+              }}
+            >
               <View
                 style={{
-                  flexDirection: 'row',
-                  alignItems: 'flex-start',
-                  justifyContent: 'space-between',
+                  height: 60,
+                  width: 60,
+                  padding: 5,
+                  borderRadius: 6,
+                  backgroundColor: BaseColor.whiteColor,
                 }}
               >
-
-                <View style={{ flex: 1, backgroundColor: BaseColor.whiteColor }}>
-                  <QRCode
-                    value={`${shareLink}`}
-                    size={50}
-                    backgroundColor={colors.whiteColor}
-                  />
-                </View>
-
-                <View style={{ marginRight: 10 }}>
-                  <Icon name="ribbon" size={20} color={colors.primaryLight} />
-                </View>
+                <QRCode value={shareLink} size={50} backgroundColor={BaseColor.whiteColor} />
               </View>
 
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'flex-start',
-                  justifyContent: 'space-between',
-                }}
-              >
-
-                <View style={{ flex: 1 }}>
-                  <Text bold>
-                  </Text>
-                  <Text semibold grayColor>
-                    {formatDate(new Date(itemData.postDate), true)}
-                  </Text>
-                </View>
-
-                <View style={{ alignItems: 'center', minWidth: 80, marginRight: 10 }}>
-                  <Text bold style={{ color: colors.primaryLight }}>
-                    {t('birth_date')}
-                  </Text>
-                  <Text semibold>
-                    {itemData.birthDate
-                      ? formatDate(new Date(itemData.birthDate))
-                      : '-'}
-                  </Text>
-                </View>
-
-                <View style={{ alignItems: 'center', minWidth: 80 }}>
-                  <Text bold style={{ color: colors.primaryLight }}>
-                    {t('death_date')}
-                  </Text>
-                  <Text semibold>
-                    {itemData.deathDate
-                      ? formatDate(new Date(itemData.deathDate))
-                      : '-'}
-                  </Text>
-                </View>
+              <View style={{ marginRight: 10 }}>
+                <Icon name="ribbon" size={20} color={colors.primaryLight} />
               </View>
-
-              <Text title1 semibold style={{ marginVertical: 10 }}>
-                {itemData.name}
-              </Text>
             </View>
 
-            {loading ? renderPlaceholder() : renderContent()}
-          </ScrollView>
-        </SafeAreaView>
-        <Animated.View
-          style={[
-            styles.headerImageStyle,
-            {
-              opacity: headerImageOpacity,
-              height: heightViewImg,
-            },
-          ]}
-        >
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'flex-start',
+                justifyContent: 'space-between',
+              }}
+            >
+              <View style={{ flex: 1 }}>
+                <Text bold>{' '}</Text>
+                <Text semibold grayColor>
+                  {formatDate(new Date(itemData.postDate), true)}
+                </Text>
+              </View>
 
-          {mediaFiles.length > 0 ? (
-            <MediaSlider
-              media={mediaFiles}
-              activeMediaIndex={activeMediaIndex}
-            />
-          ) : (
-            <Image
-              source={Images.avata6}
-              style={{ height: '100%', width: '100%' }}
-            />
-          )}
-        </Animated.View>
-        <Animated.View style={[styles.headerStyle, { position: 'absolute' }]}>
-          <SafeAreaView style={{ width: '100%' }} forceInset={{ top: 'always', bottom: 'never' }}>
-            <Header
-              title=""
-              renderLeft={() => {
-                return (
-                  <Animated.Image
-                    resizeMode="contain"
-                    style={[
-                      styles.icon,
-                      {
-                        transform: [
-                          {
-                            scaleX: I18nManager.isRTL ? -1 : 1,
-                          },
-                        ],
-                        tintColor: headerBackgroundColor,
-                      },
-                    ]}
-                    source={Images.angleLeft}
-                  />
-                );
-              }}
-              renderRight={() => {
-                if (user && user.id === itemData.userId && user.isActive && !itemData.belongingToOldPackage) {
-                  return (
-                    <Icon
-                      size={20}
-                      color={colors.card}
-                      name="pen"
-                    />
-                  );
-                }
-              }}
-              onPressLeft={() => {
-                navigation.navigate('NPost');
-              }}
-              onPressRight={() => {
-                if (user && user.id === itemData.userId && user.isActive && !itemData.belongingToOldPackage) {
-                  navigation.navigate('NPostEditNew', {
-                    item: itemData,
-                  })
-                }
-              }}
-            />
-          </SafeAreaView>
-        </Animated.View>
-      </View>
-    );
-  }
+              <View style={{ alignItems: 'center', minWidth: 80, marginRight: 10 }}>
+                <Text bold style={{ color: colors.primaryLight }}>
+                  {t('birth_date')}
+                </Text>
+                <Text semibold>
+                  {itemData.birthDate ? formatDate(new Date(itemData.birthDate)) : '-'}
+                </Text>
+              </View>
+
+              <View style={{ alignItems: 'center', minWidth: 80 }}>
+                <Text bold style={{ color: colors.primaryLight }}>
+                  {t('death_date')}
+                </Text>
+                <Text semibold>
+                  {itemData.deathDate ? formatDate(new Date(itemData.deathDate)) : '-'}
+                </Text>
+              </View>
+            </View>
+
+            <Text title1 semibold style={{ marginVertical: 10 }}>
+              {itemData.name}
+            </Text>
+          </View>
+
+          {loading ? renderPlaceholder() : renderContent()}
+        </ScrollView>
+      </SafeAreaView>
+
+      <Animated.View
+        style={[
+          styles.headerImageStyle,
+          {
+            opacity: headerImageOpacity,
+            height: heightViewImg,
+          },
+        ]}
+      >
+        {mediaFiles.length > 0 ? (
+          <MediaSlider media={mediaFiles} activeMediaIndex={activeMediaIndex} />
+        ) : (
+          <Image source={Images.avata6} style={{ height: '100%', width: '100%' }} />
+        )}
+      </Animated.View>
+
+      <Animated.View style={[styles.headerStyle, { position: 'absolute' }]}>
+        <SafeAreaView style={{ width: '100%' }} forceInset={{ top: 'always', bottom: 'never' }}>
+          <Header
+            title=""
+            renderLeft={() => {
+              return (
+                <Animated.Image
+                  resizeMode="contain"
+                  style={[
+                    styles.icon,
+                    {
+                      transform: [
+                        {
+                          scaleX: I18nManager.isRTL ? -1 : 1,
+                        },
+                      ],
+                      tintColor: headerBackgroundColor,
+                    },
+                  ]}
+                  source={Images.angleLeft}
+                />
+              );
+            }}
+            renderRight={() => {
+              if (user && user.id === itemData.userId && user.isActive && !itemData.belongingToOldPackage) {
+                return <Icon size={20} color={colors.card} name="pen" />;
+              }
+
+              return null;
+            }}
+            onPressLeft={() => {
+              navigation.navigate('NPost');
+            }}
+            onPressRight={() => {
+              if (user && user.id === itemData.userId && user.isActive && !itemData.belongingToOldPackage) {
+                navigation.navigate('NPostEditNew', {
+                  item: itemData,
+                });
+              }
+            }}
+          />
+        </SafeAreaView>
+      </Animated.View>
+    </View>
+  );
 };
 
 export default NPostDetail;

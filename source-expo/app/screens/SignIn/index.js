@@ -3,13 +3,14 @@ import { TouchableOpacity, View, KeyboardAvoidingView, Platform } from 'react-na
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { BaseColor, BaseStyle, Images, useTheme } from '@/config';
-import { AuthActions } from '@/actions';
 import { Button, Header, Icon, Image, SafeAreaView, Text, TextInput } from '@/components';
 import styles from './styles';
 import { getUserByToken, login } from '@/actions/auth';
 import { loadToken } from '@/utils/storage';
 import Toast from 'react-native-toast-message';
 import { isNullOrEmpty } from '@/utils/utility';
+import { registerForPushNotificationsAsync } from '@/services/notification.service';
+import { registerDevice } from '@/apis/notificationApi';
 
 const successInit = {
   id: true,
@@ -21,36 +22,74 @@ const SignIn = (props) => {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const dispatch = useDispatch();
-  const [id, setId] = useState();
-  const [password, setPassword] = useState();
+
+  const [id, setId] = useState('');
+  const [password, setPassword] = useState('');
   const [success, setSuccess] = useState(successInit);
   const { error, token, isPaymentRequired } = useSelector((state) => state.auth);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    var access_token = loadToken();
+    const access_token = loadToken();
+
     if (!access_token) {
-      dispatch({ type: "AUTH_LOGOUT" });
-      dispatch({ type: "USER_INIT" });
+      dispatch({ type: 'AUTH_LOGOUT' });
+      dispatch({ type: 'USER_INIT' });
     }
-  }, [navigation]);
+  }, [navigation, dispatch]);
 
   useEffect(() => {
-    if (token) {
-      dispatch(getUserByToken());
+    if (!token) return;
 
-      setTimeout(() => {
+    async function initAfterLogin() {
+      try {
+        const pushToken = await registerForPushNotificationsAsync();
+        console.log('Push token sonucu:', pushToken);
+
+        if (pushToken) {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          const userId = Number(payload?.id);
+
+          if (pushToken && userId) {
+            await registerDevice({
+              pushToken,
+              platform: Platform.OS,
+              userId
+            });
+
+            console.log('Cihaz kaydı başarılı.');
+          }
+        } else {
+          console.log('Push token null döndü, registerDevice çağrılmadı.');
+        }
+
+        dispatch(getUserByToken());
+
+        setTimeout(() => {
+          setLoading(false);
+
+          if (isPaymentRequired) {
+            navigation.navigate('Payment', { item: { typeId: 1 } });
+          } else {
+            navigation.navigate('NHome');
+          }
+        }, 500);
+      } catch (err) {
+        console.log('Login sonrası init hatası:', err);
         setLoading(false);
 
-        if(isPaymentRequired) {
-          navigation.navigate('Payment', { item: { typeId: 1 }});
-        }
-        else{
+        dispatch(getUserByToken());
+
+        if (isPaymentRequired) {
+          navigation.navigate('Payment', { item: { typeId: 1 } });
+        } else {
           navigation.navigate('NHome');
         }
-      }, 500)
+      }
     }
-  }, [token]);
+
+    initAfterLogin();
+  }, [token, isPaymentRequired, navigation, dispatch]);
 
   useEffect(() => {
     if (error) {
@@ -62,19 +101,17 @@ const SignIn = (props) => {
 
       setLoading(false);
     }
-  }, [error]);
+  }, [error, t]);
 
   const onLogin = () => {
-    
     if (!isNullOrEmpty(id) && !isNullOrEmpty(password)) {
       setLoading(true);
       dispatch(login(id, password));
-    }
-    else{
+    } else {
       setSuccess({
         ...success,
-        id: !isNullOrEmpty(id) ? true : false,
-        password: !isNullOrEmpty(password) ? true : false
+        id: !isNullOrEmpty(id),
+        password: !isNullOrEmpty(password),
       });
     }
   };
@@ -97,15 +134,13 @@ const SignIn = (props) => {
       />
 
       <View style={{ alignItems: 'center', marginTop: 50 }}>
-          <Image source={Images.logo} style={styles.logo} resizeMode="contain" />
-        </View>
+        <Image source={Images.logo} style={styles.logo} resizeMode="contain" />
+      </View>
 
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={offsetKeyboard}
-        style={{
-          flex: 1,
-        }}
+        style={{ flex: 1 }}
       >
         <View style={styles.contain}>
           <TextInput
@@ -117,6 +152,7 @@ const SignIn = (props) => {
             value={id}
             selectionColor={colors.primary}
           />
+
           <TextInput
             style={[BaseStyle.textInput, { marginTop: 10 }]}
             onChangeText={(text) => setPassword(text)}
@@ -127,11 +163,13 @@ const SignIn = (props) => {
             value={password}
             selectionColor={colors.primary}
           />
+
           <View style={{ width: '100%', marginVertical: 16 }}>
             <Button full loading={loading} style={{ marginTop: 20 }} onPress={onLogin}>
               {t('sign_in')}
             </Button>
           </View>
+
           <View style={styles.contentActionBottom}>
             <TouchableOpacity onPress={() => navigation.navigate('ResetPassword')}>
               <Text body2 grayColor>
@@ -139,7 +177,14 @@ const SignIn = (props) => {
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => navigation.navigate('Pricing',  { isStandByPage: false, isProfilePage: false })}>
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate('Pricing', {
+                  isStandByPage: false,
+                  isProfilePage: false,
+                })
+              }
+            >
               <Text body2 primaryColor>
                 {t('not_have_account')}
               </Text>

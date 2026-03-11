@@ -14,6 +14,7 @@ import * as rootNavigation from './rootNavigation';
 import { AllScreens, ModalScreens } from './config';
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message';
 import { removeToken } from '@/utils/storage';
+import { useNotifications } from '@/hooks/userNotifications';
 
 const RootStack = createStackNavigator();
 const MainStack = createStackNavigator();
@@ -42,6 +43,11 @@ const Navigator = () => {
   const language = useSelector(languageSelect);
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
+
+  const token = useSelector((state) => state.user?.token);
+  const userId = useSelector((state) => state.user?.user?.id);
+
+  useNotifications(token, userId);
 
   useEffect(() => {
     // Config status bar

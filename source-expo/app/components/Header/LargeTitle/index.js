@@ -77,12 +77,23 @@ export const HeaderLargeTitleStore = ({ storesData = EYourStores, onChange = () 
   );
 };
 
-export const HeaderLargeTitleBadge = ({ onPress }) => {
+export const HeaderLargeTitleBadge = ({ onPress, count }) => {
   const { colors } = useTheme();
   return (
-    <TouchableOpacity hitSlop={{ top: 4, left: 4, right: 4, bottom: 4 }} onPress={onPress}>
+    <TouchableOpacity
+      hitSlop={{ top: 4, left: 4, right: 4, bottom: 4 }}
+      onPress={onPress}
+      style={{ position: "relative" }}
+    >
       <Icon solid name="bell" color={BaseColor.grayColor} size={18} />
-      <View style={[styles.badge, { backgroundColor: colors.primary }]} />
+
+      {count > 0 && (
+        <View style={[styles.badge, { backgroundColor: colors.primary }]}>
+          <Text style={styles.badgeText}>
+            {count > 99 ? "99+" : count}
+          </Text>
+        </View>
+      )}
     </TouchableOpacity>
   );
 };

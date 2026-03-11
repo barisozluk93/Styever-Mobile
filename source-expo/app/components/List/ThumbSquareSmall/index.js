@@ -4,6 +4,7 @@ import { useTheme } from '@/config';
 import Image from '@/components/Image';
 import Text from '@/components/Text';
 import styles from './styles';
+import { useTranslation } from 'react-i18next';
 
 export default function ThumbSquareSmall({
   style = {},
@@ -15,6 +16,7 @@ export default function ThumbSquareSmall({
   onPress = () => {},
 }) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
 
   return (
     <TouchableOpacity style={[styles.item, style]} onPress={onPress} activeOpacity={0.9}>
@@ -23,14 +25,14 @@ export default function ThumbSquareSmall({
         <View style={styles.content}>
           <View style={styles.left}>
             <Text subhead semibold>
-              {txtLeftTitle}
+              {t(txtLeftTitle)}
             </Text>
-            <Text numberOfLines={1} caption1 light grayColor>
+            <Text numberOfLines={1} caption1 light>
               {txtContent}
             </Text>
           </View>
           <View style={styles.right}>
-            <Text caption2 grayColor numberOfLines={1}>
+            <Text caption2 numberOfLines={1}>
               {txtRight}
             </Text>
           </View>

@@ -358,8 +358,8 @@
   "music_live_streaming": "Live Streaming",
   "music_recently_played": "Recently Played",
   "music_activity": "Activity",
-  "music_recents": "Recent",
-  "music_earlier": "Earlier",
+  "music_recents": "Güncel",
+  "music_earlier": "Daha Eski",
   "music_liked_songs": "Liked Songs",
   "music_upload": "Upload",
   "music_new_album_song": "New Album / Song",
@@ -469,5 +469,15 @@
   "add_comment": "Yorum Yap",
   "link_only": "Yalnızca Bağlantı",
   "English": "İngilizce",
-  "Turkish": "Türkçe"
+  "Turkish": "Türkçe",
+  "copy_link": "Bağlantıyı Kopyala",
+  "share": "Paylaş",
+  "now": "Şimdi",
+  "h": "sa",
+  "min": "dk",
+  "comment_not": "Yorum",
+  "lighting_candle": "Mum Yakma",
+  "birthdate_anniversary": "Doğum Günü",
+  "deathdate_anniversary": "Vefat Yıl Dönümü",
+  "notifications": "Bildirimler"
 }
