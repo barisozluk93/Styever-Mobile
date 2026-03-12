@@ -32,7 +32,7 @@ export function useNotifications(token, userId) {
       }
 
       await startNotificationConnection(
-        "http://192.168.1.118:5029",
+        "https://styever.com",
         token,
         {
           onNotificationReceived: (notification) => {

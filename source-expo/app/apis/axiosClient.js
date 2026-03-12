@@ -10,7 +10,7 @@ import * as rootNavigation from '../navigation/rootNavigation';
 
 
 const api = axios.create({
-  baseURL: 'http://192.168.1.118:5058/api',
+  baseURL: 'https://styever.com/api',
   timeout: 15000,
 });
 
