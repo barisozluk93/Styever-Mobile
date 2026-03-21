@@ -4,6 +4,7 @@ import { Platform } from "react-native";
 import { registerForPushNotificationsAsync } from "@/services/notification.service";
 import { registerDevice } from "@/apis/notificationApi";
 import { startNotificationConnection, stopNotificationConnection } from "@/services/realtime.service";
+import { useDispatch } from "react-redux";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -15,6 +16,7 @@ Notifications.setNotificationHandler({
 });
 
 export function useNotifications(token, userId) {
+  const dispatch = useDispatch();
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
@@ -42,6 +44,10 @@ export function useNotifications(token, userId) {
           onUnreadCountChanged: (count) => {
             if (!isMounted) return;
             setUnreadCount(count);
+            dispatch({
+                type: "USER_SET_UNREADED_NOT_COUNT",
+                payload: count,
+              });
           },
         }
       );

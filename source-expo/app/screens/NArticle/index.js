@@ -23,17 +23,21 @@ const NArticle = ({ mode = modes.square }) => {
   const [search, setSearch] = useState('');
   const { loading, articles, searchTerm } = useSelector(state => state.article);
   const { language } = useSelector(state => state.application);
-  const { user } = useSelector(state => state.user);
+  const { user, unreadCount } = useSelector((state) => state.user);
   const login = !!user;
   const [refreshing] = useState(false);
   const [modeView, setModeView] = useState(mode);
   const scrollAnim = useRef(new Animated.Value(0)).current;
-  const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadedCount, setUnreadedCount] = useState(unreadCount);
+
+  useEffect(() => {
+    setUnreadedCount(unreadCount);
+  }, [unreadCount])
 
   const fetchUnreadCount = useCallback(async () => {
       try {
         if (!user?.id) {
-          setUnreadCount(0);
+          setUnreadedCount(0);
           return;
         }
   
@@ -51,7 +55,7 @@ const NArticle = ({ mode = modes.square }) => {
           count = response.data.count;
         }
   
-        setUnreadCount(count);
+        setUnreadedCount(count);
       } catch (error) {
         console.log('fetchUnreadCount error:', error);
       }
@@ -79,7 +83,7 @@ const NArticle = ({ mode = modes.square }) => {
       const foregroundListener = Notifications.addNotificationReceivedListener((notification) => {
         console.log('Foreground notification:', notification);
   
-        setUnreadCount((prev) => prev + 1);
+        setUnreadedCount((prev) => prev + 1);
       });
   
       const responseListener = Notifications.addNotificationResponseReceivedListener(() => {
