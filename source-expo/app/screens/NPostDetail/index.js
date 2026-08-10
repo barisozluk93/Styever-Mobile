@@ -316,6 +316,15 @@ const NPostDetail = (props) => {
     });
   };
 
+  const onReportPress = async () => {
+    const pageLink = `https://styever.com/#/memories/${itemData.id}`;
+
+    const url =
+      `https://styever.com/#/report-content?pagedLink=${pageLink}`;
+
+    await Linking.openURL(url);
+  };
+
   const lightCandle = () => {
     if (user) {
       lightCandleRequest({ id: 0, memoryId: itemData.id, userId: user.id })
@@ -462,6 +471,10 @@ const NPostDetail = (props) => {
             <View style={styles.stats} />
 
             <View style={styles.stats}>
+              <TouchableOpacity style={styles.statItem} onPress={onReportPress}>
+                <Icon name="flag" size={20} color={colors.primaryLight} />
+              </TouchableOpacity>
+
               {(!user || (user && user.isActive)) && (
                 <TouchableOpacity style={styles.statItem} onPress={lightCandle}>
                   <Icon name="hanukiah" size={20} color={colors.primaryLight} />
@@ -632,9 +645,9 @@ const NPostDetail = (props) => {
                 <QRCode value={shareLink} size={50} backgroundColor={BaseColor.whiteColor} />
               </View>
 
-              <View style={{ marginRight: 10 }}>
+              {/* <View style={{ marginRight: 10 }}>
                 <Icon name="ribbon" size={20} color={colors.primaryLight} />
-              </View>
+              </View> */}
             </View>
 
             <View

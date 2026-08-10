@@ -106,7 +106,7 @@ export default function NMessages({ navigation }) {
             navigation.goBack();
           }}
         >
-          <Icon solid name="angle-left" size={20} color={colors.text} enableRTL={true} />
+          <Icon solid name="angle-left" size={20} color={colors.primary} enableRTL={true} />
         </TouchableOpacity>
         <View style={{ flex: 1 }}>
           <ProfileAuthor

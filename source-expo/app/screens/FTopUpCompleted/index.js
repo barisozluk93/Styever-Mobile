@@ -14,7 +14,7 @@ export default function FTopUpCompleted({ navigation }) {
       <Header
         title={t('topup_completed')}
         renderLeft={() => {
-          return <Icon name="angle-left" size={20} color={colors.text} enableRTL={true} />;
+          return <Icon name="angle-left" size={20} color={colors.primary} enableRTL={true} />;
         }}
         renderRight={() => {
           return (

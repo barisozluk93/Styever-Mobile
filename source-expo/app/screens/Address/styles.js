@@ -1,27 +1,2 @@
-import { StyleSheet } from 'react-native';
-import { BaseColor } from '@/config';
-
-export default StyleSheet.create({
-  contain: {
-    padding: 20,
-    width: '100%',
-  },
-  textInput: {
-    height: 46,
-    borderRadius: 5,
-    padding: 10,
-    width: '100%',
-  },
-  textInputName: {
-    height: 46,
-    borderRadius: 5,
-    padding: 10,
-    width: '48.5%',
-  },
-  logo: {
-    width: 200,
-    height: 200,
-    borderRadius: 20,
-    overflow: 'hidden',
-  }
-});
+import {StyleSheet} from 'react-native';export default StyleSheet.create({
+  errorField:{color:'#DC3545',fontSize:11.5,lineHeight:16,fontWeight:'500',marginTop:0,marginBottom:14},flex:{flex:1},scrollContent:{paddingHorizontal:20,paddingTop:28,paddingBottom:40},heading:{marginBottom:24},kickerRow:{flexDirection:'row',alignItems:'center',marginBottom:6},kickerLine:{width:34,height:3,borderRadius:2,marginRight:12},kicker:{fontSize:10,lineHeight:14,fontWeight:'800',letterSpacing:1.5},pageTitle:{fontSize:22,lineHeight:28,fontWeight:'700',marginBottom:6},description:{fontSize:14,lineHeight:20,fontWeight:'400'},primaryRow:{marginBottom:10},label:{fontSize:13,fontWeight:'700',marginTop:8,marginBottom:8},input:{height:62,borderRadius:12,borderWidth:1,borderColor:'#D8DFEA',paddingHorizontal:16,marginBottom:6},inputIcon:{marginRight:12},row:{flexDirection:'row'},half:{flex:1},gap:{width:12},addressInput:{minHeight:96,borderRadius:12,borderWidth:1,borderColor:'#D8DFEA',paddingHorizontal:16,alignItems:'flex-start',paddingTop:15,marginBottom:6},addressInner:{minHeight:70},inputIconTop:{marginRight:12,marginTop:4},saveButton:{height:58,borderRadius:12,marginTop:4}});

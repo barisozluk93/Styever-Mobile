@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Button, Header, Icon, Image, SafeAreaView, Text, TextInput, CheckBox } from '@/components';
-import { BaseColor, BaseStyle, Images, useTheme } from '@/config';
+import { Button, Header, Icon, SafeAreaView, Text, TextInput, CheckBox } from '@/components';
+import { BaseColor, BaseStyle, useTheme } from '@/config';
 import styles from './styles';
 import { isNullOrEmpty } from '@/utils/utility';
 import Toast from 'react-native-toast-message';
@@ -256,97 +256,44 @@ const Address = (props) => {
   });
 
   return (
-    <SafeAreaView style={BaseStyle.safeAreaView} edges={['right', 'top', 'left']}>
-      <Header
-        title={t('address_info')}
-        renderLeft={() => {
-          return <Icon name="angle-left" size={20} color={colors.primary} enableRTL={true} />;
-        }}
-        onPressLeft={() => {
-          navigation.goBack();
-        }}
-        renderRight={() => {
-          if (route?.params?.item && route?.params?.item.id > 0) {
-            return <Text headline primaryColor>{t('remove')}</Text>;
-          }
-        }}
-        onPressRight={() => {
-          onDelete();
-        }}
-      />
-
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={offsetKeyboard}
-        style={{
-          flex: 1,
-        }}
-      >
-        <View style={{ alignItems: 'center', marginTop: 50 }}>
-          <Image source={Images.logo} style={styles.logo} resizeMode="contain" />
-        </View>
-
-        <ScrollView>
-          <View style={styles.contain}>
-            <CheckBox
-              color={colors.primaryLight}
-              title={t('primary')}
-              checked={user ? true : (isPrimary === true)}
-              disabled={user ? true : false}
-              onPress={() => setIsPrimary(isPrimary === true ? false : true)}
-            />
-
-            <TextInput
-              style={[styles.textInput, { marginTop: 10 }]}
-              onChangeText={(text) => setCountry(text)}
-              autoCorrect={false}
-              placeholder={t('country')}
-              placeholderTextColor={success.country ? BaseColor.grayColor : colors.primary}
-              value={country}
-            />
-            <TextInput
-              style={[styles.textInput, { marginTop: 10 }]}
-              onChangeText={(text) => setCity(text)}
-              autoCorrect={false}
-              placeholder={t('city')}
-              placeholderTextColor={success.city ? BaseColor.grayColor : colors.primary}
-              value={city}
-            />
-            <TextInput
-              style={[styles.textInput, { marginTop: 10 }]}
-              onChangeText={(text) => setDistrict(text)}
-              autoCorrect={false}
-              placeholder={t('district')}
-              placeholderTextColor={success.district ? BaseColor.grayColor : colors.primary}
-              value={district}
-            />
-            <TextInput
-              style={[styles.textInput, { marginTop: 10, height: 100 }]}
-              onChangeText={(text) => setAddress(text)}
-              autoCorrect={false}
-              placeholder={t('address')}
-              multiline
-              scrollEnabled
-              placeholderTextColor={success.address ? BaseColor.grayColor : colors.primary}
-              value={address}
-            />
-            <TextInput
-              style={[BaseStyle.textInput, { marginTop: 10 }]}
-              onChangeText={(text) => setAddressHeader(text)}
-              autoCorrect={false}
-              placeholder={t('address_header')}
-              placeholderTextColor={success.addressHeader ? BaseColor.grayColor : colors.primary}
-              value={addressHeader}
-            />
-            <View style={{ width: '100%' }}>
-              <Button full style={{ marginTop: 20 }} loading={loading} onPress={() => continueRegister()}>
-                {t('save')}
-              </Button>
+    <SafeAreaView style={BaseStyle.safeAreaView} edges={['right','top','left']}>
+      <Header title="" renderLeft={()=><Icon name="angle-left" size={20} color={colors.primary} enableRTL/>} onPressLeft={()=>navigation.goBack()} renderRight={()=>route?.params?.item?.id>0?<Text headline primaryColor>{t('remove')}</Text>:null} onPressRight={onDelete}/>
+      <KeyboardAvoidingView behavior={Platform.OS==='ios'?'padding':'height'} keyboardVerticalOffset={offsetKeyboard} style={styles.flex}>
+        <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.scrollContent}>
+          <View style={styles.heading}>
+            <View style={styles.kickerRow}>
+              <View
+                style={[
+                  styles.kickerLine,
+                  {backgroundColor:colors.primary},
+                ]}
+              />
+              <Text
+                style={[
+                  styles.kicker,
+                  {color:colors.primary},
+                ]}
+              >
+                STYEVER
+              </Text>
             </View>
+
+            <Text numberOfLines={0} style={styles.pageTitle}>
+              {t('address_info')}
+            </Text>
+
+            <Text numberOfLines={0} grayColor style={styles.description}>
+              {t('address_page_description')}
+            </Text>
           </View>
+          <View style={styles.primaryRow}><CheckBox color={colors.primaryLight} title={t('primary')} checked={user?true:isPrimary===true} disabled={!!user} onPress={()=>setIsPrimary(isPrimary!==true)}/></View>
+          <Text style={styles.label}>{t('country')}</Text><TextInput style={styles.input} iconLeft={<Icon name="location-dot" size={18} color={BaseColor.grayColor} style={styles.inputIcon}/>} onChangeText={text=>{setCountry(text);if(!isNullOrEmpty(text))setSuccess(prev=>({...prev,country:true}));}} placeholder={t('country')} success={success.country} value={country}/>{!success.country&&<Text style={styles.errorField}>{t('required_field')}</Text>}
+          <View style={styles.row}><View style={styles.half}><Text style={styles.label}>{t('city')}</Text><TextInput style={styles.input} iconLeft={<Icon name="map-location-dot" size={18} color={BaseColor.grayColor} style={styles.inputIcon}/>} onChangeText={text=>{setCity(text);if(!isNullOrEmpty(text))setSuccess(prev=>({...prev,city:true}));}} placeholder={t('city')} success={success.city} value={city}/>{!success.city&&<Text style={styles.errorField}>{t('required_field')}</Text>}</View><View style={styles.gap}/><View style={styles.half}><Text style={styles.label}>{t('district')}</Text><TextInput style={styles.input} iconLeft={<Icon name="location-dot" size={18} color={BaseColor.grayColor} style={styles.inputIcon}/>} onChangeText={text=>{setDistrict(text);if(!isNullOrEmpty(text))setSuccess(prev=>({...prev,district:true}));}} placeholder={t('district')} success={success.district} value={district}/>{!success.district&&<Text style={styles.errorField}>{t('required_field')}</Text>}</View></View>
+          <Text style={styles.label}>{t('address')}</Text><TextInput style={styles.addressInput} inputStyle={styles.addressInner} iconLeft={<Icon name="location-dot" size={18} color={BaseColor.grayColor} style={styles.inputIconTop}/>} onChangeText={text=>{setAddress(text);if(!isNullOrEmpty(text))setSuccess(prev=>({...prev,address:true}));}} placeholder={t('address')} multiline textAlignVertical="top" success={success.address} value={address}/>{!success.address&&<Text style={styles.errorField}>{t('required_field')}</Text>}
+          <Text style={styles.label}>{t('address_header')}</Text><TextInput style={styles.input} iconLeft={<Icon name="house" size={18} color={BaseColor.grayColor} style={styles.inputIcon}/>} onChangeText={text=>{setAddressHeader(text);if(!isNullOrEmpty(text))setSuccess(prev=>({...prev,addressHeader:true}));}} placeholder={t('address_header')} success={success.addressHeader} value={addressHeader}/>{!success.addressHeader&&<Text style={styles.errorField}>{t('required_field')}</Text>}
+          <Button full style={styles.saveButton} loading={loading} onPress={continueRegister}>{t('save')}</Button>
         </ScrollView>
       </KeyboardAvoidingView>
-
     </SafeAreaView>
   );
 };

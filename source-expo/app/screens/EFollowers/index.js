@@ -39,7 +39,7 @@ export default function Followers({ navigation }) {
       <Header
         title={t('followers')}
         renderLeft={() => {
-          return <Icon name="angle-left" size={20} color={colors.text} enableRTL={true} />;
+          return <Icon name="angle-left" size={20} color={colors.primary} enableRTL={true} />;
         }}
         onPressLeft={() => {
           navigation.goBack();

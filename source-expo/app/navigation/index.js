@@ -3,7 +3,7 @@ import { NavigationContainer, StackActions } from '@react-navigation/native';
 import { createStackNavigator, CardStyleInterpolators } from '@react-navigation/stack';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import { Platform, StatusBar, View, useColorScheme } from 'react-native';
+import { Platform, StatusBar, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { ApplicationActions } from '@/actions';
 import * as Utils from '@/utils';
@@ -39,7 +39,6 @@ const Navigator = () => {
   // Check display intro screen
   const intro = useSelector(getInto);
   const { theme } = useTheme();
-  const isDarkMode = useColorScheme() === 'dark';
   const language = useSelector(languageSelect);
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
@@ -50,12 +49,12 @@ const Navigator = () => {
   useNotifications(token, userId);
 
   useEffect(() => {
-    // Config status bar
+    // App is permanently light themed.
     if (Platform.OS === 'android') {
-      StatusBar.setBackgroundColor(isDarkMode ? 'black' : 'white', true);
+      StatusBar.setBackgroundColor('white', true);
     }
-    StatusBar.setBarStyle(isDarkMode ? 'light-content' : 'dark-content', true);
-  }, [isDarkMode]);
+    StatusBar.setBarStyle('dark-content', true);
+  }, []);
 
   useEffect(() => {
     const onProcess = async () => {

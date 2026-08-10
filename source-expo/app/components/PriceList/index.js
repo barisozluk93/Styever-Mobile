@@ -1,61 +1,148 @@
 import PropTypes from 'prop-types';
-import { TouchableOpacity, View } from 'react-native';
-import { useTheme } from '@/config';
+import {TouchableOpacity,View} from 'react-native';
+import {useTheme} from '@/config';
 import Text from '@/components/Text';
 import styles from './styles';
 import Icon from '@/components/Icon';
-import { useTranslation } from 'react-i18next';
+import {useTranslation} from 'react-i18next';
 
-const PriceList = ({
-  style = {},
-  onSelect = () => { },
-  disabled = true,
-  item = {},
-  isStandByPage = false,
-  isProfilePage = false,
-  selected
-}) => {
-  const { colors } = useTheme();
-  const { t } = useTranslation();
-  
-  return (
-    <TouchableOpacity style={[styles.card, style, selected && styles.selected,
-      , { backgroundColor: colors.card }]} onPress={onSelect}>
-      <View style={styles.checkbox}>
-        {selected && (
-          <Icon name="check" size={14} color={colors.primary} />
-        )}
+const PriceList=({
+  style={},
+  onSelect=()=>{},
+  item={},
+  isStandByPage=false,
+  isProfilePage=false,
+  selected=false,
+})=>{
+  const {colors}=useTheme();
+  const {t}=useTranslation();
+
+  return(
+    <TouchableOpacity
+      activeOpacity={0.85}
+      style={[
+        styles.card,
+        style,
+        {
+          backgroundColor:colors.card,
+          borderColor:selected
+            ?colors.primary
+            :colors.border,
+        },
+      ]}
+      onPress={onSelect}
+    >
+      {item.preferred&&(
+        <View
+          style={[
+            styles.preferredBadge,
+            {backgroundColor:colors.primary},
+          ]}
+        >
+          <Text style={styles.preferredText}>
+            {t('most_preferred')}
+          </Text>
+
+          <Icon
+            solid
+            name="star"
+            size={11}
+            color="#D4AF37"
+          />
+        </View>
+      )}
+
+      <View style={styles.headerRow}>
+        <View style={styles.headerText}>
+          <Text numberOfLines={0} style={styles.title}>
+            {item.name}
+          </Text>
+
+          <Text
+            numberOfLines={0}
+            style={[
+              styles.price,
+              {color:colors.primary},
+            ]}
+          >
+            {item.price}
+          </Text>
+        </View>
+
+        <View
+          style={[
+            styles.selectCircle,
+            {borderColor:colors.primary},
+            selected&&{
+              backgroundColor:colors.primary,
+            },
+          ]}
+        >
+          {selected&&(
+            <Icon
+              name="check"
+              size={11}
+              color="#FFFFFF"
+            />
+          )}
+        </View>
       </View>
 
-      <Text headline style={[styles.title, { color: colors.primary }]}>{item.name.toUpperCase()}</Text>
-      <Text style={styles.price}>{item.price}</Text>
-      <View style={styles.divider} />
+      <View style={styles.properties}>
+        {item.properties.map((prop,index)=>(
+          <View
+            key={`${item.id}-${index}`}
+            style={styles.propertyItem}
+          >
+            <View
+              style={[
+                styles.checkIcon,
+                {backgroundColor:colors.primary},
+              ]}
+            >
+              <Icon
+                name="check"
+                size={8}
+                color="#FFFFFF"
+              />
+            </View>
 
-      <View style={styles.propertiesGrid}>
-        {item.properties.map((prop, index) => (
-          <View key={index} style={styles.propertyItem}>
-            <Icon name="check" size={14} color={colors.primary} />
-            <Text style={styles.property}>{prop}</Text>
+            <Text
+              numberOfLines={0}
+              style={styles.property}
+            >
+              {prop}
+            </Text>
           </View>
         ))}
       </View>
 
-      {selected && !isProfilePage && !isStandByPage && <View style={styles.trialBadge}>
-        <Text style={styles.trialText}>{t('trial')}</Text>
-      </View>}
+      {selected&&!isProfilePage&&!isStandByPage&&(
+        <View
+          style={[
+            styles.trialBadge,
+            {backgroundColor:colors.primary},
+          ]}
+        >
+          <Text style={styles.trialText}>
+            {t('trial')}
+          </Text>
+        </View>
+      )}
     </TouchableOpacity>
   );
 };
 
-PriceList.propTypes = {
-  onPress: PropTypes.func,
-  style: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
-  title: PropTypes.string,
-  subTitle: PropTypes.string,
-  description: PropTypes.string,
-  progress: PropTypes.number,
-  days: PropTypes.string,
-  members: PropTypes.array,
+PriceList.propTypes={
+  onSelect:PropTypes.func,
+  style:PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.array,
+  ]),
+  item:PropTypes.object,
+  isStandByPage:PropTypes.bool,
+  isProfilePage:PropTypes.bool,
+  selected:PropTypes.bool,
 };
 
 export default PriceList;

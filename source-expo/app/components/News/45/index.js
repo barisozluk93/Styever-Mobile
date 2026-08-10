@@ -8,10 +8,11 @@ import styles from './styles';
 import { Icon } from '@/components';
 import { useTranslation } from 'react-i18next';
 import QRCode from "react-native-qrcode-svg";
-import { useEffect } from 'react';
+import { Linking } from 'react-native';
 
 const News45 = ({
   style = {},
+  id = null,
   image = Images.news,
   isImageExist = false,
   avatar = '',
@@ -32,6 +33,15 @@ const News45 = ({
   const { colors } = useTheme();
   const { t } = useTranslation();
   
+  const onReportPress = async (memoryId) => {
+    const pageLink = `https://styever.com/#/memories/${memoryId}`;
+
+    const url =
+      `https://styever.com/#/report-content?pagedLink=${pageLink}`;
+
+    await Linking.openURL(url);
+  };
+
   const formatDate = (date, isDateTime) => {
     if (isDateTime) {
       return date.toLocaleDateString('tr-TR', {
@@ -57,9 +67,9 @@ const News45 = ({
   return (
     <TouchableOpacity style={style} onPress={onPress}>
       <ImageBackground source={isImageExist ? { uri: image } : image} style={styles.imageBackground} borderRadius={8}>
-        <View style={styles.topLeftIcon}>
+        {/* <View style={styles.topLeftIcon}>
           <Icon name="ribbon" size={20} color={BaseColor.whiteColor} />
-        </View>
+        </View> */}
 
         {qrData != null && <View style={styles.topRightQr}>
           <QRCode
@@ -89,6 +99,10 @@ const News45 = ({
               {title}
             </Text>
             <View style={styles.stats}>
+              <TouchableOpacity style={styles.statItem} onPress={() => onReportPress(id)}>
+                <Icon name="flag" size={20} color={BaseColor.whiteColor} />
+              </TouchableOpacity>
+
               <TouchableOpacity style={styles.statItem} onPress={onCommentPress}>
                 <Icon name="comment" size={20} color={BaseColor.whiteColor} />
                 <Text bold style={[styles.statText, { color: BaseColor.whiteColor }]} >{commentCount}</Text>

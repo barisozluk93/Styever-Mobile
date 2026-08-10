@@ -279,6 +279,7 @@ const NPost = ({ mode = modes.square }) => {
           <News45
             loading={loading}
             style={{ marginVertical: 8 }}
+            id={item.id}
             avatar={
               item.userAvatar
                 ? avatarUploadFolderUrl +

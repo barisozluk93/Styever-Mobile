@@ -21,7 +21,7 @@ export default function FActivityFilter() {
       <Header
         title={t('activity_filter')}
         renderLeft={() => {
-          return <Icon name="angle-left" size={20} enableRTL={true} color={colors.text} />;
+          return <Icon name="angle-left" size={20} enableRTL={true} color={colors.primary} />;
         }}
         onPressLeft={() => {
           navigation.goBack();

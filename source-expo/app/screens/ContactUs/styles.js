@@ -1,20 +1,32 @@
-import { StyleSheet } from 'react-native';
-import { BaseColor } from '@/config';
-
+import {Platform,StyleSheet} from 'react-native';
 export default StyleSheet.create({
-  contain: {
-    padding: 20,
-    width: '100%',
-  },
-  textInput: {
-    height: 46,
-    backgroundColor: BaseColor.fieldColor,
-    borderRadius: 5,
-    marginTop: 10,
-    padding: 10,
-    width: '100%',
-  },
-  map: {
-    ...StyleSheet.absoluteFillObject,
-  },
+  errorField:{color:'#DC3545',fontSize:11.5,lineHeight:16,fontWeight:'500',marginTop:5,marginBottom:4},
+  kickerRow:{flexDirection:'row',alignItems:'center',marginBottom:6},
+  kickerLine:{width:34,height:3,borderRadius:2,marginRight:12},
+  flex:{flex:1},
+  scrollContent:{paddingHorizontal:20,paddingTop:30,paddingBottom:40},
+  heading:{marginBottom:22},
+  kicker:{fontSize:10,lineHeight:14,fontWeight:'800',letterSpacing:1.5,marginBottom:0},
+  pageTitle:{fontSize:22,lineHeight:28,fontWeight:'700',marginBottom:6},
+  description:{fontSize:14,lineHeight:20,fontWeight:'400'},
+  companyCard:{borderWidth:1,borderRadius:16,padding:18,marginBottom:16,...Platform.select({ios:{shadowColor:'#000',shadowOpacity:0.03,shadowRadius:8,shadowOffset:{width:0,height:3}},android:{elevation:1}})},
+  companyHeader:{flexDirection:'row',alignItems:'center'},
+  companyMark:{width:48,height:48,borderRadius:10,marginRight:14},
+  companyTitle:{fontSize:15,lineHeight:20,fontWeight:'800'},
+  companyName:{marginTop:3,fontSize:12.5,lineHeight:18},
+  companyDivider:{height:StyleSheet.hairlineWidth,marginVertical:16},
+  infoRow:{flexDirection:'row',alignItems:'center',paddingVertical:13},
+  infoIconBox:{width:36,height:36,borderRadius:10,alignItems:'center',justifyContent:'center',marginRight:12},
+  infoText:{flex:1},
+  infoLabel:{fontSize:11,lineHeight:15,fontWeight:'600',marginBottom:3},
+  infoValue:{fontSize:13.5,lineHeight:19,fontWeight:'700'},
+  formCard:{borderWidth:1,borderRadius:16,padding:18,...Platform.select({ios:{shadowColor:'#000',shadowOpacity:0.03,shadowRadius:8,shadowOffset:{width:0,height:3}},android:{elevation:1}})},
+  formKicker:{fontSize:10,lineHeight:14,fontWeight:'800',letterSpacing:1.2,marginBottom:4},
+  formTitle:{fontSize:20,lineHeight:26,fontWeight:'800',marginBottom:14},
+  input:{marginTop:10,minHeight:52,borderRadius:12},
+  inputIcon:{width:20,marginRight:12},
+  messageInput:{marginTop:10,minHeight:130,borderRadius:12,alignItems:'flex-start',paddingTop:12},
+  messageInputInner:{minHeight:105,paddingTop:0},
+  submitButton:{marginTop:18},
+  siteFooter:{marginHorizontal:-20,marginBottom:-40},
 });

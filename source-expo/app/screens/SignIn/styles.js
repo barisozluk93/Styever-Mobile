@@ -1,29 +1,6 @@
-import { StyleSheet } from 'react-native';
-import { BaseColor } from '@/config';
-
+import {StyleSheet} from 'react-native';
 export default StyleSheet.create({
-  textInput: {
-    height: 46,
-    backgroundColor: BaseColor.fieldColor,
-    borderRadius: 5,
-    // marginTop: 10,
-    padding: 10,
-    width: '100%',
-  },
-  contain: {
-    padding: 20,
-    paddingTop: 0,
-    flex: 1,
-    justifyContent: 'center',
-  },
-  contentActionBottom: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  logo: {
-    width: 200,
-    height: 200,
-    borderRadius: 20,
-    overflow: 'hidden',
-  },
+ flex:{flex:1},scrollContent:{flexGrow:1,paddingHorizontal:28,paddingTop:36,paddingBottom:40},
+ heading:{marginBottom:32},kickerRow:{flexDirection:'row',alignItems:'center',marginBottom:14},kickerLine:{width:34,height:3,borderRadius:2,marginRight:12},kicker:{fontSize:10,lineHeight:14,fontWeight:'800',letterSpacing:1.7},pageTitle:{fontSize:34,lineHeight:42,fontWeight:'800',marginBottom:10},description:{fontSize:14,lineHeight:21},
+ label:{fontSize:14,lineHeight:20,fontWeight:'700',marginBottom:8},input:{height:60,borderRadius:12,borderWidth:1,borderColor:'#D8DFEA',paddingHorizontal:16,marginBottom:8},inputIcon:{marginRight:12},passwordLabelRow:{flexDirection:'row',justifyContent:'space-between',alignItems:'center',marginTop:16},forgot:{fontSize:12.5,fontWeight:'700',marginBottom:8},error:{color:'#FF1744',fontSize:11.5,marginBottom:5},primaryButton:{marginTop:20,height:60,borderRadius:12},dividerRow:{flexDirection:'row',alignItems:'center',marginVertical:22},divider:{flex:1,height:1,backgroundColor:'#E2E6EC'},dividerText:{fontSize:11.5,marginHorizontal:12},signupButton:{height:58,borderRadius:12},footerText:{textAlign:'center',fontSize:11.5,lineHeight:17,marginTop:22},siteFooter:{marginHorizontal:-28,marginBottom:-40}
 });

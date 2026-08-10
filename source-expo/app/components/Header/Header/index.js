@@ -1,12 +1,10 @@
 import { useEffect } from 'react';
-import { StatusBar, TouchableOpacity, View, useColorScheme } from 'react-native';
-import { useSelector } from 'react-redux';
+import { StatusBar, TouchableOpacity, View } from 'react-native';
 import PropTypes from 'prop-types';
 import Text from '@/components/Text';
 import styles from './styles';
 
 export default function Header(props) {
-  const forceDark = useSelector((state) => state.application.force_dark);
   const {
     style = {},
     styleLeft = {},
@@ -25,21 +23,10 @@ export default function Header(props) {
     subTitle = '',
     barStyle = '',
   } = props;
-  const isDarkMode = useColorScheme() === 'dark';
 
   useEffect(() => {
-    let option = isDarkMode ? 'light-content' : 'dark-content';
-    if (forceDark) {
-      option = 'light-content';
-    }
-    if (forceDark === false) {
-      option = 'dark-content';
-    }
-    if (barStyle) {
-      option = barStyle;
-    }
-    StatusBar.setBarStyle(option, true);
-  }, [forceDark, isDarkMode]);
+    StatusBar.setBarStyle(barStyle || 'dark-content', true);
+  }, [barStyle]);
 
   return (
     <View style={[styles.contain, style]}>

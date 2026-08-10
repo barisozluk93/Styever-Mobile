@@ -16,6 +16,7 @@ import SliderIntro from '@/screens/SliderIntro';
 import component from './component';
 import Address from '@/screens/Address';
 import MyAddresses from '@/screens/MyAddresses';
+import MyAgreements from '@/screens/MyAgreements';
 import Membership from '@/screens/Membership';
 import Faqs from '@/screens/Faqs';
 
@@ -99,6 +100,12 @@ export default {
     component: MyAddresses,
     options: {
       title: 'my_address'
+    }
+  },
+  MyAgreements: {
+    component: MyAgreements,
+    options: {
+      title: 'my_agreements'
     }
   },
   Address: {

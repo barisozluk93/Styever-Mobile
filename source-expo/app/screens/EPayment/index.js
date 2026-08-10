@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlatList, KeyboardAvoidingView, Platform, ScrollView, Switch, View } from 'react-native';
-import { BaseStyle, useTheme } from '@/config';
+import { BaseColor, BaseStyle, useTheme } from '@/config';
 import { Banks, MobileWallet, PaymentItems } from '@/data/ePayment';
 import {
   Button,
@@ -61,6 +61,7 @@ export default function EPayment({ navigation }) {
         return (
           <View>
             <TextInput
+              iconLeft={<Icon name="building-columns" size={17} color={BaseColor.grayColor} style={{marginRight:12}} />}
               onChangeText={(text) => setBankName(text)}
               placeholder={t('select_bank')}
               success={success.street}
@@ -95,6 +96,7 @@ export default function EPayment({ navigation }) {
             </Text>
             <TextInput
               style={{ marginTop: 10 }}
+              iconLeft={<Icon name="user" size={17} color={BaseColor.grayColor} style={{marginRight:12}} />}
               onChangeText={(text) => setName(text)}
               placeholder={t('name_on_card')}
               success={success.name}
@@ -102,6 +104,7 @@ export default function EPayment({ navigation }) {
             />
             <TextInput
               style={{ marginTop: 10 }}
+              iconLeft={<Icon name="credit-card" size={17} color={BaseColor.grayColor} style={{marginRight:12}} />}
               onChangeText={(text) => setCard(text)}
               placeholder={t('credit_card_number')}
               success={success.card}
@@ -118,6 +121,7 @@ export default function EPayment({ navigation }) {
             >
               <View style={{ flex: 3.5 }}>
                 <TextInput
+                  iconLeft={<Icon name="shield-halved" size={17} color={BaseColor.grayColor} style={{marginRight:12}} />}
                   onChangeText={(text) => setDigit(text)}
                   placeholder={t('digit_num')}
                   success={success.digit}
@@ -238,7 +242,7 @@ export default function EPayment({ navigation }) {
         <Header
           title={t('Payment')}
           renderLeft={() => {
-            return <Icon name="angle-left" size={20} color={colors.text} enableRTL={true} />;
+            return <Icon name="angle-left" size={20} color={colors.primary} enableRTL={true} />;
           }}
           onPressLeft={() => {
             navigation.goBack();

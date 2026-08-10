@@ -55,7 +55,7 @@ export default function FChooseLocation() {
       <Header
         title={t('choose_location')}
         renderLeft={() => {
-          return <Icon name="angle-left" size={20} color={colors.text} enableRTL={true} />;
+          return <Icon name="angle-left" size={20} color={colors.primary} enableRTL={true} />;
         }}
         renderRight={() => {
           if (loading) {

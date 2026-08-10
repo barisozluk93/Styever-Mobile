@@ -1,73 +1,123 @@
-import { StyleSheet, Platform, Dimensions } from 'react-native';
-import * as Utils from '@/utils';
-import { BaseColor } from '@/config';
+import {Platform,StyleSheet} from 'react-native';
 
 export default StyleSheet.create({
-  card: {
-    position: 'relative',
-    width: Utils.getWidthDevice() - 20,
-    height: (Utils.heightTabView() - 60) / 4 + 35,
-    borderRadius: 20,
-    padding: 10,
+  card:{
+    position:'relative',
+    width:'100%',
+    minHeight:240,
+    borderWidth:1,
+    borderRadius:16,
+    paddingHorizontal:20,
+    paddingTop:22,
+    paddingBottom:20,
+
+    ...Platform.select({
+      ios:{
+        shadowColor:'#000',
+        shadowOpacity:0.035,
+        shadowRadius:10,
+        shadowOffset:{width:0,height:4},
+      },
+      android:{
+        elevation:1,
+      },
+    }),
   },
-  checkbox: {
-    position: 'absolute',
-    top: 12,
-    left: 12,
-    width: 22,
-    height: 22,
-    borderRadius: 6,
-    borderWidth: 2,
-    borderColor: BaseColor.darkgreenColor,
-    alignItems: 'center',
-    justifyContent: 'center',
+
+  preferredBadge:{
+    position:'absolute',
+    top:-12,
+    alignSelf:'center',
+    flexDirection:'row',
+    alignItems:'center',
+    paddingHorizontal:12,
+    paddingVertical:5,
+    borderRadius:14,
+    zIndex:5,
   },
-  selected: {
-    borderWidth: StyleSheet.hairlineWidth + 1,
-    borderColor: BaseColor.darkgreenColor,
+
+  preferredText:{
+    color:'#FFFFFF',
+    fontSize:9,
+    lineHeight:12,
+    fontWeight:'800',
+    letterSpacing:0.4,
+    marginRight:5,
   },
-  title: {
-    textAlign: 'center',
+
+  headerRow:{
+    flexDirection:'row',
+    alignItems:'flex-start',
+    justifyContent:'space-between',
+    marginBottom:18,
   },
-  price: {
-    textAlign: 'center',
-    marginVertical: 5,
-    color: BaseColor.darkgreenColor,
+
+  headerText:{
+    flex:1,
+    paddingRight:14,
   },
-  divider: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: BaseColor.darkgreenColor,
-    marginVertical: 5,
+
+  title:{
+    fontSize:20,
+    lineHeight:25,
+    fontWeight:'800',
+    marginBottom:6,
   },
-  propertiesGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginTop: 5,
+
+  price:{
+    fontSize:18,
+    lineHeight:23,
+    fontWeight:'800',
   },
-  propertyItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '50%',        // 👈 satır başına 2 tane
-    marginBottom: 5,
+
+  selectCircle:{
+    width:24,
+    height:24,
+    borderRadius:12,
+    borderWidth:1.5,
+    alignItems:'center',
+    justifyContent:'center',
   },
-  property: {
-    marginLeft: 6,
-    flexShrink: 1,
+
+  properties:{
+    flex:1,
   },
-  trialBadge: {
-    position: 'absolute',
-    bottom: -16,                   
-    alignSelf: 'center',           
-    paddingHorizontal: 14,
-    paddingVertical: 5,
-    borderRadius: 14,
-    backgroundColor: BaseColor.darkgreenColor,
-    borderWidth: 1,
-    borderColor: BaseColor.darkgreenColor,
-    zIndex: 10,
+
+  propertyItem:{
+    flexDirection:'row',
+    alignItems:'flex-start',
+    marginBottom:11,
   },
-  trialText: {
-    color: BaseColor.whiteColor,
-    textAlign: 'center',
+
+  checkIcon:{
+    width:16,
+    height:16,
+    borderRadius:8,
+    alignItems:'center',
+    justifyContent:'center',
+    marginTop:2,
+    marginRight:9,
+  },
+
+  property:{
+    flex:1,
+    fontSize:13.5,
+    lineHeight:20,
+    opacity:0.72,
+  },
+
+  trialBadge:{
+    alignSelf:'flex-start',
+    marginTop:5,
+    paddingHorizontal:11,
+    paddingVertical:5,
+    borderRadius:10,
+  },
+
+  trialText:{
+    color:'#FFFFFF',
+    fontSize:10,
+    lineHeight:13,
+    fontWeight:'700',
   },
 });

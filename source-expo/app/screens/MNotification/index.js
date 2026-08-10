@@ -354,7 +354,7 @@ const MNotification = ({ navigation }) => {
       <Header
         title={t('notifications')}
         renderLeft={() => (
-          <Icon name="angle-left" size={20} color={colors.text} enableRTL={true} />
+          <Icon name="angle-left" size={20} color={colors.primary} enableRTL={true} />
         )}
         onPressLeft={() => {
           navigation.goBack();

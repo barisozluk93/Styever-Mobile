@@ -22,6 +22,8 @@ export default function ProfileDetail({
 }) {
   const { colors } = useTheme();
 
+  console.log('ProfileDetail image:', image);
+
   return (
     <TouchableOpacity style={[styles.contain, style]} onPress={onPress} activeOpacity={0.9}>
       <View style={[styles.contentLeft, styleLeft]}>

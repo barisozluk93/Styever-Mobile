@@ -1,4 +1,4 @@
-import { FlatList, View } from 'react-native';
+import {FlatList,TouchableOpacity,View} from 'react-native';
 import { useTranslation } from 'react-i18next';
 import {
   Button,
@@ -8,6 +8,7 @@ import {
   ModalOption,
   PriceList,
   SafeAreaView,
+  Text,
   TextInput,
 } from '@/components';
 import { BaseColor, BaseStyle, useTheme } from '@/config';
@@ -29,6 +30,7 @@ const Pricing = (props) => {
   const [isProfilePage, setIsProfilePage] = useState();
   const [useVoucher, setUseVoucher] = useState(false);
   const [voucher, setVoucher] = useState('');
+  const [voucherSuccess, setVoucherSuccess] = useState(true);
   const { user } = useSelector(state => state.user);
   const [userMemories, setUserMemories] = useState([]);
   const [selectedMemory, setSelectedMemory] = useState(undefined);
@@ -38,27 +40,48 @@ const Pricing = (props) => {
     {
       id: 2,
       name: t('standard'),
-      price: "₺359,00/" + t('year'),
-      properties: [t('standardProperty1'), t('standardProperty2'), t('standardProperty3'), t('standardProperty4'), t('standardProperty4')]
+      price: "₺499,00/" + t('year'),
+      properties: [
+        t('standardProperty1'),
+        t('standardProperty2'),
+        t('standardProperty3'),
+        t('standardProperty5'),
+      ],
     },
     {
       id: 3,
       name: t('premium'),
-      price: "₺559,00/" + t('year'),
-      properties: [t('premiumProperty1'), t('premiumProperty2'), t('premiumProperty3'), t('premiumProperty4'), t('premiumProperty5'), t('premiumProperty6'), t('premiumProperty7')]
+      price: "₺699,00/" + t('year'),
+      preferred: true,
+      properties: [
+        t('premiumProperty1'),
+        t('premiumProperty2'),
+        t('premiumProperty3'),
+        t('premiumProperty4'),
+        t('premiumProperty5'),
+        t('premiumProperty7'),
+      ],
     },
     {
       id: 4,
       name: t('ultra'),
-      price: "₺959,00/" + t('year'),
-      properties: [t('ultraProperty1'), t('ultraProperty2'), t('ultraProperty3'), t('ultraProperty4'), t('ultraProperty5'), t('ultraProperty6'), t('ultraProperty7')]
-    }
+      price: "₺1299,00/" + t('year'),
+      properties: [
+        t('ultraProperty1'),
+        t('ultraProperty2'),
+        t('ultraProperty3'),
+        t('ultraProperty4'),
+        t('ultraProperty5'),
+        t('ultraProperty7'),
+      ],
+    },
   ];
   
   useEffect(() => {
     setSelectedPlanId(-1);
     setUseVoucher(false);
     setVoucher('');
+    setVoucherSuccess(true);
     
     if (route?.params?.isStandByPage) {
       setIsStandByPage(route?.params?.isStandByPage);
@@ -68,6 +91,59 @@ const Pricing = (props) => {
       setIsProfilePage(route?.params?.isProfilePage);
     }
   }, [route?.params?.isStandByPage, route?.params?.isProfilePage])
+
+  const searchVoucher=()=>{
+    if(isNullOrEmpty(voucher)){
+      setSelectedPlanId(-1);
+      setVoucherSuccess(false);
+      return;
+    }
+
+    setVoucherSuccess(true);
+
+    setLoading(true);
+
+    voucherControlRequest(voucher)
+      .then(response=>{
+        if(response?.isSuccess&&response?.data?.planId>1){
+          setSelectedPlanId(response.data.planId);
+
+          Toast.show({
+            type:'success',
+            text1:t('success'),
+            text2:t('voucher_found'),
+          });
+
+          if(useVoucher&&!isProfilePage&&!isStandByPage){
+            setTimeout(()=>{
+              navigation.navigate('SignUp',{
+                voucher:voucher,
+                selectedPlanId:response.data.planId,
+              });
+            },500);
+          }
+        }
+        else{
+          setSelectedPlanId(-1);
+
+          Toast.show({
+            type:'error',
+            text1:t('error'),
+            text2:t('voucher_not_found'),
+          });
+        }
+      })
+      .catch(()=>{
+        setSelectedPlanId(-1);
+
+        Toast.show({
+          type:'error',
+          text1:t('error'),
+          text2:t('voucher_not_found'),
+        });
+      })
+      .finally(()=>setLoading(false));
+  };
 
   const continueRegister = () => {
     setLoading(true);
@@ -191,7 +267,7 @@ const Pricing = (props) => {
   const renderContent = () => {
     return (
       <SafeAreaView style={[BaseStyle.safeAreaView]} edges={['right', 'top', 'left']}>
-        <Header title={isStandByPage ? t('purchase_voucher') : t('pricing')}
+        <Header title=""
           renderLeft={() => {
             return <Icon name="angle-left" size={20} color={colors.primary} enableRTL={true} />;
           }}
@@ -201,42 +277,112 @@ const Pricing = (props) => {
         />
 
         <View style={{ flex: 1 }}>
-          {(!isStandByPage && !isProfilePage) && <View style={{ margin: 10 }}>
+          <FlatList
+            data={!useVoucher ? data : []}
+            keyExtractor={(item) => item.id.toString()}
+            contentContainerStyle={styles.listContent}
+            ListHeaderComponent={
+              <>
+                <View style={styles.heading}>
+                  <View style={styles.kickerRow}>
+              <View
+                style={[
+                  styles.kickerLine,
+                  {backgroundColor:colors.primary},
+                ]}
+              />
+              <Text
+                style={[
+                  styles.kicker,
+                  {color:colors.primary},
+                ]}
+              >
+                STYEVER
+              </Text>
+            </View>
+
+                  <Text numberOfLines={0} style={styles.title}>
+                    {isStandByPage ? t('purchase_voucher') : t('pricing')}
+                  </Text>
+
+                  <Text numberOfLines={0} grayColor style={styles.description}>
+                    {isStandByPage
+                      ? t('gift_voucher_page_description')
+                      : t('pricing_page_description')}
+                  </Text>
+                </View>
+
+                {(!isStandByPage && !isProfilePage) && (
+                  <View style={styles.voucherOption}>
             <CheckBox
               color={colors.primary}
               title={t('use_voucher')}
               checked={useVoucher}
               onPress={() => { setUseVoucher(!useVoucher); if(!useVoucher) setVoucher(''); setSelectedPlanId(-1); }}
             />
-          </View>}
+                  </View>
+                )}
 
-          {(useVoucher && !isProfilePage && !isStandByPage) && <TextInput
-            style={{ margin: 10 }}
-            onChangeText={(text) => setVoucher(text)}
-            placeholder={t('voucher')}
-            value={voucher}
-          />}
+                {(useVoucher&&!isProfilePage&&!isStandByPage)&&(
+                  <View style={styles.voucherGroup}>
+                    <View style={styles.voucherInputWrap}>
+                    <TextInput
+                      style={styles.voucherInput}
+                      iconLeft={
+                        <Icon
+                          name="ticket"
+                          size={18}
+                          color={BaseColor.grayColor}
+                        />
+                      }
+                      onChangeText={text=>{
+                        setVoucher(text);
+                        setVoucherSuccess(!isNullOrEmpty(text));
+                        setSelectedPlanId(-1);
+                      }}
+                      placeholder={t('voucher')}
+                      value={voucher}
+                      autoCapitalize="characters"
+                      success={voucherSuccess}
+                    />
+                    {!voucherSuccess&&<Text style={styles.error}>{t('required_field')}</Text>}
+                    </View>
 
-          {(!useVoucher) && <FlatList
-            horizontal={false}
-            data={data}
-            keyExtractor={(_item, index) => index.toString()}
-            renderItem={({ item }) => (
+                    <TouchableOpacity
+                      activeOpacity={0.85}
+                      style={[
+                        styles.voucherSearchButton,
+                        {backgroundColor:colors.primary},
+                      ]}
+                      onPress={searchVoucher}
+                      disabled={loading}
+                    >
+                      <Icon
+                        name="magnifying-glass"
+                        size={17}
+                        color="#FFFFFF"
+                      />
+                    </TouchableOpacity>
+                  </View>                  
+                )}
+              </>
+            }
+            renderItem={({item}) => (
               <PriceList
                 item={item}
                 isStandByPage={isStandByPage}
                 isProfilePage={isProfilePage}
                 selected={item.id === selectedPlanId}
                 onSelect={() => setSelectedPlanId(item.id)}
-                style={{
-                  margin: 10,
-                }}
+                style={styles.planCard}
               />
             )}
-          />}
+            showsVerticalScrollIndicator={false}
+          />
+
           <View style={styles.bottomBar}>
             <Button full loading={loading} onPress={() => continueRegister()}>
-              {t('continue')}
+              {isStandByPage ? t('purchase_voucher') : t('continue')}
             </Button>
           </View>
         </View>

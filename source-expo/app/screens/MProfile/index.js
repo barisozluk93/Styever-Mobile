@@ -62,7 +62,7 @@ const MLikedSongs = () => {
       <Header
         title={t('profile')}
         renderLeft={() => {
-          return <Icon name="angle-left" size={20} enableRTL={true} color={colors.text} />;
+          return <Icon name="angle-left" size={20} enableRTL={true} color={colors.primary} />;
         }}
         onPressLeft={() => {
           navigation.goBack();

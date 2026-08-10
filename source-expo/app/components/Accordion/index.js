@@ -1,12 +1,23 @@
 import PropTypes from 'prop-types';
-import { LayoutAnimation, Platform, TouchableOpacity, UIManager, View, StyleSheet } from 'react-native';
+import {
+  LayoutAnimation,
+  Platform,
+  TouchableOpacity,
+  UIManager,
+  View,
+  StyleSheet,
+  useWindowDimensions,
+} from 'react-native';
+
+import RenderHtml from 'react-native-render-html';
+
 import { useTheme } from '@/config';
 import Text from '@/components/Text';
 import Icon from '@/components/Icon';
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 
-if (Platform.OS === "android") {
+if (Platform.OS === 'android') {
   UIManager.setLayoutAnimationEnabledExperimental?.(true);
 }
 
@@ -16,11 +27,16 @@ const Accordion = ({
 }) => {
   const { colors } = useTheme();
   const { t } = useTranslation();
-  
+
   const [open, setOpen] = useState(false);
 
+  const { width } = useWindowDimensions();
+
   const toggle = () => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    LayoutAnimation.configureNext(
+      LayoutAnimation.Presets.easeInEaseOut
+    );
+
     setOpen(!open);
   };
 
@@ -29,7 +45,7 @@ const Accordion = ({
       style={{
         marginBottom: 12,
         borderRadius: 12,
-        overflow: "hidden",
+        overflow: 'hidden',
       }}
     >
       <TouchableOpacity
@@ -38,23 +54,41 @@ const Accordion = ({
         style={{
           padding: 16,
           backgroundColor: colors.card,
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
         }}
       >
-        <Text headline style={{flex: 1, color: colors.primary }}>
+        <Text
+          headline
+          style={{
+            flex: 1,
+            color: colors.primary,
+          }}
+        >
           {title}
         </Text>
 
         <Text
           style={{
             fontSize: 22,
-            fontWeight: "bold",
+            fontWeight: 'bold',
             marginLeft: 12,
           }}
         >
-          {open ? <Icon name="minus" size={14} color={colors.primary} />: <Icon name="plus" size={14} color={colors.primary} />}
+          {open ? (
+            <Icon
+              name="minus"
+              size={14}
+              color={colors.primary}
+            />
+          ) : (
+            <Icon
+              name="plus"
+              size={14}
+              color={colors.primary}
+            />
+          )}
         </Text>
       </TouchableOpacity>
 
@@ -67,7 +101,26 @@ const Accordion = ({
             borderTopColor: colors.primary,
           }}
         >
-          <Text style={{ color: colors.primary }}>{description}</Text>
+          <RenderHtml
+            contentWidth={width}
+            source={{ html: description }}
+            baseStyle={{
+              color: colors.primary,
+              fontSize: 15,
+              lineHeight: 24,
+            }}
+            tagsStyles={{
+              p: {
+                marginBottom: 10,
+              },
+              strong: {
+                fontWeight: 'bold',
+              },
+              li: {
+                marginBottom: 6,
+              },
+            }}
+          />
         </View>
       )}
     </View>

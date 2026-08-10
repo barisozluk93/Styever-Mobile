@@ -27,6 +27,7 @@ const ChangePassword = (props) => {
   const [repassword, setRepassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(successInit);
+  const [passwordMismatch, setPasswordMismatch] = useState(false);
 
   const onChangePassowrd = () => {
     if (isNullOrEmpty(currentPassword) || isNullOrEmpty(password) || isNullOrEmpty(repassword)) {
@@ -41,18 +42,14 @@ const ChangePassword = (props) => {
       if (password !== repassword) {
         setSuccess({
           ...success,
-          currentPassword: !isNullOrEmpty(currentPassword) ? true : false,
-          password: false,
-          repassword: false,
+          currentPassword: !isNullOrEmpty(currentPassword),
+          password: !isNullOrEmpty(password),
+          repassword: !isNullOrEmpty(repassword),
         });
-
-        Toast.show({
-          type: 'error',
-          text1: t('error'),
-          text2: t('pw_didnt_match_message'),
-        });
+        setPasswordMismatch(true);
       }
       else {
+        setPasswordMismatch(false);
         setLoading(true);
         changePasswordRequest(user.id, currentPassword, password).then(async (response) => {
 
@@ -100,7 +97,7 @@ const ChangePassword = (props) => {
   return (
     <SafeAreaView style={BaseStyle.safeAreaView} edges={['right', 'top', 'left']}>
       <Header
-        title={t('change_password')}
+        title=""
         renderLeft={() => {
           return <Icon name="angle-left" size={20} color={colors.primary} enableRTL={true} />;
         }}
@@ -108,7 +105,37 @@ const ChangePassword = (props) => {
           navigation.goBack();
         }}
       />
-      <ScrollView>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        <View style={styles.heading}>
+          <View style={styles.kickerRow}>
+            <View
+              style={[
+                styles.kickerLine,
+                {backgroundColor:colors.primary},
+              ]}
+            />
+            <Text
+              style={[
+                styles.kicker,
+                {color:colors.primary},
+              ]}
+            >
+              STYEVER
+            </Text>
+          </View>
+
+          <Text numberOfLines={0} style={styles.pageTitle}>
+            {t('change_password')}
+          </Text>
+
+          <Text numberOfLines={0} grayColor style={styles.description}>
+            {t('change_password_description')}
+          </Text>
+        </View>
+
         <View style={styles.contain}>
           <View style={styles.contentTitle}>
             <Text headline semibold>
@@ -117,7 +144,8 @@ const ChangePassword = (props) => {
           </View>
           <TextInput
             style={BaseStyle.textInput}
-            onChangeText={(text) => setCurrentPassword(text)}
+            iconLeft={<Icon name="lock" size={17} color={BaseColor.grayColor} style={{marginRight:12}} />}
+            onChangeText={(text) => {setCurrentPassword(text); if(!isNullOrEmpty(text)) setSuccess(prev => ({...prev, currentPassword: true}));}}
             autoCorrect={false}
             secureTextEntry={true}
             placeholder={t('current_password')}
@@ -125,6 +153,7 @@ const ChangePassword = (props) => {
             value={currentPassword}
             selectionColor={colors.primary}
           />
+          {!success.currentPassword&&<Text style={styles.errorField}>{t('required_field')}</Text>}
           <View style={styles.contentTitle}>
             <Text headline semibold>
               {t('new_password')}
@@ -132,7 +161,7 @@ const ChangePassword = (props) => {
           </View>
           <TextInput
             style={BaseStyle.textInput}
-            onChangeText={(text) => setPassword(text)}
+            onChangeText={(text) => {setPassword(text); setPasswordMismatch(false); if(!isNullOrEmpty(text)) setSuccess(prev => ({...prev, password: true}));}}
             autoCorrect={false}
             secureTextEntry={true}
             placeholder={t('new_password')}
@@ -140,6 +169,7 @@ const ChangePassword = (props) => {
             value={password}
             selectionColor={colors.primary}
           />
+          {!success.password&&<Text style={styles.errorField}>{t('required_field')}</Text>}
           <View style={styles.contentTitle}>
             <Text headline semibold>
               {t('password_confirm')}
@@ -147,7 +177,7 @@ const ChangePassword = (props) => {
           </View>
           <TextInput
             style={BaseStyle.textInput}
-            onChangeText={(text) => setRepassword(text)}
+            onChangeText={(text) => {setRepassword(text); setPasswordMismatch(false); if(!isNullOrEmpty(text)) setSuccess(prev => ({...prev, repassword: true}));}}
             autoCorrect={false}
             secureTextEntry={true}
             placeholder={t('password_confirm')}
@@ -155,6 +185,8 @@ const ChangePassword = (props) => {
             value={repassword}
             selectionColor={colors.primary}
           />
+          {!success.repassword&&<Text style={styles.errorField}>{t('required_field')}</Text>}
+          {passwordMismatch&&<Text style={styles.errorField}>{t('pw_didnt_match_message')}</Text>}
         </View>
       </ScrollView>
       <View style={{ padding: 20 }}>

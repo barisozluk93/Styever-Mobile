@@ -1,52 +1,118 @@
 import PropTypes from 'prop-types';
-import { TouchableOpacity, View } from 'react-native';
-import { useTheme } from '@/config';
+import {TouchableOpacity,View} from 'react-native';
+import {useTheme} from '@/config';
 import Text from '@/components/Text';
-import styles from './styles';
 import Icon from '@/components/Icon';
-import { useTranslation } from 'react-i18next';
+import {useTranslation} from 'react-i18next';
+import styles from './styles';
 
-const AddressList = ({
-  style = {},
-  onSelect = () => { },
-  disabled = true,
-  item = {},
-}) => {
-  const { colors } = useTheme();
-  const { t } = useTranslation();
-  
-  return (
-    <TouchableOpacity style={[styles.card, style, item.isPrimary && styles.selected, { backgroundColor: colors.card }]} onPress={onSelect}>
-      <Text headline style={[styles.title, { color: colors.primary }]}>{item.addressHeader}</Text>
-      <View style={styles.divider} />
+const AddressList=({
+  style={},
+  onSelect=()=>{},
+  item={},
+})=>{
+  const {colors}=useTheme();
+  const {t}=useTranslation();
 
-      <View style={styles.propertiesGrid}>
-          <View style={styles.propertyItem}>
-            <Icon name="check" size={16} color={colors.primary} />
-            <Text style={styles.property}>{item.address}</Text>
+  return(
+    <TouchableOpacity
+      activeOpacity={0.85}
+      style={[
+        styles.card,
+        style,
+        {
+          backgroundColor:colors.card,
+          borderColor:colors.border,
+        },
+      ]}
+      onPress={onSelect}
+    >
+      <View style={styles.cardTop}>
+        <View style={styles.cardContent}>
+          <Text
+            numberOfLines={0}
+            style={styles.title}
+          >
+            {item.addressHeader||t('address')}
+          </Text>
+
+          <View style={styles.badges}>
+            {item.isPrimary&&(
+              <View
+                style={[
+                  styles.badge,
+                  {backgroundColor:colors.primary+'14'},
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.badgeText,
+                    {color:colors.primary},
+                  ]}
+                >
+                  {t('primary')}
+                </Text>
+              </View>
+            )}
+
+            {!!item.city&&(
+              <View
+                style={[
+                  styles.badge,
+                  styles.outlineBadge,
+                  {borderColor:colors.border},
+                ]}
+              >
+                <Text style={styles.badgeText}>
+                  {item.city}
+                </Text>
+              </View>
+            )}
           </View>
-          <View style={[styles.propertyItem, {marginBottom : 5}]}>
-            <Icon name="check" size={16} color={colors.primary} />
-            <Text style={styles.property}>{item.district} / {item.city}</Text>
-          </View>
-          <View style={styles.propertyItem}>
-            <Icon name="check" size={16} color={colors.primary} />
-            <Text style={styles.property}>{item.country}</Text>
-          </View>
+
+          <Text
+            numberOfLines={0}
+            grayColor
+            style={styles.address}
+          >
+            {item.address}
+          </Text>
+
+          <Text
+            numberOfLines={0}
+            style={styles.location}
+          >
+            {[item.district,item.city,item.country]
+              .filter(Boolean)
+              .join(' / ')}
+          </Text>
+        </View>
+
+        <View
+          style={[
+            styles.viewButton,
+            {backgroundColor:colors.primary+'14'},
+          ]}
+        >
+          <Icon
+            name="angle-right"
+            size={14}
+            color={colors.primary}
+            enableRTL={true}
+          />
+        </View>
       </View>
     </TouchableOpacity>
   );
 };
 
-AddressList.propTypes = {
-  onPress: PropTypes.func,
-  style: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
-  title: PropTypes.string,
-  subTitle: PropTypes.string,
-  description: PropTypes.string,
-  progress: PropTypes.number,
-  days: PropTypes.string,
-  members: PropTypes.array,
+AddressList.propTypes={
+  onSelect:PropTypes.func,
+  style:PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.array,
+  ]),
+  item:PropTypes.object,
 };
 
 export default AddressList;

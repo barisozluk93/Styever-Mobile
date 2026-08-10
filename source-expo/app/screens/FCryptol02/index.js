@@ -45,7 +45,7 @@ export default function FCryptol01({ navigation }) {
       <Header
         title={`${item.name} (${item.code})`}
         renderLeft={() => {
-          return <Icon name="angle-left" size={20} enableRTL={true} color={colors.text} />;
+          return <Icon name="angle-left" size={20} enableRTL={true} color={colors.primary} />;
         }}
         onPressLeft={() => {
           navigation.goBack();

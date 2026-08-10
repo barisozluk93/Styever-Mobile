@@ -1,55 +1,85 @@
-import { StyleSheet, Platform, Dimensions } from 'react-native';
-import * as Utils from '@/utils';
-import { BaseColor } from '@/config';
+import {Platform,StyleSheet} from 'react-native';
 
 export default StyleSheet.create({
-  card: {
-    position: 'relative',
-    width: Utils.getWidthDevice() - 20,
-    borderRadius: 20,
-    padding: 10,
+  card:{
+    width:'100%',
+    borderWidth:1,
+    borderRadius:14,
+    padding:16,
+
+    ...Platform.select({
+      ios:{
+        shadowColor:'#000',
+        shadowOpacity:0.03,
+        shadowRadius:8,
+        shadowOffset:{width:0,height:3},
+      },
+      android:{
+        elevation:1,
+      },
+    }),
   },
-  selected: {
-    borderWidth: StyleSheet.hairlineWidth + 1,
-    borderColor: BaseColor.darkgreenColor,
+
+  cardTop:{
+    flexDirection:'row',
+    alignItems:'flex-start',
   },
-  title: {
-    textAlign: 'center',
-    marginVertical: 10,
+
+  cardContent:{
+    flex:1,
+    paddingRight:10,
   },
-  divider: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: BaseColor.darkgreenColor,
-    marginVertical: 5,
+
+  title:{
+    fontSize:15,
+    lineHeight:21,
+    fontWeight:'800',
   },
-  propertiesGrid: {
-    flexDirection: 'column',
-    marginTop: 10,
-    padding: 10
+
+  badges:{
+    flexDirection:'row',
+    flexWrap:'wrap',
+    marginTop:10,
   },
-  propertyItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
+
+  badge:{
+    minHeight:26,
+    borderRadius:7,
+    justifyContent:'center',
+    paddingHorizontal:9,
+    paddingVertical:4,
+    marginRight:6,
+    marginBottom:6,
   },
-  property: {
-    marginLeft: 6,
-    // flexShrink: 1,
+
+  outlineBadge:{
+    borderWidth:1,
   },
-  trialBadge: {
-    position: 'absolute',
-    bottom: -16,           
-    alignSelf: 'center', 
-    paddingHorizontal: 14,
-    paddingVertical: 5,
-    borderRadius: 14,
-    backgroundColor: BaseColor.darkgreenColor,
-    borderWidth: 1,
-    borderColor: BaseColor.darkgreenColor,
-    zIndex: 10,
+
+  badgeText:{
+    fontSize:11,
+    lineHeight:15,
+    fontWeight:'700',
   },
-  trialText: {
-    color: BaseColor.whiteColor,
-    textAlign: 'center',
+
+  address:{
+    fontSize:13,
+    lineHeight:19,
+    marginTop:7,
+  },
+
+  location:{
+    fontSize:12.5,
+    lineHeight:18,
+    fontWeight:'700',
+    marginTop:5,
+  },
+
+  viewButton:{
+    width:34,
+    height:34,
+    borderRadius:8,
+    alignItems:'center',
+    justifyContent:'center',
   },
 });

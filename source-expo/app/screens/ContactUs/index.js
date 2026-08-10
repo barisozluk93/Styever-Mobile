@@ -1,159 +1,122 @@
-import { useState } from 'react';
-import { ScrollView, View } from 'react-native';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
-import { useTranslation } from 'react-i18next';
-import { BaseColor, BaseStyle, useTheme } from '@/config';
-import { Button, Header, Icon, SafeAreaView, Text, TextInput } from '@/components';
+import {useState} from 'react';
+import {KeyboardAvoidingView,Platform,ScrollView,StyleSheet,View} from 'react-native';
+import {useTranslation} from 'react-i18next';
+import {BaseColor,BaseStyle,useTheme} from '@/config';
+import {Button,Header,Icon,SafeAreaView,SiteFooter,Text,TextInput} from '@/components';
 import styles from './styles';
-import { isNullOrEmpty } from '@/utils/utility';
+import {isNullOrEmpty} from '@/utils/utility';
 import Toast from 'react-native-toast-message';
-import { saveRequest } from '@/apis/contactUsApi';
+import {saveRequest} from '@/apis/contactUsApi';
 
+const successInit={fullname:true,email:true,subject:true,message:true};
 
-const successInit = {
-  fullname: true,
-  email: true,
-  subject: true,
-  message: true,
-};
+const ContactUs=({navigation})=>{
+  const {t}=useTranslation();
+  const {colors}=useTheme();
+  const [fullname,setFullname]=useState('');
+  const [email,setEmail]=useState('');
+  const [message,setMessage]=useState('');
+  const [subject,setSubject]=useState('');
+  const [success,setSuccess]=useState(successInit);
+  const [loading,setLoading]=useState(false);
 
-const ContactUs = (props) => {
-  const { navigation } = props;
-  const { t } = useTranslation();
-  const { colors } = useTheme();
-  const [fullname, setFullname] = useState('');
-  const [email, setEmail] = useState('');
-  const [message, setMessage] = useState('');
-  const [subject, setSubject] = useState('');
-  const [success, setSuccess] = useState(successInit);
-  const [loading, setLoading] = useState(false);
+  const inputIcon=name=>(
+    <Icon name={name} size={17} color={BaseColor.grayColor} style={styles.inputIcon}/>
+  );
 
-  /**
-   * @description Called when user sumitted form
-   * @author Passion UI <passionui.com>
-   * @date 2019-08-03
-   */
-  const onSubmit = () => {
-    if (isNullOrEmpty(fullname) || isNullOrEmpty(email) || isNullOrEmpty(subject) || isNullOrEmpty(message)) {
+  const onSubmit=()=>{
+    if(isNullOrEmpty(fullname)||isNullOrEmpty(email)||isNullOrEmpty(subject)||isNullOrEmpty(message)){
       setSuccess({
-        ...success,
-        email: !isNullOrEmpty(email) ? true : false,
-        fullname: !isNullOrEmpty(fullname) ? true : false,
-        message: !isNullOrEmpty(message) ? true : false,
-        subject: !isNullOrEmpty(subject) ? true : false,
+        fullname:!isNullOrEmpty(fullname),
+        email:!isNullOrEmpty(email),
+        subject:!isNullOrEmpty(subject),
+        message:!isNullOrEmpty(message),
       });
-    } else {
-      setLoading(true);
-      saveRequest(0, fullname, subject, message, email).then(response => {
-        if (response.isSuccess) {
-
-          setFullname('');
-          setEmail('');
-          setSubject('');
-          setMessage('');
-          
-          setSuccess({
-            ...success,
-            email: true,
-            fullname: true,
-            message: true,
-            subject: true,
-          });
-
-          Toast.show({
-            type: 'success',
-            text1: t('success'),
-            text2: t('success_message'),
-          });
-
-
-          setTimeout(() => {
-            setLoading(false);
-          }, 500)
-        }
-        else {
-          Toast.show({
-            type: 'error',
-            text1: t('error'),
-            text2: t('error_file_message'),
-          });
-
-          setLoading(false);
-        }
-      }).catch(error => {
-        Toast.show({
-          type: 'error',
-          text1: t('error'),
-          text2: t('error_file_message'),
-        });
-
-        setLoading(false);
-      })
+      return;
     }
+
+    setLoading(true);
+    saveRequest(0,fullname,subject,message,email)
+      .then(response=>{
+        if(response?.isSuccess){
+          setFullname(''); setEmail(''); setSubject(''); setMessage('');
+          setSuccess(successInit);
+          Toast.show({type:'success',text1:t('success'),text2:t('success_message')});
+        }else{
+          Toast.show({type:'error',text1:t('error'),text2:t('error_file_message')});
+        }
+      })
+      .catch(()=>Toast.show({type:'error',text1:t('error'),text2:t('error_file_message')}))
+      .finally(()=>setLoading(false));
   };
 
-  return (
-    <SafeAreaView style={BaseStyle.safeAreaView} edges={['right', 'top', 'left']}>
-      <Header
-        title={t('contact_us')}
-        renderLeft={() => {
-          return <Icon name="angle-left" size={20} color={colors.primary} enableRTL={true} />;
-        }}
-        onPressLeft={() => {
-          navigation.goBack();
-        }}
-      />
-      <ScrollView>
-        <View style={styles.contain}>
+  const infoRows=[
+    {icon:'location-dot',label:t('company_center_address'),value:'Çankaya / Ankara'},
+    {icon:'building-columns',label:t('tax_office'),value:'Doğanbey Vergi Dairesi'},
+    {icon:'file-lines',label:t('tax_number'),value:'0990426667'},
+    {icon:'envelope',label:t('email'),value:'info@styever.com'},
+  ];
 
-          <TextInput
-            style={[BaseStyle.textInput]}
-            onChangeText={(text) => setFullname(text)}
-            autoCorrect={false}
-            placeholder={t('fullname')}
-            placeholderTextColor={success.fullname ? BaseColor.grayColor : colors.primary}
-            value={fullname}
-          />
-          <TextInput
-            style={[BaseStyle.textInput, { marginTop: 10 }]}
-            onChangeText={(text) => setEmail(text)}
-            autoCorrect={false}
-            placeholder={t('email')}
-            keyboardType="email-address"
-            placeholderTextColor={success.email ? BaseColor.grayColor : colors.primary}
-            value={email}
-          />
-          <TextInput
-            style={[BaseStyle.textInput, { marginTop: 10 }]}
-            onChangeText={(text) => setSubject(text)}
-            autoCorrect={false}
-            placeholder={t('subject')}
-            placeholderTextColor={success.subject ? BaseColor.grayColor : colors.primary}
-            value={subject}
-          />
-          <TextInput
-            style={[BaseStyle.textInput, { marginTop: 10, height: 120 }]}
-            onChangeText={(text) => setMessage(text)}
-            textAlignVertical="top"
-            multiline={true}
-            autoCorrect={false}
-            placeholder={t('message')}
-            placeholderTextColor={success.message ? BaseColor.grayColor : colors.primary}
-            value={message}
-          />
-        </View>
-      </ScrollView>
-      <View style={{ padding: 20 }}>
-        <Button
-          loading={loading}
-          full
-          onPress={() => {
-            onSubmit();
-          }}
-        >
-          {t('send')}
-        </Button>
-      </View>
+  return(
+    <SafeAreaView style={BaseStyle.safeAreaView} edges={['right','top','left']}>
+      <Header title="" renderLeft={()=><Icon name="angle-left" size={20} color={colors.primary} enableRTL/>} onPressLeft={()=>navigation.goBack()}/>
+      <KeyboardAvoidingView behavior={Platform.OS==='ios'?'padding':'height'} style={styles.flex}>
+        <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={styles.scrollContent}>
+          <View style={styles.heading}>
+            <View style={styles.kickerRow}>
+              <View
+                style={[
+                  styles.kickerLine,
+                  {backgroundColor:colors.primary},
+                ]}
+              />
+              <Text
+                style={[
+                  styles.kicker,
+                  {color:colors.primary},
+                ]}
+              >
+                STYEVER
+              </Text>
+            </View>
+            <Text numberOfLines={0} style={styles.pageTitle}>{t('contact_us')}</Text>
+            <Text numberOfLines={0} grayColor style={styles.description}>{t('contact_us_page_description')}</Text>
+          </View>
+
+          <View style={[styles.companyCard,{backgroundColor:colors.card,borderColor:colors.border}]}>
+            <View style={styles.companyHeader}>
+              <View style={[styles.companyMark,{backgroundColor:colors.primary}]}/>
+              <View>
+                <Text style={styles.companyTitle}>{t('company_information')}</Text>
+                <Text body2 grayColor style={styles.companyName}>Styever</Text>
+              </View>
+            </View>
+            <View style={[styles.companyDivider,{backgroundColor:colors.border}]}/>
+            {infoRows.map((item,index)=>(
+              <View key={item.label} style={[styles.infoRow,index!==infoRows.length-1&&{borderBottomColor:colors.border,borderBottomWidth:StyleSheet.hairlineWidth}]}>
+                <View style={[styles.infoIconBox,{backgroundColor:colors.primary+'10'}]}>
+                  <Icon name={item.icon} size={16} color={colors.primary}/>
+                </View>
+                <View style={styles.infoText}>
+                  <Text style={styles.infoLabel} grayColor>{item.label}</Text>
+                  <Text numberOfLines={0} style={styles.infoValue}>{item.value}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
+
+          <View style={[styles.formCard,{backgroundColor:colors.card,borderColor:colors.border}]}>
+            <Text style={[styles.formKicker,{color:colors.primary}]}>{t('contact_us')}</Text>
+            <Text style={styles.formTitle}>{t('message')}</Text>
+            <TextInput style={styles.input} iconLeft={inputIcon('user')} onChangeText={text=>{setFullname(text);if(!isNullOrEmpty(text))setSuccess(prev=>({...prev,fullname:true}));}} placeholder={t('fullname')} success={success.fullname} value={fullname}/>{!success.fullname&&<Text style={styles.errorField}>{t('required_field')}</Text>}
+            <TextInput style={styles.input} iconLeft={inputIcon('envelope')} onChangeText={text=>{setEmail(text);if(!isNullOrEmpty(text))setSuccess(prev=>({...prev,email:true}));}} placeholder={t('email')} keyboardType="email-address" autoCapitalize="none" success={success.email} value={email}/>{!success.email&&<Text style={styles.errorField}>{t('required_field')}</Text>}
+            <TextInput style={styles.input} iconLeft={inputIcon('message')} onChangeText={text=>{setSubject(text);if(!isNullOrEmpty(text))setSuccess(prev=>({...prev,subject:true}));}} placeholder={t('subject')} success={success.subject} value={subject}/>{!success.subject&&<Text style={styles.errorField}>{t('required_field')}</Text>}
+            <TextInput style={styles.messageInput} inputStyle={styles.messageInputInner} iconLeft={inputIcon('pen-to-square')} onChangeText={text=>{setMessage(text);if(!isNullOrEmpty(text))setSuccess(prev=>({...prev,message:true}));}} textAlignVertical="top" multiline placeholder={t('message')} success={success.message} value={message}/>{!success.message&&<Text style={styles.errorField}>{t('required_field')}</Text>}
+            <Button full loading={loading} style={styles.submitButton} onPress={onSubmit}>{t('send')}</Button>
+          </View>
+          <SiteFooter style={styles.siteFooter}/>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };

@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ScrollView, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, TouchableOpacity, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { BaseStyle, Images, useTheme } from '@/config';
+import { BaseColor, BaseStyle, Images, useTheme } from '@/config';
 // Load sample data
 import { UserData } from '@/data';
 import { Button, Icon, ProfileDetail, ProfilePerformance, SafeAreaView, Tag, Text } from '@/components';
@@ -11,6 +11,8 @@ import styles from './styles';
 import { useFocusEffect } from '@react-navigation/native';
 import { logout } from '@/actions/auth';
 import { avatarUploadFolderUrl } from '@/utils/utility';
+import { deleteUserRequest } from '@/apis/userApi';
+import Toast from 'react-native-toast-message';
 
 const { authentication } = AuthActions;
 
@@ -39,6 +41,49 @@ const Profile = (props) => {
     navigation.navigate('SignIn');
   };
 
+  const clearSession = () => {
+    dispatch(logout());
+    dispatch({type: "USER_INIT"});
+    dispatch({type: "MEMORY_INIT"});
+    dispatch({type: "ARTICLE_INIT"});
+    navigation.navigate('NHome');
+  };
+
+  const onDeleteAccount = () => {
+    if (!user?.id) return;
+
+    Alert.alert(
+      t('delete_account'),
+      t('delete_account_confirmation'),
+      [
+        { text: t('cancel'), style: 'cancel' },
+        {
+          text: t('delete'),
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const response = await deleteUserRequest(user.id);
+              if (response?.isSuccess === false) {
+                Alert.alert(t('error'), response?.message || t('delete_account_error'));
+                return;
+              }
+              Toast.show({
+                type: 'success',
+                text1: t('success'),
+                text2: t('delete_account_success'),
+              });
+              setTimeout(() => {
+                clearSession();
+              }, 1200);
+            } catch (error) {
+              Alert.alert(t('error'), error?.response?.data?.message || t('delete_account_error'));
+            }
+          },
+        },
+      ],
+    );
+  };
+
   const styleItem = {
     ...styles.profileItem,
     borderBottomColor: colors.border,
@@ -56,7 +101,7 @@ const Profile = (props) => {
           <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
             {user && (
               <ProfileDetail
-                image={user.file ? avatarUploadFolderUrl + user.file.path.split("\\")[user.file.path.split("\\").length-1] : Images.avata5}
+                image={user.file ? avatarUploadFolderUrl + user.file.path.split("\\")[user.file.path.split("\\").length-1] + (user.file.extension == ".jpeg" || user.file.extension == ".jpg" ? ".jpg" : user.file.extension == ".png" ? ".png" : "") : Images.avata5}
                 isAvatarExist={user.file ? true : false}
                 textFirst={user.name + " " + user.surname}
                 textSecond={user.username}
@@ -75,7 +120,7 @@ const Profile = (props) => {
                 <Text body1>{t('system')}</Text>
                 <Icon name="angle-right" size={18} color={colors.primary} style={{ marginLeft: 5 }} enableRTL={true} />
               </TouchableOpacity>
-              {(user && user.isActive) || !user && <TouchableOpacity
+              {((user && user.isActive) || !user) && <TouchableOpacity
                 style={styleItem}
                 onPress={() => {
                   navigation.navigate('Pricing', { isStandByPage: true });
@@ -157,6 +202,23 @@ const Profile = (props) => {
                 <TouchableOpacity
                   style={styleItem}
                   onPress={() => {
+                    navigation.navigate('MyAgreements');
+                  }}
+                >
+                  <Text body1>{t('my_agreements')}</Text>
+                  <Icon
+                    name="angle-right"
+                    size={18}
+                    color={colors.primary}
+                    style={{ marginLeft: 5 }}
+                    enableRTL={true}
+                  />
+                </TouchableOpacity>
+              )}
+              {user && (
+                <TouchableOpacity
+                  style={styleItem}
+                  onPress={() => {
                     navigation.navigate('Membership');
                   }}
                 >
@@ -177,9 +239,18 @@ const Profile = (props) => {
       </View>
       <View style={{ padding: 10 }}>
         {user ? (
-          <Button full loading={loading} onPress={() => onLogOut()}>
-            {t('sign_out')}
-          </Button>
+          <>
+            <Button
+              full
+              onPress={onDeleteAccount}
+              style={{ backgroundColor: BaseColor.pinkLightColor, marginBottom: 10 }}
+            >
+              {t('delete_account')}
+            </Button>
+            <Button full loading={loading} onPress={() => onLogOut()}>
+              {t('sign_out')}
+            </Button>
+          </>
         ) : (
           <Button full loading={loading} onPress={() => onLogIn()}>
             {t('sign_in')}

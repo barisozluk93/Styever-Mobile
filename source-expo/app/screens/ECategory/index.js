@@ -188,7 +188,7 @@ const ECategory = (props) => {
               }}
             >
               <TouchableOpacity onPress={() => navigation.goBack()}>
-                <Icon name="angle-left" size={20} color={colors.text} enableRTL={true} style={{ marginRight: 16 }} />
+                <Icon name="angle-left" size={20} color={colors.primary} enableRTL={true} style={{ marginRight: 16 }} />
               </TouchableOpacity>
               <Text header bold>
                 {t('categories')}

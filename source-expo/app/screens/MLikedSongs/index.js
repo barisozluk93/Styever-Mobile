@@ -18,7 +18,7 @@ const MProfile = () => {
         title={t('music_liked_songs')}
         subTitle={'126 songs'}
         renderLeft={() => {
-          return <Icon name="angle-left" size={20} enableRTL={true} color={colors.text} />;
+          return <Icon name="angle-left" size={20} enableRTL={true} color={colors.primary} />;
         }}
         onPressLeft={() => {
           navigation.goBack();

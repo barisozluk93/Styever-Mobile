@@ -42,7 +42,7 @@ const FAddTransaction = (props) => {
       <Header
         title={t('Bitcoin')}
         renderLeft={() => {
-          return <Icon name="angle-left" size={20} enableRTL={true} color={colors.text} />;
+          return <Icon name="angle-left" size={20} enableRTL={true} color={colors.primary} />;
         }}
         renderRight={() => {
           return (

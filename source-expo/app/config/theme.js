@@ -1,5 +1,4 @@
 import { useSelector } from 'react-redux';
-import { useColorScheme } from 'react-native';
 
 /**
  * Define Const color use for whole application
@@ -214,7 +213,7 @@ export const DefaultTheme = {
       primaryDark: '#022d1c',
       primaryLight: '#3E8C6F',
       accent: '#FF8A65',
-      background: 'white',
+      background: '#fbfaf7',
       card: '#F5F5F5',
       text: '#212121',
       border: '#c7c7cc',
@@ -250,21 +249,8 @@ export const DefaultFont = 'Roboto';
  * @returns theme,colors
  */
 export const useTheme = () => {
-  const isDarkMode = useColorScheme() === 'dark';
-  const forceDark = useSelector((state) => state.application.force_dark);
-  const themeStorage = useSelector((state) => state.application.theme);
-  const listTheme = ThemeSupport.filter((item) => item.theme === themeStorage);
   const theme = DefaultTheme;
-
-  if (forceDark) {
-    return { theme: theme.dark, colors: theme.dark.colors };
-  }
-  if (forceDark === false) {
-    return { theme: theme.light, colors: theme.light.colors };
-  }
-  return isDarkMode
-    ? { theme: theme.dark, colors: theme.dark.colors }
-    : { theme: theme.light, colors: theme.light.colors };
+  return { theme: theme.light, colors: theme.light.colors };
 };
 
 /**

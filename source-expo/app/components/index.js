@@ -198,3 +198,4 @@ export { default as MusicPlaySong } from './Music/PlaySong';
 
 // Picker Select
 export { default as PickerSelect } from './PickerSelect';
+export { default as SiteFooter } from './SiteFooter';

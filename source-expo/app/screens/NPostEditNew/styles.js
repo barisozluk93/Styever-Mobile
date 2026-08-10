@@ -2,6 +2,7 @@ import { StyleSheet } from 'react-native';
 import { BaseColor } from '@/config';
 
 export default StyleSheet.create({
+  errorField:{color:'#DC3545',fontSize:11.5,lineHeight:16,fontWeight:'500',marginTop:5,marginBottom:4},
   profileImage: {
     position: 'absolute',
     zIndex: 100,

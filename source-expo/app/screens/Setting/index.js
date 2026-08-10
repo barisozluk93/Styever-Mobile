@@ -73,7 +73,6 @@ export default function Setting({ isShowHeader = true }) {
   const navigation = useNavigation();
   const { t, i18n } = useTranslation();
   const { colors } = useTheme();
-  const forceDark = useSelector((state) => state.application.force_dark);
   const font = useSelector((state) => state.application.font);
 
   const [reminders, setReminders] = useState(true);
@@ -86,7 +85,6 @@ export default function Setting({ isShowHeader = true }) {
     setReminders(value);
   };
 
-  const darkOption = forceDark ? t('always_on') : forceDark !== null ? t('always_off') : t('dynamic_system');
 
   const onChangeIntro = () => {
     dispatch(setIntro(!intro));
@@ -147,20 +145,6 @@ export default function Setting({ isShowHeader = true }) {
                 </Text>
               }
             />
-
-            <Item
-              title={t('dark_theme')}
-              iconName="adjust"
-              iconBackground={BaseColor.pinkColor}
-              onPress={() => {
-                navigation.navigate('SelectDarkOption');
-              }}
-              ComponentRight={
-                <Text body1 grayColor>
-                  {darkOption}
-                </Text>
-              }
-            />
             <Item
               title={t('notification')}
               iconName="bell"
@@ -201,7 +185,7 @@ export default function Setting({ isShowHeader = true }) {
       <Header
         title={t('setting')}
         renderLeft={() => {
-          return <Icon name="angle-left" size={20} color={BaseColor.grayColor} enableRTL={true} />;
+          return <Icon name="angle-left" size={20} color={colors.primary} enableRTL={true} />;
         }}
         onPressLeft={() => {
           navigation.goBack();

@@ -60,6 +60,7 @@ const NFeedback = (props) => {
           </View>
           <TextInput
             style={[BaseStyle.textInput, { marginTop: 10 }]}
+            iconLeft={<Icon name="heading" size={17} color={BaseColor.grayColor} style={{marginRight:12}} />}
             onChangeText={(text) => setTitle(text)}
             autoCorrect={false}
             placeholder={t('input_title')}

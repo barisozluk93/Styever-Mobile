@@ -31,7 +31,7 @@ const MAlbum = (props) => {
       <SafeAreaView style={[BaseStyle.safeAreaView]} edges={['right', 'top', 'left']}>
         <Header
           title={t('music_album')}
-          renderLeft={() => <Icon name="angle-left" size={20} enableRTL={true} color={colors.text} />}
+          renderLeft={() => <Icon name="angle-left" size={20} enableRTL={true} color={colors.primary} />}
           onPressLeft={() => navigation.goBack()}
         />
         <View style={BaseStyle.container}>

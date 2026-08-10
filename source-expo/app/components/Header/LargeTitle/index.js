@@ -1,7 +1,6 @@
 import { Fragment, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { StatusBar, View, TouchableOpacity, useColorScheme } from 'react-native';
-import { useSelector } from 'react-redux';
+import { StatusBar, View, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { EYourStores } from '@/data';
 import { BaseColor, useTheme } from '@/config';
@@ -99,22 +98,10 @@ export const HeaderLargeTitleBadge = ({ onPress, count }) => {
 };
 
 function HeaderLargeTitle({ barStyle = '', style = {}, onPressBadge = () => {}, onChangeStore = () => {} }) {
-  const forceDark = useSelector((state) => state.application.force_dark);
-  const isDarkMode = useColorScheme() === 'dark';
 
   useEffect(() => {
-    let option = isDarkMode ? 'light-content' : 'dark-content';
-    if (forceDark) {
-      option = 'light-content';
-    }
-    if (forceDark === false) {
-      option = 'dark-content';
-    }
-    if (barStyle) {
-      option = barStyle;
-    }
-    StatusBar.setBarStyle(option, true);
-  }, [forceDark, isDarkMode]);
+    StatusBar.setBarStyle(barStyle || 'dark-content', true);
+  }, [barStyle]);
 
   return (
     <View style={[styles.contain, style]}>

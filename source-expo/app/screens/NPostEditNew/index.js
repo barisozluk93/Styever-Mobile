@@ -676,6 +676,7 @@ const NPostEditNew = (props) => {
                 value={name}
                 selectionColor={colors.primary}
               />
+              {!success.name&&<Text style={styles.errorField}>{t('required_field')}</Text>}
               <View style={{ flexDirection: "row", marginTop: 10 }}>
                 <DatePicker
                   placeholder={t('birth_date')}
@@ -695,6 +696,7 @@ const NPostEditNew = (props) => {
                   placeholderTextColor={success.deathDate ? BaseColor.grayColor : colors.primary}
                 />
               </View>
+              {(!success.birthDate||!success.deathDate)&&<View style={{flexDirection:'row'}}><View style={{flex:1,marginRight:5}}>{!success.birthDate&&<Text style={styles.errorField}>{t('required_field')}</Text>}</View><View style={{flex:1,marginLeft:5}}>{!success.deathDate&&<Text style={styles.errorField}>{t('required_field')}</Text>}</View></View>}
 
               <View style={styles.contentTitle}>
                 <Text headline>
@@ -713,6 +715,7 @@ const NPostEditNew = (props) => {
                 maxLength={allowedCharacterCount}
                 selectionColor={colors.primary}
               />
+              {!success.text&&<Text style={styles.errorField}>{t('required_field')}</Text>}
 
             </View>
           </ScrollView>
