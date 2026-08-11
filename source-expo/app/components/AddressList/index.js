@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import {TouchableOpacity,View} from 'react-native';
-import {useTheme} from '@/config';
+import {BaseColor,useTheme} from '@/config';
 import Text from '@/components/Text';
 import Icon from '@/components/Icon';
 import {useTranslation} from 'react-i18next';
@@ -9,6 +9,7 @@ import styles from './styles';
 const AddressList=({
   style={},
   onSelect=()=>{},
+  onDelete=()=>{},
   item={},
 })=>{
   const {colors}=useTheme();
@@ -88,18 +89,38 @@ const AddressList=({
           </Text>
         </View>
 
-        <View
-          style={[
-            styles.viewButton,
-            {backgroundColor:colors.primary+'14'},
-          ]}
-        >
-          <Icon
-            name="angle-right"
-            size={14}
-            color={colors.primary}
-            enableRTL={true}
-          />
+        <View style={styles.actions}>
+          <TouchableOpacity
+            activeOpacity={0.85}
+            style={[
+              styles.viewButton,
+              {backgroundColor:BaseColor.pinkDarkColor},
+            ]}
+            onPress={event=>{
+              event.stopPropagation();
+              onDelete(item);
+            }}
+          >
+            <Icon
+              name="trash"
+              size={14}
+              color="#FFFFFF"
+            />
+          </TouchableOpacity>
+
+          <View
+            style={[
+              styles.viewButton,
+              {backgroundColor:colors.primary+'14'},
+            ]}
+          >
+            <Icon
+              name="angle-right"
+              size={14}
+              color={colors.primary}
+              enableRTL={true}
+            />
+          </View>
         </View>
       </View>
     </TouchableOpacity>
@@ -108,6 +129,7 @@ const AddressList=({
 
 AddressList.propTypes={
   onSelect:PropTypes.func,
+  onDelete:PropTypes.func,
   style:PropTypes.oneOfType([
     PropTypes.object,
     PropTypes.array,

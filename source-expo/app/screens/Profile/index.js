@@ -101,7 +101,7 @@ const Profile = (props) => {
           <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
             {user && (
               <ProfileDetail
-                image={user.file ? avatarUploadFolderUrl + user.file.path.split("\\")[user.file.path.split("\\").length-1] + (user.file.extension == ".jpeg" || user.file.extension == ".jpg" ? ".jpg" : user.file.extension == ".png" ? ".png" : "") : Images.avata5}
+                image={user.file ? avatarUploadFolderUrl + user.file.path.split("\\")[user.file.path.split("\\").length-1] : Images.avata5}
                 isAvatarExist={user.file ? true : false}
                 textFirst={user.name + " " + user.surname}
                 textSecond={user.username}

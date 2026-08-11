@@ -1,8 +1,10 @@
 import {Platform,StyleSheet} from 'react-native';
+import { BaseColor } from '@/config';
+
 export default StyleSheet.create({
   errorField:{color:'#DC3545',fontSize:11.5,lineHeight:16,fontWeight:'500',marginTop:5,marginBottom:4},
   kickerRow:{flexDirection:'row',alignItems:'center',marginBottom:6},
-  kickerLine:{width:34,height:3,borderRadius:2,marginRight:12},
+  kickerLogo:{width:28,height:18,marginRight:10},
   flex:{flex:1},
   scrollContent:{paddingHorizontal:20,paddingTop:30,paddingBottom:40},
   heading:{marginBottom:22},
@@ -28,5 +30,6 @@ export default StyleSheet.create({
   messageInput:{marginTop:10,minHeight:130,borderRadius:12,alignItems:'flex-start',paddingTop:12},
   messageInputInner:{minHeight:105,paddingTop:0},
   submitButton:{marginTop:18},
-  siteFooter:{marginHorizontal:-20,marginBottom:-40},
+  socialRow:{flexDirection:'row',alignItems:'center',justifyContent:'center',gap:12,marginTop:24,marginBottom:18},
+  socialButton:{width:44,height:44,borderRadius:22,alignItems:'center',justifyContent:'center', backgroundColor: BaseColor.lightGreenColor },
 });

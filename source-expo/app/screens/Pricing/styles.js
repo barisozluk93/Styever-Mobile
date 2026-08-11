@@ -2,7 +2,7 @@ import {StyleSheet} from 'react-native';
 
 export default StyleSheet.create({
   kickerRow:{flexDirection:'row',alignItems:'center',marginBottom:6},
-  kickerLine:{width:34,height:3,borderRadius:2,marginRight:12},
+  kickerLogo:{width:28,height:18,marginRight:10},
   listContent:{
     paddingHorizontal:20,
     paddingTop:30,

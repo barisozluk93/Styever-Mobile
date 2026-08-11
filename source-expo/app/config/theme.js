@@ -18,7 +18,8 @@ export const BaseColor = {
   pinkLightColor: '#FF5E80',
   pinkDarkColor: '#F90030',
   accentColor: '#4A90A4',
-  darkgreenColor: '#0A4A32'
+  darkgreenColor: '#022D1C',
+  lightGreenColor: '#3E8C6F',
 };
 
 /**
@@ -213,8 +214,8 @@ export const DefaultTheme = {
       primaryDark: '#022d1c',
       primaryLight: '#3E8C6F',
       accent: '#FF8A65',
-      background: '#fbfaf7',
-      card: '#F5F5F5',
+      background: '#f7f5f0',
+      card: '#ffffff',
       text: '#212121',
       border: '#c7c7cc',
     },

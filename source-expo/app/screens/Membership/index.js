@@ -1,12 +1,6 @@
 import {ScrollView,TouchableOpacity,View} from 'react-native';
 import {useTranslation} from 'react-i18next';
-import {
-  Button,
-  Header,
-  Icon,
-  SafeAreaView,
-  Text,
-} from '@/components';
+import {Button, Header, Icon, Image, SafeAreaView, Text} from '@/components';
 import {BaseStyle,useTheme} from '@/config';
 import {useSelector} from 'react-redux';
 import styles from './styles';
@@ -107,11 +101,10 @@ const Membership=({navigation})=>{
       >
         <View style={styles.heading}>
           <View style={styles.kickerRow}>
-              <View
-                style={[
-                  styles.kickerLine,
-                  {backgroundColor:colors.primary},
-                ]}
+              <Image
+                source={require('../../assets/images/styever-mark.png')}
+                style={styles.kickerLogo}
+                resizeMode="contain"
               />
               <Text
                 style={[

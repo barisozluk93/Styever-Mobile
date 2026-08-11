@@ -48,11 +48,10 @@ export default StyleSheet.create({
     marginBottom:18,
   },
 
-  eyebrowLine:{
-    width:isTablet?36:30,
-    height:1,
-    backgroundColor:'rgba(255,255,255,0.65)',
-    marginRight:12,
+  eyebrowLogo:{
+    width:isTablet?34:28,
+    height:isTablet?20:17,
+    marginRight:10,
   },
 
   eyebrowText:{

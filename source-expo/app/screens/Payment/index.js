@@ -30,6 +30,7 @@ import {
   CardBooking,
   Header,
   Icon,
+  Image,
   SafeAreaView,
   Text,
   TextInput,
@@ -1400,7 +1401,11 @@ const Payment = (props) => {
             >
               <View style={styles.heading}>
                 <View style={styles.kickerRow}>
-                  <View style={[styles.kickerLine,{backgroundColor:colors.primary}]}/>
+                  <Image
+                source={require('../../assets/images/styever-mark.png')}
+                style={styles.kickerLogo}
+                resizeMode="contain"
+              />
                   <Text style={[styles.kicker,{color:colors.primary}]}>STYEVER</Text>
                 </View>
                 <Text numberOfLines={0} style={styles.pageTitle}>{t('payment')}</Text>

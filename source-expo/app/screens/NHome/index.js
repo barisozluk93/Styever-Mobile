@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import {
   View,
   ImageBackground,
+  Image,
   TouchableOpacity,
   StatusBar,
 } from 'react-native';
@@ -136,7 +137,11 @@ const NHome = ({ navigation }) => {
             <View style={styles.textBox}>
 
               <View style={styles.eyebrow}>
-                <View style={styles.eyebrowLine} />
+                <Image
+                  source={require('../../assets/images/styever-mark.png')}
+                  style={styles.eyebrowLogo}
+                  resizeMode="contain"
+                />
 
                 <Text style={styles.eyebrowText}>
                   {t('HOME_HERO_EYEBROW')}

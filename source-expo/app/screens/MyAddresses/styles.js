@@ -17,13 +17,7 @@ export default StyleSheet.create({
     alignItems:'center',
     marginBottom:6,
   },
-
-  kickerLine:{
-    width:34,
-    height:3,
-    borderRadius:2,
-    marginRight:12,
-  },
+  kickerLogo:{width:28,height:18,marginRight:10},
 
   kicker:{
     fontSize:10,

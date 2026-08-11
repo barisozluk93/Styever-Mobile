@@ -1,7 +1,16 @@
 import { useEffect, useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Button, Header, Icon, SafeAreaView, Text, TextInput, CheckBox } from '@/components';
+import {
+  Button,
+  Header,
+  Icon,
+  Image,
+  SafeAreaView,
+  Text,
+  TextInput,
+  CheckBox,
+} from '@/components';
 import { BaseColor, BaseStyle, useTheme } from '@/config';
 import styles from './styles';
 import { isNullOrEmpty } from '@/utils/utility';
@@ -262,11 +271,10 @@ const Address = (props) => {
         <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.scrollContent}>
           <View style={styles.heading}>
             <View style={styles.kickerRow}>
-              <View
-                style={[
-                  styles.kickerLine,
-                  {backgroundColor:colors.primary},
-                ]}
+              <Image
+                source={require('../../assets/images/styever-mark.png')}
+                style={styles.kickerLogo}
+                resizeMode="contain"
               />
               <Text
                 style={[
@@ -289,8 +297,8 @@ const Address = (props) => {
           <View style={styles.primaryRow}><CheckBox color={colors.primaryLight} title={t('primary')} checked={user?true:isPrimary===true} disabled={!!user} onPress={()=>setIsPrimary(isPrimary!==true)}/></View>
           <Text style={styles.label}>{t('country')}</Text><TextInput style={styles.input} iconLeft={<Icon name="location-dot" size={18} color={BaseColor.grayColor} style={styles.inputIcon}/>} onChangeText={text=>{setCountry(text);if(!isNullOrEmpty(text))setSuccess(prev=>({...prev,country:true}));}} placeholder={t('country')} success={success.country} value={country}/>{!success.country&&<Text style={styles.errorField}>{t('required_field')}</Text>}
           <View style={styles.row}><View style={styles.half}><Text style={styles.label}>{t('city')}</Text><TextInput style={styles.input} iconLeft={<Icon name="map-location-dot" size={18} color={BaseColor.grayColor} style={styles.inputIcon}/>} onChangeText={text=>{setCity(text);if(!isNullOrEmpty(text))setSuccess(prev=>({...prev,city:true}));}} placeholder={t('city')} success={success.city} value={city}/>{!success.city&&<Text style={styles.errorField}>{t('required_field')}</Text>}</View><View style={styles.gap}/><View style={styles.half}><Text style={styles.label}>{t('district')}</Text><TextInput style={styles.input} iconLeft={<Icon name="location-dot" size={18} color={BaseColor.grayColor} style={styles.inputIcon}/>} onChangeText={text=>{setDistrict(text);if(!isNullOrEmpty(text))setSuccess(prev=>({...prev,district:true}));}} placeholder={t('district')} success={success.district} value={district}/>{!success.district&&<Text style={styles.errorField}>{t('required_field')}</Text>}</View></View>
-          <Text style={styles.label}>{t('address')}</Text><TextInput style={styles.addressInput} inputStyle={styles.addressInner} iconLeft={<Icon name="location-dot" size={18} color={BaseColor.grayColor} style={styles.inputIconTop}/>} onChangeText={text=>{setAddress(text);if(!isNullOrEmpty(text))setSuccess(prev=>({...prev,address:true}));}} placeholder={t('address')} multiline textAlignVertical="top" success={success.address} value={address}/>{!success.address&&<Text style={styles.errorField}>{t('required_field')}</Text>}
           <Text style={styles.label}>{t('address_header')}</Text><TextInput style={styles.input} iconLeft={<Icon name="house" size={18} color={BaseColor.grayColor} style={styles.inputIcon}/>} onChangeText={text=>{setAddressHeader(text);if(!isNullOrEmpty(text))setSuccess(prev=>({...prev,addressHeader:true}));}} placeholder={t('address_header')} success={success.addressHeader} value={addressHeader}/>{!success.addressHeader&&<Text style={styles.errorField}>{t('required_field')}</Text>}
+          <Text style={styles.label}>{t('address')}</Text><TextInput style={styles.addressInput} inputStyle={styles.addressInner} iconLeft={<Icon name="location-dot" size={18} color={BaseColor.grayColor} style={styles.inputIconTop}/>} onChangeText={text=>{setAddress(text);if(!isNullOrEmpty(text))setSuccess(prev=>({...prev,address:true}));}} placeholder={t('address')} multiline textAlignVertical="top" success={success.address} value={address}/>{!success.address&&<Text style={styles.errorField}>{t('required_field')}</Text>}
           <Button full style={styles.saveButton} loading={loading} onPress={continueRegister}>{t('save')}</Button>
         </ScrollView>
       </KeyboardAvoidingView>

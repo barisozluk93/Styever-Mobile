@@ -2,7 +2,15 @@ import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { BaseColor, BaseStyle, useTheme } from '@/config';
-import { Button, Header, Icon, SafeAreaView, Text, TextInput } from '@/components';
+import {
+  Button,
+  Header,
+  Icon,
+  Image,
+  SafeAreaView,
+  Text,
+  TextInput,
+} from '@/components';
 import styles from './styles';
 import { useDispatch, useSelector } from 'react-redux';
 import { changePasswordRequest } from '@/apis/authApi';
@@ -111,12 +119,11 @@ const ChangePassword = (props) => {
       >
         <View style={styles.heading}>
           <View style={styles.kickerRow}>
-            <View
-              style={[
-                styles.kickerLine,
-                {backgroundColor:colors.primary},
-              ]}
-            />
+            <Image
+                source={require('../../assets/images/styever-mark.png')}
+                style={styles.kickerLogo}
+                resizeMode="contain"
+              />
             <Text
               style={[
                 styles.kicker,
@@ -172,7 +179,7 @@ const ChangePassword = (props) => {
           {!success.password&&<Text style={styles.errorField}>{t('required_field')}</Text>}
           <View style={styles.contentTitle}>
             <Text headline semibold>
-              {t('password_confirm')}
+              {t('new_password_confirm')}
             </Text>
           </View>
           <TextInput
@@ -180,13 +187,13 @@ const ChangePassword = (props) => {
             onChangeText={(text) => {setRepassword(text); setPasswordMismatch(false); if(!isNullOrEmpty(text)) setSuccess(prev => ({...prev, repassword: true}));}}
             autoCorrect={false}
             secureTextEntry={true}
-            placeholder={t('password_confirm')}
+            placeholder={t('new_password_confirm')}
             placeholderTextColor={success.repassword ? BaseColor.grayColor : colors.primary}
             value={repassword}
             selectionColor={colors.primary}
           />
           {!success.repassword&&<Text style={styles.errorField}>{t('required_field')}</Text>}
-          {passwordMismatch&&<Text style={styles.errorField}>{t('pw_didnt_match_message')}</Text>}
+          {passwordMismatch&&<Text style={styles.errorField}>{t('pw_didnt_match_message2')}</Text>}
         </View>
       </ScrollView>
       <View style={{ padding: 20 }}>

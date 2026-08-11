@@ -1,18 +1,34 @@
 import {useState} from 'react';
-import {KeyboardAvoidingView,Platform,ScrollView,StyleSheet,View} from 'react-native';
+import {KeyboardAvoidingView,Platform,ScrollView,StyleSheet,View,Linking,TouchableOpacity} from 'react-native';
 import {useTranslation} from 'react-i18next';
 import {BaseColor,BaseStyle,useTheme} from '@/config';
-import {Button,Header,Icon,SafeAreaView,SiteFooter,Text,TextInput} from '@/components';
+import {
+  Button,
+  Header,
+  Icon,
+  Image,
+  SafeAreaView,
+Text,
+  TextInput,
+} from '@/components';
 import styles from './styles';
 import {isNullOrEmpty} from '@/utils/utility';
 import Toast from 'react-native-toast-message';
 import {saveRequest} from '@/apis/contactUsApi';
 
+
+const SOCIAL_LINKS={
+  instagram:'https://www.instagram.com/sty.ever',
+  linkedin:'https://www.linkedin.com/company/styever/',
+  tiktok:'https://www.tiktok.com/@styever',
+};
+
+
 const successInit={fullname:true,email:true,subject:true,message:true};
 
 const ContactUs=({navigation})=>{
   const {t}=useTranslation();
-  const {colors}=useTheme();
+  const {colors}=useTheme();const openLink=url=>Linking.openURL(url).catch(()=>{});
   const [fullname,setFullname]=useState('');
   const [email,setEmail]=useState('');
   const [message,setMessage]=useState('');
@@ -64,11 +80,10 @@ const ContactUs=({navigation})=>{
         <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={styles.scrollContent}>
           <View style={styles.heading}>
             <View style={styles.kickerRow}>
-              <View
-                style={[
-                  styles.kickerLine,
-                  {backgroundColor:colors.primary},
-                ]}
+              <Image
+                source={require('../../assets/images/styever-mark.png')}
+                style={styles.kickerLogo}
+                resizeMode="contain"
               />
               <Text
                 style={[
@@ -107,6 +122,7 @@ const ContactUs=({navigation})=>{
 
           <View style={[styles.formCard,{backgroundColor:colors.card,borderColor:colors.border}]}>
             <Text style={[styles.formKicker,{color:colors.primary}]}>{t('contact_us')}</Text>
+            <Text numberOfLines={0} grayColor style={[styles.description, {marginTop: 5, marginBottom: 5}]}>{t('contact_us_page_form_description')}</Text>
             <Text style={styles.formTitle}>{t('message')}</Text>
             <TextInput style={styles.input} iconLeft={inputIcon('user')} onChangeText={text=>{setFullname(text);if(!isNullOrEmpty(text))setSuccess(prev=>({...prev,fullname:true}));}} placeholder={t('fullname')} success={success.fullname} value={fullname}/>{!success.fullname&&<Text style={styles.errorField}>{t('required_field')}</Text>}
             <TextInput style={styles.input} iconLeft={inputIcon('envelope')} onChangeText={text=>{setEmail(text);if(!isNullOrEmpty(text))setSuccess(prev=>({...prev,email:true}));}} placeholder={t('email')} keyboardType="email-address" autoCapitalize="none" success={success.email} value={email}/>{!success.email&&<Text style={styles.errorField}>{t('required_field')}</Text>}
@@ -114,8 +130,18 @@ const ContactUs=({navigation})=>{
             <TextInput style={styles.messageInput} inputStyle={styles.messageInputInner} iconLeft={inputIcon('pen-to-square')} onChangeText={text=>{setMessage(text);if(!isNullOrEmpty(text))setSuccess(prev=>({...prev,message:true}));}} textAlignVertical="top" multiline placeholder={t('message')} success={success.message} value={message}/>{!success.message&&<Text style={styles.errorField}>{t('required_field')}</Text>}
             <Button full loading={loading} style={styles.submitButton} onPress={onSubmit}>{t('send')}</Button>
           </View>
-          <SiteFooter style={styles.siteFooter}/>
-        </ScrollView>
+          
+        <View style={styles.socialRow}>
+          <TouchableOpacity activeOpacity={0.85} style={[styles.socialButton]} onPress={()=>openLink(SOCIAL_LINKS.instagram)}>
+            <Icon name="instagram" size={18} color={BaseColor.darkgreenColor}/>
+          </TouchableOpacity>
+          <TouchableOpacity activeOpacity={0.85} style={[styles.socialButton]} onPress={()=>openLink(SOCIAL_LINKS.linkedin)}>
+            <Icon name="linkedin-in" size={18} color={BaseColor.darkgreenColor}/>
+          </TouchableOpacity>
+          <TouchableOpacity activeOpacity={0.85} style={[styles.socialButton]} onPress={()=>openLink(SOCIAL_LINKS.tiktok)}>
+            <Icon name="tiktok" size={18} color={BaseColor.darkgreenColor}/>
+          </TouchableOpacity>
+        </View></ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

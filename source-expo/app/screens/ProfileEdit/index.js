@@ -1,7 +1,15 @@
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Button, Header, Icon, Image, SafeAreaView, Text, TextInput } from '@/components';
+import {
+  Button,
+  Header,
+  Icon,
+  Image,
+  SafeAreaView,
+  Text,
+  TextInput,
+} from '@/components';
 import { BaseColor, BaseStyle, Images, useTheme } from '@/config';
 import styles from './styles';
 import { useDispatch, useSelector } from 'react-redux';
@@ -32,7 +40,7 @@ const ProfileEdit = (props) => {
   const avatarPath = user?.file?.path;
   const hasAvatar = Boolean(avatarPath);
   const image = hasAvatar
-    ? {uri: avatarUploadFolderUrl + user.file.path.split("\\")[user.file.path.split("\\").length-1] + (user.file.extension == ".jpeg" || user.file.extension == ".jpg" ? ".jpg" : user.file.extension == ".png" ? ".png" : "")}
+    ? {uri: avatarUploadFolderUrl + user.file.path.split("\\")[user.file.path.split("\\").length-1]}
     : Images.avata5;
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(successInit);
@@ -119,11 +127,10 @@ const ProfileEdit = (props) => {
         >
           <View style={styles.heading}>
             <View style={styles.kickerRow}>
-              <View
-                style={[
-                  styles.kickerLine,
-                  {backgroundColor:colors.primary},
-                ]}
+              <Image
+                source={require('../../assets/images/styever-mark.png')}
+                style={styles.kickerLogo}
+                resizeMode="contain"
               />
               <Text
                 style={[

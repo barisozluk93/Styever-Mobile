@@ -12,6 +12,7 @@ import {
   Button,
   Header,
   Icon,
+  Image,
   SafeAreaView,
   Text,
   TextInput,
@@ -332,11 +333,10 @@ const SignUp=(props)=>{
           <View style={styles.contain}>
             <View style={styles.heading}>
               <View style={styles.kickerRow}>
-              <View
-                style={[
-                  styles.kickerLine,
-                  {backgroundColor:colors.primary},
-                ]}
+              <Image
+                source={require('../../assets/images/styever-mark.png')}
+                style={styles.kickerLogo}
+                resizeMode="contain"
               />
               <Text
                 style={[
@@ -431,6 +431,33 @@ const SignUp=(props)=>{
             />
             {!success.email&&<Text style={styles.errorField}>{t('required_field')}</Text>}
 
+            <TextInput
+                iconLeft={
+                  <Icon
+                    name="mobile-screen-button"
+                    size={18}
+                    color={BaseColor.grayColor}
+                  />
+                }
+              style={[
+                BaseStyle.textInput,
+                {
+                  marginTop:10,
+                },
+              ]}
+              onChangeText={text=>{setPhone(text);if(!isNullOrEmpty(text))setSuccess(prev=>({...prev,phone:true}));}}
+              autoCorrect={false}
+              placeholder={t('phone')}
+              keyboardType="phone-pad"
+              placeholderTextColor={
+                success.phone
+                  ?BaseColor.grayColor
+                  :colors.primary
+              }
+              value={phone}
+            />
+            {!success.phone&&<Text style={styles.errorField}>{t('required_field')}</Text>}
+
             <View
               style={{
                 flexDirection:'row',
@@ -466,7 +493,7 @@ const SignUp=(props)=>{
               <TextInput
                 iconLeft={
                   <Icon
-                    name="shield-halved"
+                    name="lock"
                     size={18}
                     color={BaseColor.grayColor}
                   />
@@ -501,32 +528,6 @@ const SignUp=(props)=>{
             {(!success.password||!success.passwordConfirm)&&<View style={{flexDirection:'row'}}><View style={{flex:1,marginRight:5}}>{!success.password&&<Text style={styles.errorField}>{t('required_field')}</Text>}</View><View style={{flex:1,marginLeft:5}}>{!success.passwordConfirm&&<Text style={styles.errorField}>{t('required_field')}</Text>}</View></View>}
             {passwordMismatch&&<Text style={styles.errorField}>{t('pw_didnt_match_message')}</Text>}
 
-            <TextInput
-                iconLeft={
-                  <Icon
-                    name="mobile-screen-button"
-                    size={18}
-                    color={BaseColor.grayColor}
-                  />
-                }
-              style={[
-                BaseStyle.textInput,
-                {
-                  marginTop:10,
-                },
-              ]}
-              onChangeText={text=>{setPhone(text);if(!isNullOrEmpty(text))setSuccess(prev=>({...prev,phone:true}));}}
-              autoCorrect={false}
-              placeholder={t('phone')}
-              keyboardType="phone-pad"
-              placeholderTextColor={
-                success.phone
-                  ?BaseColor.grayColor
-                  :colors.primary
-              }
-              value={phone}
-            />
-            {!success.phone&&<Text style={styles.errorField}>{t('required_field')}</Text>}
 
             <View style={styles.legalContainer}>
 

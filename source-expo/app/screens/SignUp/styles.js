@@ -1,7 +1,8 @@
 import {StyleSheet} from 'react-native';
 export default StyleSheet.create({
   errorField:{color:'#DC3545',fontSize:11.5,lineHeight:16,fontWeight:'500',marginTop:5,marginBottom:4},
-  contain:{paddingHorizontal:20,paddingTop:28,paddingBottom:40,width:'100%'},heading:{marginBottom:26},kickerRow:{flexDirection:'row',alignItems:'center',marginBottom:10},kickerLine:{width:34,height:3,borderRadius:2,marginRight:12},kicker:{fontSize:10,fontWeight:'800',letterSpacing:1.6},pageTitle:{fontSize:28,lineHeight:35,fontWeight:'800',marginBottom:7},description:{fontSize:13.5,lineHeight:20},textInput:{height:60,borderRadius:12,borderWidth:1,borderColor:'#D8DFEA',paddingHorizontal:16,width:'100%'},textInputName:{height:60,borderRadius:12,borderWidth:1,borderColor:'#D8DFEA',paddingHorizontal:16,width:'48.5%'},
+  contain:{paddingHorizontal:20,paddingTop:28,paddingBottom:40,width:'100%'},heading:{marginBottom:26},kickerRow:{flexDirection:'row',alignItems:'center',marginBottom:10},kicker:{fontSize:10,fontWeight:'800',letterSpacing:1.6},pageTitle:{fontSize:28,lineHeight:35,fontWeight:'800',marginBottom:7},description:{fontSize:13.5,lineHeight:20},textInput:{height:60,borderRadius:12,borderWidth:1,borderColor:'#D8DFEA',paddingHorizontal:16,width:'100%'},textInputName:{height:60,borderRadius:12,borderWidth:1,borderColor:'#D8DFEA',paddingHorizontal:16,width:'48.5%'},
+  kickerLogo:{width:28,height:18,marginRight:10},
   /*
    * LEGAL CHECKBOXES
    */

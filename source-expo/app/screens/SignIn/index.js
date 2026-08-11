@@ -1,9 +1,17 @@
 import {useEffect,useState} from 'react';
-import {KeyboardAvoidingView,Platform,ScrollView,TouchableOpacity,View} from 'react-native';
+import {KeyboardAvoidingView,Platform,ScrollView,TouchableOpacity,View,Linking} from 'react-native';
 import {useDispatch,useSelector} from 'react-redux';
 import {useTranslation} from 'react-i18next';
 import {BaseColor,BaseStyle,useTheme} from '@/config';
-import {Button,Header,Icon,SafeAreaView,SiteFooter,Text,TextInput} from '@/components';
+import {
+  Button,
+  Header,
+  Icon,
+  Image,
+  SafeAreaView,
+Text,
+  TextInput,
+} from '@/components';
 import styles from './styles';
 import {getUserByToken,login} from '@/actions/auth';
 import {loadToken} from '@/utils/storage';
@@ -12,8 +20,16 @@ import {isNullOrEmpty} from '@/utils/utility';
 import {registerForPushNotificationsAsync} from '@/services/notification.service';
 import {registerDevice} from '@/apis/notificationApi';
 
+
+const SOCIAL_LINKS={
+  instagram:'https://www.instagram.com/sty.ever',
+  linkedin:'https://www.linkedin.com/company/styever/',
+  tiktok:'https://www.tiktok.com/@styever',
+};
+
+
 const SignIn=({navigation})=>{
-  const {t}=useTranslation(); const {colors}=useTheme(); const dispatch=useDispatch();
+  const {t}=useTranslation(); const {colors}=useTheme();const openLink=url=>Linking.openURL(url).catch(()=>{}); const dispatch=useDispatch();
   const [id,setId]=useState(''); const [password,setPassword]=useState('');
   const [success,setSuccess]=useState({id:true,password:true}); const [loading,setLoading]=useState(false);
   const {error,token,isPaymentRequired}=useSelector(state=>state.auth);
@@ -27,11 +43,10 @@ const SignIn=({navigation})=>{
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.scrollContent}>
         <View style={styles.heading}>
           <View style={styles.kickerRow}>
-              <View
-                style={[
-                  styles.kickerLine,
-                  {backgroundColor:colors.primary},
-                ]}
+              <Image
+                source={require('../../assets/images/styever-mark.png')}
+                style={styles.kickerLogo}
+                resizeMode="contain"
               />
               <Text
                 style={[
@@ -53,10 +68,20 @@ const SignIn=({navigation})=>{
         {!success.password&&<Text style={styles.error}>{t('required_field')}</Text>}
         <Button full loading={loading} style={styles.primaryButton} onPress={onLogin}>{t('sign_in')}  →</Button>
         <View style={styles.dividerRow}><View style={styles.divider}/><Text grayColor style={styles.dividerText}>{t('new_to_styever')}</Text><View style={styles.divider}/></View>
-        <Button full outline style={styles.signupButton} onPress={()=>navigation.navigate('Pricing',{isStandByPage:false,isProfilePage:false})}>{t('sign_up')}</Button>
+        <Button full style={[styles.signupButton]} onPress={()=>navigation.navigate('Pricing',{isStandByPage:false,isProfilePage:false})}>{t('sign_up')}</Button>
         <Text grayColor style={styles.footerText}>{t('login_footer_text')}</Text>
-        <SiteFooter style={styles.siteFooter}/>
-      </ScrollView>
+        
+      <View style={styles.socialRow}>
+          <TouchableOpacity activeOpacity={0.85} style={[styles.socialButton]} onPress={()=>openLink(SOCIAL_LINKS.instagram)}>
+            <Icon name="instagram" size={18} color={BaseColor.darkgreenColor}/>
+          </TouchableOpacity>
+          <TouchableOpacity activeOpacity={0.85} style={[styles.socialButton]} onPress={()=>openLink(SOCIAL_LINKS.linkedin)}>
+            <Icon name="linkedin-in" size={18} color={BaseColor.darkgreenColor}/>
+          </TouchableOpacity>
+          <TouchableOpacity activeOpacity={0.85} style={[styles.socialButton]} onPress={()=>openLink(SOCIAL_LINKS.tiktok)}>
+            <Icon name="tiktok" size={18} color={BaseColor.darkgreenColor}/>
+          </TouchableOpacity>
+        </View></ScrollView>
     </KeyboardAvoidingView>
   </SafeAreaView>;
 };

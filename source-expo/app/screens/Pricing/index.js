@@ -5,6 +5,7 @@ import {
   CheckBox,
   Header,
   Icon,
+  Image,
   ModalOption,
   PriceList,
   SafeAreaView,
@@ -285,11 +286,10 @@ const Pricing = (props) => {
               <>
                 <View style={styles.heading}>
                   <View style={styles.kickerRow}>
-              <View
-                style={[
-                  styles.kickerLine,
-                  {backgroundColor:colors.primary},
-                ]}
+              <Image
+                source={require('../../assets/images/styever-mark.png')}
+                style={styles.kickerLogo}
+                resizeMode="contain"
               />
               <Text
                 style={[

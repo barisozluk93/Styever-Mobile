@@ -75,6 +75,12 @@ export default StyleSheet.create({
     marginTop:5,
   },
 
+  actions:{
+    flexDirection:'row',
+    alignItems:'center',
+    gap:8,
+  },
+
   viewButton:{
     width:34,
     height:34,

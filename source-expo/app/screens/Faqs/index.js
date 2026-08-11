@@ -11,7 +11,7 @@ import {useTranslation} from 'react-i18next';
 import {useSelector} from 'react-redux';
 import RenderHTML from 'react-native-render-html';
 import {BaseStyle,useTheme} from '@/config';
-import {Header,Icon,SafeAreaView,Text} from '@/components';
+import {Header, Icon, Image, SafeAreaView, Text} from '@/components';
 import {listFaqRequest} from '@/apis/faqApi';
 import styles from './styles';
 
@@ -95,12 +95,11 @@ const Faqs=({navigation})=>{
       >
         <View style={styles.heading}>
           <View style={styles.kickerRow}>
-            <View
-              style={[
-                styles.kickerLine,
-                {backgroundColor:colors.primary},
-              ]}
-            />
+            <Image
+                source={require('../../assets/images/styever-mark.png')}
+                style={styles.kickerLogo}
+                resizeMode="contain"
+              />
             <Text
               numberOfLines={0}
               style={[
