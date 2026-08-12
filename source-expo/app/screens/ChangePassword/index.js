@@ -71,7 +71,7 @@ const ChangePassword = (props) => {
             Toast.show({
               type: 'success',
               text1: t('success'),
-              text2: t('success_message'),
+              text2: t('password_change_success'),
             });
 
             setTimeout(() => {
@@ -83,7 +83,7 @@ const ChangePassword = (props) => {
             Toast.show({
               type: 'error',
               text1: t('error'),
-              text2: t('error_file_message'),
+              text2: response?.message || t('password_change_error'),
             });
 
             setLoading(false);
@@ -93,7 +93,7 @@ const ChangePassword = (props) => {
             Toast.show({
               type: 'error',
               text1: t('error'),
-              text2: t('error_file_message'),
+              text2: error?.response?.data?.message || t('password_change_error'),
             });
 
             setLoading(false);

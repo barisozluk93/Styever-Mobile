@@ -67,21 +67,21 @@ const ModalComment = (props) => {
           Toast.show({
             type: 'success',
             text1: t('success'),
-            text2: t('success_message'),
+            text2: t('comment_add_success'),
           });
         }
         else {
           Toast.show({
             type: 'error',
             text1: t('error'),
-            text2: t('error_file_message'),
+            text2: response?.message || t('comment_add_error'),
           });
         }
       }).catch(error => {
         Toast.show({
           type: 'error',
           text1: t('error'),
-          text2: t('error_file_message'),
+          text2: error?.response?.data?.message || t('comment_add_error'),
         });
       })
     }
@@ -97,21 +97,21 @@ const ModalComment = (props) => {
         Toast.show({
           type: 'success',
           text1: t('success'),
-          text2: t('success_message'),
+          text2: t('comment_delete_success'),
         });
       }
       else {
         Toast.show({
           type: 'error',
           text1: t('error'),
-          text2: t('error_file_message'),
+          text2: response?.message || t('comment_delete_error'),
         });
       }
     }).catch((error) => {
       Toast.show({
         type: 'error',
         text1: t('error'),
-        text2: t('error_file_message'),
+        text2: error?.response?.data?.message || t('comment_delete_error'),
       });
     });
   }
@@ -125,21 +125,21 @@ const ModalComment = (props) => {
         Toast.show({
           type: 'success',
           text1: t('success'),
-          text2: t('success_message'),
+          text2: t('comment_approve_success'),
         });
       }
       else {
         Toast.show({
           type: 'error',
           text1: t('error'),
-          text2: t('error_file_message'),
+          text2: response?.message || t('comment_approve_error'),
         });
       }
     }).catch((error) => {
       Toast.show({
         type: 'error',
         text1: t('error'),
-        text2: t('error_file_message'),
+        text2: error?.response?.data?.message || t('comment_approve_error'),
       });
     });
   }

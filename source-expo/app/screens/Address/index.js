@@ -66,7 +66,7 @@ const Address = (props) => {
             Toast.show({
               type: 'success',
               text1: t('success'),
-              text2: t('success_message'),
+              text2: t('address_delete_success'),
             });
 
             navigation.goBack();
@@ -76,7 +76,7 @@ const Address = (props) => {
           Toast.show({
             type: 'error',
             text1: t('error'),
-            text2: t('error_message'),
+            text2: response?.message || t('address_delete_error'),
           });
 
         }
@@ -84,7 +84,7 @@ const Address = (props) => {
         Toast.show({
           type: 'error',
           text1: t('error'),
-          text2: t('error_message'),
+          text2: error?.response?.data?.message || t('address_delete_error'),
         });
       })
     }
@@ -116,7 +116,7 @@ const Address = (props) => {
                 Toast.show({
                   type: 'success',
                   text1: t('success'),
-                  text2: t('success_message'),
+                  text2: t('registration_success'),
                 });
 
                 navigation.navigate('SignIn');
@@ -126,7 +126,7 @@ const Address = (props) => {
               Toast.show({
                 type: 'error',
                 text1: t('error'),
-                text2: t('error_message'),
+                text2: response?.message || t('registration_error'),
               });
 
               setLoading(false);
@@ -135,7 +135,7 @@ const Address = (props) => {
             Toast.show({
               type: 'error',
               text1: t('error'),
-              text2: t('error_message'),
+              text2: error?.response?.data?.message || t('registration_error'),
             });
 
             setLoading(false);
@@ -149,7 +149,7 @@ const Address = (props) => {
                 Toast.show({
                   type: 'success',
                   text1: t('success'),
-                  text2: t('success_message'),
+                  text2: t('registration_success'),
                 });
 
                 navigation.navigate('SignIn');
@@ -159,7 +159,7 @@ const Address = (props) => {
               Toast.show({
                 type: 'error',
                 text1: t('error'),
-                text2: t('error_message'),
+                text2: response?.message || t('registration_error'),
               });
 
               setLoading(false);
@@ -168,7 +168,7 @@ const Address = (props) => {
             Toast.show({
               type: 'error',
               text1: t('error'),
-              text2: t('error_message'),
+              text2: error?.response?.data?.message || t('registration_error'),
             });
 
             setLoading(false);
@@ -191,7 +191,7 @@ const Address = (props) => {
                 Toast.show({
                   type: 'success',
                   text1: t('success'),
-                  text2: t('success_message'),
+                  text2: t('address_update_success'),
                 });
 
                 navigation.goBack();
@@ -201,7 +201,7 @@ const Address = (props) => {
               Toast.show({
                 type: 'error',
                 text1: t('error'),
-                text2: t('error_message'),
+                text2: response?.message || t('address_update_error'),
               });
 
               setLoading(false);
@@ -210,7 +210,7 @@ const Address = (props) => {
             Toast.show({
               type: 'error',
               text1: t('error'),
-              text2: t('error_message'),
+              text2: error?.response?.data?.message || t('address_update_error'),
             });
 
             setLoading(false);
@@ -230,7 +230,7 @@ const Address = (props) => {
                 Toast.show({
                   type: 'success',
                   text1: t('success'),
-                  text2: t('success_message'),
+                  text2: t('address_add_success'),
                 });
 
                 navigation.goBack();
@@ -240,7 +240,7 @@ const Address = (props) => {
               Toast.show({
                 type: 'error',
                 text1: t('error'),
-                text2: t('error_message'),
+                text2: response?.message || t('address_add_error'),
               });
 
               setLoading(false);
@@ -249,7 +249,7 @@ const Address = (props) => {
             Toast.show({
               type: 'error',
               text1: t('error'),
-              text2: t('error_message'),
+              text2: error?.response?.data?.message || t('address_add_error'),
             });
 
             setLoading(false);

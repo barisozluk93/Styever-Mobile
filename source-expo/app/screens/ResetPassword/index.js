@@ -21,7 +21,7 @@ const SOCIAL_LINKS={
 
 
 const ResetPassword=({navigation})=>{const {t}=useTranslation();const {colors}=useTheme();const openLink=url=>Linking.openURL(url).catch(()=>{});const [email,setEmail]=useState('');const [loading,setLoading]=useState(false);const [success,setSuccess]=useState(true);
-const onConfirm=()=>{if(isNullOrEmpty(email)){setSuccess(false);return;}setLoading(true);resetPasswordRequest(email).then(r=>{if(r.isSuccess){Toast.show({type:'success',text1:t('success'),text2:t('success_message')});navigation.navigate('SignIn');}else Toast.show({type:'error',text1:t('error'),text2:t('error_file_message')});}).catch(()=>Toast.show({type:'error',text1:t('error'),text2:t('error_file_message')})).finally(()=>setLoading(false));};
+const onConfirm=()=>{if(isNullOrEmpty(email)){setSuccess(false);return;}setLoading(true);resetPasswordRequest(email).then(r=>{if(r.isSuccess){Toast.show({type:'success',text1:t('success'),text2:t('password_reset_success')});navigation.navigate('SignIn');}else Toast.show({type:'error',text1:t('error'),text2:r?.message || t('password_reset_error')});}).catch(error=>Toast.show({type:'error',text1:t('error'),text2:error?.response?.data?.message || t('password_reset_error')})).finally(()=>setLoading(false));};
 return <SafeAreaView style={BaseStyle.safeAreaView} edges={['right','top','left']}><Header title="" renderLeft={()=><Icon name="angle-left" size={20} color={colors.primary}/>} onPressLeft={()=>navigation.goBack()}/><ScrollView contentContainerStyle={styles.content}><View style={styles.heading}><View style={styles.kickerRow}>
               <Image
                 source={require('../../assets/images/styever-mark.png')}

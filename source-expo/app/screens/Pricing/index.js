@@ -130,17 +130,17 @@ const Pricing = (props) => {
           Toast.show({
             type:'error',
             text1:t('error'),
-            text2:t('voucher_not_found'),
+            text2:response?.message || t('voucher_not_found'),
           });
         }
       })
-      .catch(()=>{
+      .catch((error)=>{
         setSelectedPlanId(-1);
 
         Toast.show({
           type:'error',
           text1:t('error'),
-          text2:t('voucher_not_found'),
+          text2:error?.response?.data?.message || t('voucher_check_error'),
         });
       })
       .finally(()=>setLoading(false));
@@ -168,7 +168,7 @@ const Pricing = (props) => {
               Toast.show({
                 type: 'error',
                 text1: t('error'),
-                text2: t('error_file_message'),
+                text2: response?.message || t('voucher_check_error'),
               });
 
               setLoading(false);
@@ -179,7 +179,7 @@ const Pricing = (props) => {
             Toast.show({
               type: 'error',
               text1: t('error'),
-              text2: t('error_file_message'),
+              text2: error?.response?.data?.message || t('voucher_check_error'),
             });
 
             setLoading(false);

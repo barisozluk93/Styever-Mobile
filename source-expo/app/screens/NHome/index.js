@@ -138,7 +138,7 @@ const NHome = ({ navigation }) => {
 
               <View style={styles.eyebrow}>
                 <Image
-                  source={require('../../assets/images/styever-mark.png')}
+                  source={require('../../assets/images/logo.png')}
                   style={styles.eyebrowLogo}
                   resizeMode="contain"
                 />

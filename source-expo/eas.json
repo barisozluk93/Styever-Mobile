@@ -11,17 +11,17 @@
       }
     },
     "production": {
-      "android": {
-        "buildType": "apk",
-        "autoIncrement": true
-      },
       "ios": {
         "simulator": false,
+        "autoIncrement": true
+      },
+      "android": {
+        "buildType": "app-bundle",
         "autoIncrement": true
       }
     }
   },
   "cli": {
-    "appVersionSource": "remote"
+    "appVersionSource": "local"
   }
 }

@@ -19,7 +19,8 @@
     "ios": {
       "icon": "./assets/icon.png",
       "supportsTablet": true,
-      "bundleIdentifier": "com.klcsoft.styever",
+      "bundleIdentifier": "com.styever.mobile",
+      "buildNumber": "1",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -29,7 +30,8 @@
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#0A4A32"
       },
-      "package": "com.klcsoft.styever"
+      "package": "com.styever.mobile",
+      "versionCode": 1
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -38,11 +40,6 @@
       "expo-font"
     ],
     "newArchEnabled": true,
-    "extra": {
-      "eas": {
-        "projectId": "550ce4d2-2c87-45c2-b223-250d4fdd4c49"
-      }
-    },
     "owner": "barisozluk"
   }
 }

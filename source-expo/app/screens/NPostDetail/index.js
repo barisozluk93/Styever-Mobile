@@ -176,7 +176,7 @@ const NPostDetail = (props) => {
     Toast.show({
       type: 'success',
       text1: t('success'),
-      text2: 'Bağlantı kopyalandı',
+      text2: t('link_copied_success'),
     });
   };
 
@@ -247,22 +247,22 @@ const NPostDetail = (props) => {
               Toast.show({
                 type: 'success',
                 text1: t('success'),
-                text2: t('success_message'),
+                text2: t('like_removed_success'),
               });
             });
           } else {
             Toast.show({
               type: 'error',
               text1: t('error'),
-              text2: t('error_file_message'),
+              text2: response?.message || t('like_remove_error'),
             });
           }
         })
-        .catch(() => {
+        .catch((error) => {
           Toast.show({
             type: 'error',
             text1: t('error'),
-            text2: t('error_file_message'),
+            text2: error?.response?.data?.message || t('like_remove_error'),
           });
         });
     } else {
@@ -275,22 +275,22 @@ const NPostDetail = (props) => {
               Toast.show({
                 type: 'success',
                 text1: t('success'),
-                text2: t('success_message'),
+                text2: t('like_added_success'),
               });
             });
           } else {
             Toast.show({
               type: 'error',
               text1: t('error'),
-              text2: t('error_file_message'),
+              text2: response?.message || t('like_add_error'),
             });
           }
         })
-        .catch(() => {
+        .catch((error) => {
           Toast.show({
             type: 'error',
             text1: t('error'),
-            text2: t('error_file_message'),
+            text2: error?.response?.data?.message || t('like_add_error'),
           });
         });
     }
@@ -339,15 +339,15 @@ const NPostDetail = (props) => {
             Toast.show({
               type: 'error',
               text1: t('error'),
-              text2: t('error_file_message'),
+              text2: response?.message || t('candle_light_error'),
             });
           }
         })
-        .catch(() => {
+        .catch((error) => {
           Toast.show({
             type: 'error',
             text1: t('error'),
-            text2: t('error_file_message'),
+            text2: error?.response?.data?.message || t('candle_light_error'),
           });
         });
     } else {

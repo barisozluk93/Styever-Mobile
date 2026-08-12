@@ -274,7 +274,7 @@ const Payment = (props) => {
       text2:
         message ||
         t(
-          'error_file_message',
+          'payment_error',
         ),
     });
   };
@@ -288,7 +288,7 @@ const Payment = (props) => {
       text2:
         message ||
         t(
-          'success_message',
+          'payment_success',
         ),
     });
   };
@@ -1063,9 +1063,7 @@ const Payment = (props) => {
           resetForm();
 
           showSuccess(
-            t(
-              'success_message',
-            ),
+            t(item.data.id > 0 ? 'candle_update_success' : 'candle_light_success'),
           );
 
           setTimeout(() => {
@@ -1078,9 +1076,7 @@ const Payment = (props) => {
           setLoading(false);
 
           showError(
-            t(
-              'error_file_message',
-            ),
+            response?.message || t(item.data.id > 0 ? 'candle_update_error' : 'candle_light_error'),
           );
         }
       }
@@ -1088,9 +1084,7 @@ const Payment = (props) => {
         setLoading(false);
 
         showError(
-          t(
-            'error_file_message',
-          ),
+          error?.response?.data?.message || t(item.data.id > 0 ? 'candle_update_error' : 'candle_light_error'),
         );
       }
     };

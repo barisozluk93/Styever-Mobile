@@ -113,7 +113,7 @@ const NPostEditNew = (props) => {
                 Toast.show({
                   type: 'success',
                   text1: t('success'),
-                  text2: t('success_message'),
+                  text2: t('media_add_success'),
                 });
 
                 setTimeout(() => {
@@ -125,14 +125,14 @@ const NPostEditNew = (props) => {
               Toast.show({
                 type: 'error',
                 text1: t('error'),
-                text2: t('error_file_message'),
+                text2: response1?.message || t('media_add_error'),
               });
             }
           }).catch(error => {
             Toast.show({
               type: 'error',
               text1: t('error'),
-              text2: t('error_file_message'),
+              text2: error?.response?.data?.message || t('media_add_error'),
             });
           });
         }
@@ -140,14 +140,14 @@ const NPostEditNew = (props) => {
           Toast.show({
             type: 'error',
             text1: t('error'),
-            text2: t('error_file_message'),
+            text2: response?.message || t('media_upload_error'),
           });
         }
       }).catch(error => {
         Toast.show({
           type: 'error',
           text1: t('error'),
-          text2: t('error_file_message'),
+          text2: error?.response?.data?.message || t('media_upload_error'),
         });
       })
     }
@@ -198,7 +198,7 @@ const NPostEditNew = (props) => {
                   Toast.show({
                     type: 'success',
                     text1: t('success'),
-                    text2: t('success_message'),
+                    text2: t('media_add_success'),
                   });
 
                   setTimeout(() => {
@@ -210,14 +210,14 @@ const NPostEditNew = (props) => {
                 Toast.show({
                   type: 'error',
                   text1: t('error'),
-                  text2: t('error_file_message'),
+                  text2: response1?.message || t('media_add_error'),
                 });
               }
             }).catch(error => {
               Toast.show({
                 type: 'error',
                 text1: t('error'),
-                text2: t('error_file_message'),
+                text2: error?.response?.data?.message || t('media_add_error'),
               });
             });
           }
@@ -225,14 +225,14 @@ const NPostEditNew = (props) => {
             Toast.show({
               type: 'error',
               text1: t('error'),
-              text2: t('error_file_message'),
+              text2: response?.message || t('media_upload_error'),
             });
           }
         }).catch(error => {
           Toast.show({
             type: 'error',
             text1: t('error'),
-            text2: t('error_file_message'),
+            text2: error?.response?.data?.message || t('media_upload_error'),
           });
         })
       }
@@ -253,7 +253,7 @@ const NPostEditNew = (props) => {
                 Toast.show({
                   type: 'success',
                   text1: t('success'),
-                  text2: t('success_message'),
+                  text2: t('media_delete_success'),
                 });
               })
             }
@@ -263,14 +263,14 @@ const NPostEditNew = (props) => {
           Toast.show({
             type: 'error',
             text1: t('error'),
-            text2: t('error_file_message'),
+            text2: response?.message || t('media_delete_error'),
           });
         }
       }).catch(error => {
         Toast.show({
           type: 'error',
           text1: t('error'),
-          text2: t('error_file_message'),
+          text2: error?.response?.data?.message || t('media_delete_error'),
         });
       })
     }
@@ -283,7 +283,7 @@ const NPostEditNew = (props) => {
             Toast.show({
               type: 'success',
               text1: t('success'),
-              text2: t('success_message'),
+              text2: t('media_delete_success'),
             });
           })
         }
@@ -498,7 +498,7 @@ const NPostEditNew = (props) => {
             Toast.show({
               type: 'success',
               text1: t('success'),
-              text2: t('success_message'),
+              text2: t('memory_update_success'),
             });
 
             setTimeout(() => {
@@ -509,7 +509,7 @@ const NPostEditNew = (props) => {
             Toast.show({
               type: 'error',
               text1: t('error'),
-              text2: t('error_file_message'),
+              text2: response?.message || t('memory_update_error'),
             });
 
             setLoading(false);
@@ -518,7 +518,7 @@ const NPostEditNew = (props) => {
           Toast.show({
             type: 'error',
             text1: t('error'),
-            text2: t('error_file_message'),
+            text2: error?.response?.data?.message || t('memory_update_error'),
           });
 
           setLoading(false);
@@ -534,7 +534,7 @@ const NPostEditNew = (props) => {
             Toast.show({
               type: 'success',
               text1: t('success'),
-              text2: t('success_message'),
+              text2: t('memory_create_success'),
             });
 
             setTimeout(() => {
@@ -545,7 +545,7 @@ const NPostEditNew = (props) => {
             Toast.show({
               type: 'error',
               text1: t('error'),
-              text2: t('error_file_message'),
+              text2: response?.message || t('memory_create_error'),
             });
 
             setLoading(false);
@@ -554,7 +554,7 @@ const NPostEditNew = (props) => {
           Toast.show({
             type: 'error',
             text1: t('error'),
-            text2: t('error_file_message'),
+            text2: error?.response?.data?.message || t('memory_create_error'),
           });
 
           setLoading(false);
@@ -811,7 +811,7 @@ const NPostEditNew = (props) => {
                     Toast.show({
                       type: 'success',
                       text1: t('success'),
-                      text2: t('success_message'),
+                      text2: t('media_primary_success'),
                     });
                   })
                 }
@@ -819,14 +819,14 @@ const NPostEditNew = (props) => {
                   Toast.show({
                     type: 'error',
                     text1: t('error'),
-                    text2: t('error_file_message'),
+                    text2: response?.message || t('media_primary_error'),
                   });
                 }
               }).catch(error => {
                 Toast.show({
                   type: 'error',
                   text1: t('error'),
-                  text2: t('error_file_message'),
+                  text2: error?.response?.data?.message || t('media_primary_error'),
                 });
               })
             }}

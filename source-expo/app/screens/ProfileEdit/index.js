@@ -67,7 +67,7 @@ const ProfileEdit = (props) => {
           Toast.show({
             type: 'success',
             text1: t('success'),
-            text2: t('success_message'),
+            text2: t('profile_update_success'),
           });
 
           setTimeout(() => {
@@ -79,7 +79,7 @@ const ProfileEdit = (props) => {
           Toast.show({
             type: 'error',
             text1: t('error'),
-            text2: t('error_file_message'),
+            text2: response?.message || t('profile_update_error'),
           });
 
           setLoading(false);
@@ -88,7 +88,7 @@ const ProfileEdit = (props) => {
         Toast.show({
           type: 'error',
           text1: t('error'),
-          text2: t('error_file_message'),
+          text2: err?.response?.data?.message || t('profile_update_error'),
         });
 
         setLoading(false);

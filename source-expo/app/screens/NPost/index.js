@@ -184,21 +184,21 @@ const NPost = ({ mode = modes.square }) => {
               Toast.show({
                 type: 'success',
                 text1: t('success'),
-                text2: t('success_message'),
+                text2: t('like_removed_success'),
               });
             } else {
               Toast.show({
                 type: 'error',
                 text1: t('error'),
-                text2: t('error_file_message'),
+                text2: response?.message || t('like_remove_error'),
               });
             }
           })
-          .catch(() => {
+          .catch((error) => {
             Toast.show({
               type: 'error',
               text1: t('error'),
-              text2: t('error_file_message'),
+              text2: error?.response?.data?.message || t('like_remove_error'),
             });
           });
       } else {
@@ -210,21 +210,21 @@ const NPost = ({ mode = modes.square }) => {
               Toast.show({
                 type: 'success',
                 text1: t('success'),
-                text2: t('success_message'),
+                text2: t('like_added_success'),
               });
             } else {
               Toast.show({
                 type: 'error',
                 text1: t('error'),
-                text2: t('error_file_message'),
+                text2: response?.message || t('like_add_error'),
               });
             }
           })
-          .catch(() => {
+          .catch((error) => {
             Toast.show({
               type: 'error',
               text1: t('error'),
-              text2: t('error_file_message'),
+              text2: error?.response?.data?.message || t('like_add_error'),
             });
           });
       }

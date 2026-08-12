@@ -35,7 +35,7 @@ const SignIn=({navigation})=>{
   const {error,token,isPaymentRequired}=useSelector(state=>state.auth);
   useEffect(()=>{if(!loadToken()){dispatch({type:'AUTH_LOGOUT'});dispatch({type:'USER_INIT'});}},[navigation,dispatch]);
   useEffect(()=>{if(!token)return; (async()=>{try{const pushToken=await registerForPushNotificationsAsync();if(pushToken){const payload=JSON.parse(atob(token.split('.')[1]));const userId=Number(payload?.id);if(userId)await registerDevice({pushToken,platform:Platform.OS,userId});}}catch(e){} dispatch(getUserByToken());setLoading(false);navigation.navigate(isPaymentRequired?'Payment':'NHome',isPaymentRequired?{item:{typeId:1}}:undefined);})();},[token,isPaymentRequired,navigation,dispatch]);
-  useEffect(()=>{if(error){Toast.show({type:'error',text1:t('error'),text2:t('error_login_message')});setLoading(false);}},[error,t]);
+  useEffect(()=>{if(error){Toast.show({type:'error',text1:t('error'),text2:error || t('error_login_message')});setLoading(false);}},[error,t]);
   const onLogin=()=>{if(!isNullOrEmpty(id)&&!isNullOrEmpty(password)){setLoading(true);dispatch(login(id,password));}else setSuccess({id:!isNullOrEmpty(id),password:!isNullOrEmpty(password)});};
   return <SafeAreaView style={BaseStyle.safeAreaView} edges={['right','top','left']}>
     <Header title="" renderLeft={()=><Icon name="angle-left" size={20} color={colors.primary} enableRTL/>} onPressLeft={()=>navigation.goBack()}/>

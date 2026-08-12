@@ -44,7 +44,7 @@ const ModalCandle = (props) => {
             Toast.show({
               type: 'success',
               text1: t('success'),
-              text2: t('success_message'),
+              text2: t('candle_update_success'),
             });
             setDonation('')
             isProccessSuccess();
@@ -53,14 +53,14 @@ const ModalCandle = (props) => {
             Toast.show({
               type: 'error',
               text1: t('error'),
-              text2: t('candle_update_error_message'),
+              text2: response?.message || t('candle_update_error'),
             });
           }
         }).catch(error => {
           Toast.show({
             type: 'error',
             text1: t('error'),
-            text2: t('candle_update_error_message')
+            text2: error?.response?.data?.message || t('candle_update_error')
           });
         });
       }
@@ -71,7 +71,7 @@ const ModalCandle = (props) => {
               Toast.show({
                 type: 'success',
                 text1: t('success'),
-                text2: t('success_message'),
+                text2: t('candle_light_success'),
               });
               setDonation('')
               setFullname('')
@@ -81,7 +81,7 @@ const ModalCandle = (props) => {
               Toast.show({
                 type: 'error',
                 text1: t('error'),
-                text2: t('candle_update_error_message'),
+                text2: response?.message || t('candle_light_error'),
               });
             }
           }).catch(error => {
@@ -89,7 +89,7 @@ const ModalCandle = (props) => {
             Toast.show({
               type: 'error',
               text1: t('error'),
-              text2: t('candle_update_error_message')
+              text2: error?.response?.data?.message || t('candle_light_error')
             });
           });
         }

@@ -57,12 +57,12 @@ const ContactUs=({navigation})=>{
         if(response?.isSuccess){
           setFullname(''); setEmail(''); setSubject(''); setMessage('');
           setSuccess(successInit);
-          Toast.show({type:'success',text1:t('success'),text2:t('success_message')});
+          Toast.show({type:'success',text1:t('success'),text2:t('contact_message_success')});
         }else{
-          Toast.show({type:'error',text1:t('error'),text2:t('error_file_message')});
+          Toast.show({type:'error',text1:t('error'),text2:response?.message || t('contact_message_error')});
         }
       })
-      .catch(()=>Toast.show({type:'error',text1:t('error'),text2:t('error_file_message')}))
+      .catch(error=>Toast.show({type:'error',text1:t('error'),text2:error?.response?.data?.message || t('contact_message_error')}))
       .finally(()=>setLoading(false));
   };
 

@@ -116,7 +116,7 @@ const MNotification = ({ navigation }) => {
         Toast.show({
           type: 'error',
           text1: t('error'),
-          text2: t('error_file_message'),
+          text2: error?.response?.data?.message || t('notification_open_error'),
         });
       }
     },
@@ -239,7 +239,7 @@ const MNotification = ({ navigation }) => {
           Toast.show({
             type: 'success',
             text1: t('success'),
-            text2: t('success_message'),
+            text2: t('notification_delete_success'),
           });
 
           setNotifications((prev) =>
@@ -249,7 +249,7 @@ const MNotification = ({ navigation }) => {
           Toast.show({
             type: 'error',
             text1: t('error'),
-            text2: t('delete_error_message'),
+            text2: result?.message || t('notification_delete_error'),
           });
         }
       } catch (error) {
@@ -257,7 +257,7 @@ const MNotification = ({ navigation }) => {
         Toast.show({
           type: 'error',
           text1: t('error'),
-          text2: t('delete_error_message'),
+          text2: error?.response?.data?.message || t('notification_delete_error'),
         });
       }
     },

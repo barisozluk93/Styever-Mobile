@@ -16,12 +16,12 @@ const deleteAddress=(item)=>{
             .then(r=>{
               if(r?.isSuccess){
                 setData(prev=>prev.filter(x=>x.id!==item.id));
-                Toast.show({type:'success',text1:t('success'),text2:t('success_message')});
+                Toast.show({type:'success',text1:t('success'),text2:t('address_delete_success')});
               }else{
-                Toast.show({type:'error',text1:t('error'),text2:t('error_message')});
+                Toast.show({type:'error',text1:t('error'),text2:r?.message || t('address_delete_error')});
               }
             })
-            .catch(()=>Toast.show({type:'error',text1:t('error'),text2:t('error_message')}))
+            .catch(error=>Toast.show({type:'error',text1:t('error'),text2:error?.response?.data?.message || t('address_delete_error')}))
             .finally(()=>setLoading(false));
         },
       },
