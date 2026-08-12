@@ -40,6 +40,11 @@
       "expo-font"
     ],
     "newArchEnabled": true,
-    "owner": "barisozluk"
+    "owner": "barisozluk",
+    "extra": {
+      "eas": {
+        "projectId": "0698e660-9c38-4199-a0b9-3c9f9d6e5213"
+      }
+    }
   }
 }
