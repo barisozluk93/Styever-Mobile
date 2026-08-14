@@ -6,6 +6,8 @@ import {useSelector} from 'react-redux';
 import {BaseStyle,useTheme} from '@/config';
 import {Header, Icon, Image, SafeAreaView, Text} from '@/components';
 import {getUserAgreementsRequest} from '@/apis/userApi';
+import {getRegistrationLegalContents} from '@/apis/legalContentApi';
+import {getLocalizedLegalContent} from '@/utils/legalContent';
 import styles from './styles';
 
 const formatDate=value=>{
@@ -17,13 +19,14 @@ const formatDate=value=>{
 };
 
 const MyAgreements=({navigation})=>{
-  const {t}=useTranslation();
+  const {t,i18n}=useTranslation();
   const {colors}=useTheme();
   const {user}=useSelector(state=>state.user);
   const [loading,setLoading]=useState(true);
   const [agreements,setAgreements]=useState([]);
   const [expandedId,setExpandedId]=useState(null);
   const [error,setError]=useState('');
+  const [legalDocuments,setLegalDocuments]=useState({});
 
   const typeKey=type=>{
     const value=String(type||'').toLowerCase();
@@ -42,244 +45,31 @@ const MyAgreements=({navigation})=>{
       ?'my_agreements_context_purchase'
       :'my_agreements_context_registration';
 
-  const translated=key=>{
-    const value=t(key);
-    return value&&value!==key?value:'';
-  };
+  const legalLanguage=(i18n.language||'tr').split('-')[0]==='en'?'en':'tr';
 
-  const section=(titleKey,textKeys=[],listKeys=[])=>{
-    const parts=[];
-    const title=translated(titleKey);
-    if(title)parts.push(title);
-
-    textKeys.forEach(key=>{
-      const value=translated(key);
-      if(value)parts.push(value);
-    });
-
-    listKeys.forEach(key=>{
-      const value=translated(key);
-      if(value)parts.push(`• ${value}`);
-    });
-
-    return parts.filter(Boolean).join('\n\n');
-  };
-
-  const buildTermsContent=()=>{
-    const parts=[
-      translated('TERMS.PAGE_TITLE'),
-      section('TERMS.SECTION_1_TITLE',['TERMS.SECTION_1_TEXT']),
-      section('TERMS.SECTION_2_TITLE',['TERMS.SECTION_2_TEXT']),
-      section('TERMS.SECTION_3_TITLE',['TERMS.SECTION_3_TEXT']),
-      section('TERMS.SECTION_4_TITLE',[
-        'TERMS.SECTION_4_TEXT_1',
-        'TERMS.SECTION_4_TEXT_2',
-        'TERMS.SECTION_4_TEXT_3',
-      ]),
-      section('TERMS.SECTION_5_TITLE',[
-        'TERMS.SECTION_5_TEXT_1',
-        'TERMS.SECTION_5_TEXT_2',
-        'TERMS.SECTION_5_TEXT_3',
-      ]),
-      section('TERMS.SECTION_6_TITLE',[
-        'TERMS.SECTION_6_TEXT_1',
-        'TERMS.SECTION_6_TEXT_2',
-        'TERMS.SECTION_6_TEXT_3',
-      ]),
-      section('TERMS.SECTION_7_TITLE',[
-        'TERMS.SECTION_7_TEXT_1',
-        'TERMS.SECTION_7_TEXT_2',
-      ]),
-      section('TERMS.SECTION_8_TITLE',[
-        'TERMS.SECTION_8_TEXT_1',
-        'TERMS.SECTION_8_TEXT_2',
-        'TERMS.SECTION_8_TEXT_3',
-        'TERMS.SECTION_8_TEXT_4',
-        'TERMS.SECTION_8_TEXT_5',
-        'TERMS.SECTION_8_TEXT_6',
-        'TERMS.SECTION_8_TEXT_7',
-      ]),
-      section('TERMS.SECTION_9_TITLE',['TERMS.SECTION_9_TEXT']),
-      section(
-        'TERMS.SECTION_10_TITLE',
-        [],
-        [
-          'TERMS.SECTION_10_ITEM_1',
-          'TERMS.SECTION_10_ITEM_2',
-          'TERMS.SECTION_10_ITEM_3',
-          'TERMS.SECTION_10_ITEM_4',
-          'TERMS.SECTION_10_ITEM_5',
-        ],
-      ),
-    ];
-
-    return parts.filter(Boolean).join('\n\n');
-  };
-
-  const buildPrivacyContent=()=>{
-    const parts=[
-      translated('PRIVACY_POLICY.PAGE_TITLE'),
-      section(
-        'PRIVACY_POLICY.SECTION_1_TITLE',
-        ['PRIVACY_POLICY.SECTION_1_TEXT'],
-      ),
-      section(
-        'PRIVACY_POLICY.SECTION_2_TITLE',
-        ['PRIVACY_POLICY.SECTION_2_TEXT'],
-        [
-          'PRIVACY_POLICY.DATA_1',
-          'PRIVACY_POLICY.DATA_2',
-          'PRIVACY_POLICY.DATA_3',
-          'PRIVACY_POLICY.DATA_4',
-        ],
-      ),
-      section(
-        'PRIVACY_POLICY.SECTION_3_TITLE',
-        ['PRIVACY_POLICY.SECTION_3_TEXT'],
-        [
-          'PRIVACY_POLICY.PURPOSE_1',
-          'PRIVACY_POLICY.PURPOSE_2',
-          'PRIVACY_POLICY.PURPOSE_3',
-        ],
-      ),
-      section(
-        'PRIVACY_POLICY.SECTION_4_TITLE',
-        [
-          'PRIVACY_POLICY.SECTION_4_TEXT_1',
-          'PRIVACY_POLICY.SECTION_4_TEXT_2',
-          'PRIVACY_POLICY.SECTION_4_TEXT_3',
-        ],
-      ),
-      section(
-        'PRIVACY_POLICY.SECTION_5_TITLE',
-        ['PRIVACY_POLICY.SECTION_5_TEXT'],
-        [
-          'PRIVACY_POLICY.SHARING_1',
-          'PRIVACY_POLICY.SHARING_2',
-          'PRIVACY_POLICY.SHARING_3',
-        ],
-      ),
-      section(
-        'PRIVACY_POLICY.SECTION_6_TITLE',
-        [
-          'PRIVACY_POLICY.SECTION_6_TEXT_1',
-          'PRIVACY_POLICY.SECTION_6_TEXT_2',
-          'PRIVACY_POLICY.SECTION_6_TEXT_3',
-        ],
-      ),
-      section(
-        'PRIVACY_POLICY.SECTION_7_TITLE',
-        ['PRIVACY_POLICY.SECTION_7_TEXT'],
-        [
-          'PRIVACY_POLICY.RIGHT_1',
-          'PRIVACY_POLICY.RIGHT_2',
-          'PRIVACY_POLICY.RIGHT_3',
-          'PRIVACY_POLICY.RIGHT_4',
-          'PRIVACY_POLICY.RIGHT_5',
-          'PRIVACY_POLICY.RIGHT_6',
-          'PRIVACY_POLICY.RIGHT_7',
-          'PRIVACY_POLICY.RIGHT_8',
-          'PRIVACY_POLICY.RIGHT_9',
-        ],
-      ),
-      translated('PRIVACY_POLICY.APPLICATION_TEXT'),
-      section(
-        'PRIVACY_POLICY.SECTION_8_TITLE',
-        ['PRIVACY_POLICY.SECTION_8_TEXT'],
-      ),
-    ];
-
-    return parts.filter(Boolean).join('\n\n');
-  };
-
-  const buildKvkkContent=()=>{
-    const parts=[
-      translated('KVKK.PAGE_TITLE'),
-      section('KVKK.SECTION_1_TITLE',['KVKK.SECTION_1_TEXT']),
-      section(
-        'KVKK.SECTION_2_TITLE',
-        ['KVKK.SECTION_2_TEXT'],
-        [
-          'KVKK.PURPOSE_1',
-          'KVKK.PURPOSE_2',
-          'KVKK.PURPOSE_3',
-          'KVKK.PURPOSE_4',
-        ],
-      ),
-      section(
-        'KVKK.SECTION_3_TITLE',
-        ['KVKK.SECTION_3_TEXT'],
-        [
-          'KVKK.TRANSFER_1',
-          'KVKK.TRANSFER_2',
-          'KVKK.TRANSFER_3',
-        ],
-      ),
-      translated('KVKK.SECTION_3_NOTE'),
-      section(
-        'KVKK.SECTION_4_TITLE',
-        ['KVKK.SECTION_4_TEXT'],
-        [
-          'KVKK.LEGAL_BASIS_1',
-          'KVKK.LEGAL_BASIS_2',
-          'KVKK.LEGAL_BASIS_3',
-        ],
-      ),
-      section(
-        'KVKK.SECTION_5_TITLE',
-        ['KVKK.SECTION_5_TEXT'],
-        [
-          'KVKK.RIGHT_1',
-          'KVKK.RIGHT_2',
-          'KVKK.RIGHT_3',
-          'KVKK.RIGHT_4',
-          'KVKK.RIGHT_5',
-          'KVKK.RIGHT_6',
-          'KVKK.RIGHT_7',
-          'KVKK.RIGHT_8',
-          'KVKK.RIGHT_9',
-        ],
-      ),
-      translated('KVKK.APPLICATION_TEXT'),
-      section('KVKK.SECTION_6_TITLE',['KVKK.SECTION_6_TEXT']),
-    ];
-
-    return parts.filter(Boolean).join('\n\n');
-  };
-
-  const fallbackContent=item=>{
+  const legalSlugForAgreement=item=>{
     const type=String(item?.agreementType||'').toLowerCase();
     const url=String(item?.documentUrl||'').toLowerCase();
 
-    if(
-      type==='membershipterms'||
-      type==='termsofuse'||
-      url.includes('terms-of-use')
-    ){
-      return buildTermsContent();
+    if(type==='membershipterms'||type==='termsofuse'||url.includes('terms-of-use')){
+      return'terms-of-use';
     }
-
-    if(
-      type==='privacypolicy'||
-      url.includes('privacy-policy')
-    ){
-      return buildPrivacyContent();
+    if(type==='privacypolicy'||url.includes('privacy-policy')){
+      return'privacy-policy';
     }
-
-    if(
-      type==='kvkk'||
-      type==='kvkkdisclosure'||
-      url.includes('/kvkk')
-    ){
-      return buildKvkkContent();
+    if(type==='kvkk'||type==='kvkkdisclosure'||url.includes('/kvkk')){
+      return'kvkk';
     }
-
-    return '';
+    return'';
   };
 
-  const getAgreementContent=item=>
-    String(item?.contentSnapshot||'').trim()||
-    fallbackContent(item);
+  const getAgreementContent=item=>{
+    const slug=legalSlugForAgreement(item);
+    if(slug&&legalDocuments[slug]){
+      return getLocalizedLegalContent(legalDocuments[slug],legalLanguage);
+    }
+    return String(item?.contentSnapshot||'').trim();
+  };
 
   const loadAgreements=useCallback(async()=>{
     if(!user?.id){
@@ -293,7 +83,12 @@ const MyAgreements=({navigation})=>{
     setError('');
 
     try{
-      const response=await getUserAgreementsRequest(user.id);
+      const [response,legal]=await Promise.all([
+        getUserAgreementsRequest(user.id),
+        getRegistrationLegalContents(),
+      ]);
+
+      setLegalDocuments(legal);
 
       if(response?.isSuccess){
         setAgreements(Array.isArray(response.data)?response.data:[]);
@@ -314,7 +109,7 @@ const MyAgreements=({navigation})=>{
     finally{
       setLoading(false);
     }
-  },[user?.id,t]);
+  },[user?.id,t,legalLanguage]);
 
   useFocusEffect(
     useCallback(()=>{

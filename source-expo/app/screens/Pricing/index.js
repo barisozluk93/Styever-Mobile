@@ -6,7 +6,6 @@ import {
   Header,
   Icon,
   Image,
-  ModalOption,
   PriceList,
   SafeAreaView,
   Text,
@@ -18,8 +17,6 @@ import { useEffect, useState } from 'react';
 import { isNullOrEmpty } from '@/utils/utility';
 import { voucherControlRequest } from '@/apis/userApi';
 import Toast from 'react-native-toast-message';
-import { getMemoryCountRequest, listMemoryRequest } from '@/apis/memoryApi';
-import { useSelector } from 'react-redux';
 
 const Pricing = (props) => {
   const { navigation, route } = props;
@@ -27,15 +24,9 @@ const Pricing = (props) => {
   const { colors } = useTheme();
   const [selectedPlanId, setSelectedPlanId] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [isStandByPage, setIsStandByPage] = useState();
-  const [isProfilePage, setIsProfilePage] = useState();
   const [useVoucher, setUseVoucher] = useState(false);
   const [voucher, setVoucher] = useState('');
   const [voucherSuccess, setVoucherSuccess] = useState(true);
-  const { user } = useSelector(state => state.user);
-  const [userMemories, setUserMemories] = useState([]);
-  const [selectedMemory, setSelectedMemory] = useState(undefined);
-  const [showMemoryModal, setShowMemoryModal] = useState(false);
 
   const data = [
     {
@@ -83,15 +74,7 @@ const Pricing = (props) => {
     setUseVoucher(false);
     setVoucher('');
     setVoucherSuccess(true);
-    
-    if (route?.params?.isStandByPage) {
-      setIsStandByPage(route?.params?.isStandByPage);
-    }
-
-    if (route?.params?.isProfilePage) {
-      setIsProfilePage(route?.params?.isProfilePage);
-    }
-  }, [route?.params?.isStandByPage, route?.params?.isProfilePage])
+  }, [route?.params]);
 
   const searchVoucher=()=>{
     if(isNullOrEmpty(voucher)){
@@ -115,7 +98,7 @@ const Pricing = (props) => {
             text2:t('voucher_found'),
           });
 
-          if(useVoucher&&!isProfilePage&&!isStandByPage){
+          if(useVoucher){
             setTimeout(()=>{
               navigation.navigate('SignUp',{
                 voucher:voucher,
@@ -146,123 +129,50 @@ const Pricing = (props) => {
       .finally(()=>setLoading(false));
   };
 
-  const continueRegister = () => {
+  const continueRegister=()=>{
     setLoading(true);
-    if (!isStandByPage && !isProfilePage) {
-      if (useVoucher) {
-        if (!isNullOrEmpty(voucher)) {
-          voucherControlRequest(voucher).then(response => {
-            if (response.isSuccess) {
-              setSelectedPlanId(response.data.planId);
 
-              setTimeout(() => {
-                setLoading(false);
-                if (response.data.planId > 1) {
-                  navigation.navigate('SignUp', { voucher: voucher, selectedPlanId: response.data.planId });
-                }
-              }, 500);
-            }
-            else {
-              setSelectedPlanId(-1);
+    if(useVoucher){
+      if(isNullOrEmpty(voucher)){
+        setVoucherSuccess(false);
+        setSelectedPlanId(-1);
+        setLoading(false);
+        return;
+      }
 
-              Toast.show({
-                type: 'error',
-                text1: t('error'),
-                text2: response?.message || t('voucher_check_error'),
-              });
-
-              setLoading(false);
-            }
-          }).catch(error => {
-            setSelectedPlanId(-1);
-
-            Toast.show({
-              type: 'error',
-              text1: t('error'),
-              text2: error?.response?.data?.message || t('voucher_check_error'),
+      voucherControlRequest(voucher)
+        .then(response=>{
+          if(response?.isSuccess&&response?.data?.planId>1){
+            navigation.navigate('SignUp',{
+              voucher,
+              selectedPlanId:response.data.planId,
             });
-
-            setLoading(false);
-          })
-        }
-        else {
+          }
+          else{
+            setSelectedPlanId(-1);
+            Toast.show({
+              type:'error',
+              text1:t('error'),
+              text2:response?.message||t('voucher_check_error'),
+            });
+          }
+        })
+        .catch(error=>{
           setSelectedPlanId(-1);
-
-          setTimeout(() => {
-            setLoading(false);
-          }, 500);
-        }
-      }
-      else {
-        setTimeout(() => {
-          setLoading(false);
-          if (selectedPlanId > 1) {
-            navigation.navigate('SignUp', { selectedPlanId: selectedPlanId })
-          }
-        }, 500);
-      }
+          Toast.show({
+            type:'error',
+            text1:t('error'),
+            text2:error?.response?.data?.message||t('voucher_check_error'),
+          });
+        })
+        .finally(()=>setLoading(false));
+      return;
     }
-    else {
-      if(isStandByPage) {
-        setTimeout(() => {
-          setLoading(false);
-          if (selectedPlanId > 1) {
-            navigation.navigate('Payment', { item: { typeId: 3, selectedPlan: selectedPlanId } })
-          }
-        }, 500);
-      }
-      else if(isProfilePage) {
-        setTimeout(() => {
-          setLoading(false);
-          if (selectedPlanId > 1) {
-            if(user.roles.includes(4)) {
-              if(selectedPlanId === 2 || selectedPlanId === 3) {
-                getMemoryCountRequest(user.id).then(response => {
-                  if(response.isSuccess) {
-                    if(response.data <= 1) {
-                      navigation.navigate('Payment', { item: { typeId: 4, selectedPlan: selectedPlanId } })
-                    }
-                    else{
-                      listMemoryRequest(1, 10, undefined, undefined, user.id).then(response => {
-                        if(response.isSuccess) {
-                          console.log("responsee")
 
-                          let list = [];
-                          setUserMemories([]);
-
-                          response.data.items.forEach(element => {
-                            list.push({ value: element.id + "", text: element.name });
-                          });
-
-                          setUserMemories([...list]);
-                          setShowMemoryModal(true);
-                        }
-                        else{
-                          setUserMemories([]);
-                        }
-                      });
-                    }
-                  }
-                });
-              }
-              else{
-                navigation.navigate('Payment', { item: { typeId: 4, selectedPlan: selectedPlanId } })
-              }
-            }
-            else{
-              navigation.navigate('Payment', { item: { typeId: 4, selectedPlan: selectedPlanId } })
-            }
-          }
-        }, 500);
-      }
+    setLoading(false);
+    if(selectedPlanId>1){
+      navigation.navigate('SignUp',{selectedPlanId});
     }
-  }
-
-  const memoryOptionSelected = (value) => {
-    setSelectedMemory(value);
-    setShowMemoryModal(false);
-
-    navigation.navigate('Payment',  { item: { typeId: 4, selectedPlan: selectedPlanId, memoryId: parseInt(value.value) } });
   };
 
   const renderContent = () => {
@@ -279,7 +189,7 @@ const Pricing = (props) => {
 
         <View style={{ flex: 1 }}>
           <FlatList
-            data={!useVoucher ? data : []}
+            data={!useVoucher?data:[]}
             keyExtractor={(item) => item.id.toString()}
             contentContainerStyle={styles.listContent}
             ListHeaderComponent={
@@ -302,18 +212,15 @@ const Pricing = (props) => {
             </View>
 
                   <Text numberOfLines={0} style={styles.title}>
-                    {isStandByPage ? t('purchase_voucher') : t('pricing')}
+                    {t('pricing')}
                   </Text>
 
                   <Text numberOfLines={0} grayColor style={styles.description}>
-                    {isStandByPage
-                      ? t('gift_voucher_page_description')
-                      : t('pricing_page_description')}
+                    {t('pricing_page_description')}
                   </Text>
                 </View>
 
-                {(!isStandByPage && !isProfilePage) && (
-                  <View style={styles.voucherOption}>
+                <View style={styles.voucherOption}>
             <CheckBox
               color={colors.primary}
               title={t('use_voucher')}
@@ -321,9 +228,8 @@ const Pricing = (props) => {
               onPress={() => { setUseVoucher(!useVoucher); if(!useVoucher) setVoucher(''); setSelectedPlanId(-1); }}
             />
                   </View>
-                )}
 
-                {(useVoucher&&!isProfilePage&&!isStandByPage)&&(
+                {useVoucher&&(
                   <View style={styles.voucherGroup}>
                     <View style={styles.voucherInputWrap}>
                     <TextInput
@@ -370,8 +276,8 @@ const Pricing = (props) => {
             renderItem={({item}) => (
               <PriceList
                 item={item}
-                isStandByPage={isStandByPage}
-                isProfilePage={isProfilePage}
+                isStandByPage={false}
+                isProfilePage={false}
                 selected={item.id === selectedPlanId}
                 onSelect={() => setSelectedPlanId(item.id)}
                 style={styles.planCard}
@@ -382,24 +288,10 @@ const Pricing = (props) => {
 
           <View style={styles.bottomBar}>
             <Button full loading={loading} onPress={() => continueRegister()}>
-              {isStandByPage ? t('purchase_voucher') : t('continue')}
+              {t('continue')}
             </Button>
           </View>
         </View>
-        {showMemoryModal && userMemories && userMemories.length > 0 && <ModalOption
-        value={selectedMemory}
-        options={userMemories}
-        isVisible={showMemoryModal}
-        onSwipeComplete={() => {
-          setShowMemoryModal(false);
-        }}
-        onPress={(value) => {
-          memoryOptionSelected(value)
-        }}
-        onBackdropPress={() => {
-          setShowMemoryModal(false)
-        }}
-      />}
       </SafeAreaView>
     );
   };

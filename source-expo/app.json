@@ -20,7 +20,7 @@
       "icon": "./assets/icon.png",
       "supportsTablet": true,
       "bundleIdentifier": "com.styever.mobile",
-      "buildNumber": "1",
+      "buildNumber": "2",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -31,7 +31,7 @@
         "backgroundColor": "#0A4A32"
       },
       "package": "com.styever.mobile",
-      "versionCode": 1
+      "versionCode": 6
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -43,7 +43,7 @@
     "owner": "barisozluk",
     "extra": {
       "eas": {
-        "projectId": "0698e660-9c38-4199-a0b9-3c9f9d6e5213"
+        "projectId": "7e7b5bd7-da03-4a34-b680-c116c96356ea"
       }
     }
   }

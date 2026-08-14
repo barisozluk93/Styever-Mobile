@@ -33,8 +33,8 @@ const SignIn=({navigation})=>{
   const [id,setId]=useState(''); const [password,setPassword]=useState('');
   const [success,setSuccess]=useState({id:true,password:true}); const [loading,setLoading]=useState(false);
   const {error,token,isPaymentRequired}=useSelector(state=>state.auth);
-  useEffect(()=>{if(!loadToken()){dispatch({type:'AUTH_LOGOUT'});dispatch({type:'USER_INIT'});}},[navigation,dispatch]);
-  useEffect(()=>{if(!token)return; (async()=>{try{const pushToken=await registerForPushNotificationsAsync();if(pushToken){const payload=JSON.parse(atob(token.split('.')[1]));const userId=Number(payload?.id);if(userId)await registerDevice({pushToken,platform:Platform.OS,userId});}}catch(e){} dispatch(getUserByToken());setLoading(false);navigation.navigate(isPaymentRequired?'Payment':'NHome',isPaymentRequired?{item:{typeId:1}}:undefined);})();},[token,isPaymentRequired,navigation,dispatch]);
+  useEffect(()=>{let mounted=true;(async()=>{const storedToken=await loadToken();if(mounted&&!storedToken){dispatch({type:'AUTH_LOGOUT'});dispatch({type:'USER_INIT'});}})();return()=>{mounted=false;};},[dispatch]);
+  useEffect(()=>{if(!token)return; (async()=>{try{const pushToken=await registerForPushNotificationsAsync();if(pushToken){const payload=JSON.parse(atob(token.split('.')[1]));const userId=Number(payload?.id);if(userId)await registerDevice({pushToken,platform:Platform.OS,userId});}}catch(e){} await dispatch(getUserByToken());setLoading(false);navigation.reset({index:0,routes:[{name:isPaymentRequired?'TrialEnded':'NewsMenu'}]});})();},[token,isPaymentRequired,navigation,dispatch]);
   useEffect(()=>{if(error){Toast.show({type:'error',text1:t('error'),text2:error || t('error_login_message')});setLoading(false);}},[error,t]);
   const onLogin=()=>{if(!isNullOrEmpty(id)&&!isNullOrEmpty(password)){setLoading(true);dispatch(login(id,password));}else setSuccess({id:!isNullOrEmpty(id),password:!isNullOrEmpty(password)});};
   return <SafeAreaView style={BaseStyle.safeAreaView} edges={['right','top','left']}>

@@ -1,5 +1,6 @@
 import {useEffect,useState} from 'react';
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -25,6 +26,8 @@ import {
 import styles from './styles';
 import {isNullOrEmpty} from '@/utils/utility';
 import Toast from 'react-native-toast-message';
+import {getRegistrationLegalContents} from '@/apis/legalContentApi';
+import {getLocalizedLegalContent,getLocalizedLegalTitle} from '@/utils/legalContent';
 
 const successInit={
   name:true,
@@ -53,6 +56,9 @@ const SignUp=(props)=>{
   const [passwordConfirm,setPasswordConfirm]=useState('');
   const [roles,setRoles]=useState([]);
   const [loading,setLoading]=useState(false);
+  const [legalDocuments,setLegalDocuments]=useState({});
+  const [legalLoading,setLegalLoading]=useState(false);
+  const [legalError,setLegalError]=useState('');
 
   const [
     termsAndPrivacyAccepted,
@@ -78,6 +84,31 @@ const SignUp=(props)=>{
     kvkkModalVisible,
     setKvkkModalVisible,
   ]=useState(false);
+
+  const legalLanguage=(i18n.language||'tr').split('-')[0]==='en'?'en':'tr';
+  const legalTitle=slug=>getLocalizedLegalTitle(legalDocuments[slug],legalLanguage);
+  const legalContent=slug=>getLocalizedLegalContent(legalDocuments[slug],legalLanguage);
+
+  useEffect(()=>{
+    let mounted=true;
+    setLegalLoading(true);
+    setLegalError('');
+
+    getRegistrationLegalContents()
+      .then(data=>{
+        if(mounted)setLegalDocuments(data);
+      })
+      .catch(error=>{
+        if(mounted){
+          setLegalError(error?.response?.data?.message||error?.message||t('legal_content_load_error'));
+        }
+      })
+      .finally(()=>{
+        if(mounted)setLegalLoading(false);
+      });
+
+    return()=>{mounted=false;};
+  },[legalLanguage,t]);
 
   useEffect(()=>{
     if(route?.params?.selectedPlanId){
@@ -116,6 +147,19 @@ const SignUp=(props)=>{
   };
 
   const continueRegister=()=>{
+    const legalReady=
+      legalDocuments['terms-of-use']&&
+      legalDocuments['privacy-policy']&&
+      legalDocuments.kvkk;
+
+    if(legalLoading||legalError||!legalReady){
+      Toast.show({
+        type:'error',
+        text1:t('error'),
+        text2:legalError||t('legal_content_load_error'),
+      });
+      return;
+    }
     if(
       isNullOrEmpty(name)||
       isNullOrEmpty(surname)||
@@ -184,7 +228,7 @@ const SignUp=(props)=>{
             {
               userId:0,
               agreementType:'MembershipTerms',
-              title:t('TERMS.PAGE_TITLE'),
+              title:legalTitle('terms-of-use'),
               version:'2026.08',
               language,
               context:'Registration',
@@ -193,7 +237,7 @@ const SignUp=(props)=>{
             {
               userId:0,
               agreementType:'PrivacyPolicy',
-              title:t('PRIVACY_POLICY.PAGE_TITLE'),
+              title:legalTitle('privacy-policy'),
               version:'2026.08',
               language,
               context:'Registration',
@@ -202,7 +246,7 @@ const SignUp=(props)=>{
             {
               userId:0,
               agreementType:'KvkkDisclosure',
-              title:t('KVKK.PAGE_TITLE'),
+              title:legalTitle('kvkk'),
               version:'2026.08',
               language,
               context:'Registration',
@@ -256,41 +300,6 @@ const SignUp=(props)=>{
     android:20,
   });
 
-  const renderTermsSection=({
-    title,
-    texts=[],
-    items=[],
-  })=>(
-    <View style={styles.modalSection}>
-      <Text style={styles.modalSectionTitle}>
-        {t(title)}
-      </Text>
-
-      {texts.map((key,index)=>(
-        <Text
-          key={`${key}-${index}`}
-          style={styles.modalText}
-        >
-          {t(key)}
-        </Text>
-      ))}
-
-      {items.map((key,index)=>(
-        <View
-          key={`${key}-${index}`}
-          style={styles.modalListRow}
-        >
-          <Text style={styles.modalBullet}>
-            •
-          </Text>
-
-          <Text style={styles.modalListText}>
-            {t(key)}
-          </Text>
-        </View>
-      ))}
-    </View>
-  );
 
   return(
     <SafeAreaView
@@ -582,7 +591,7 @@ const SignUp=(props)=>{
                           },
                         ]}
                       >
-                        {t('TERMS.PAGE_TITLE')}
+                        {legalTitle('terms-of-use')}
                       </Text>
                     </TouchableOpacity>
 
@@ -606,7 +615,7 @@ const SignUp=(props)=>{
                           },
                         ]}
                       >
-                        {t('PRIVACY_POLICY.PAGE_TITLE')}
+                        {legalTitle('privacy-policy')}
                       </Text>
                     </TouchableOpacity>
 
@@ -686,7 +695,7 @@ const SignUp=(props)=>{
                           },
                         ]}
                       >
-                        {t('KVKK.PAGE_TITLE')}
+                        {legalTitle('kvkk')}
                       </Text>
                     </TouchableOpacity>
 
@@ -784,275 +793,75 @@ const SignUp=(props)=>{
         transparent={true}
         animationType="slide"
         statusBarTranslucent={true}
-        onRequestClose={()=>
-          setTermsModalVisible(false)
-        }
+        onRequestClose={()=>setTermsModalVisible(false)}
       >
         <View style={styles.modalBackdrop}>
-
           <View style={styles.modalContainer}>
-
             <View style={styles.modalHeader}>
-
               <Text style={styles.modalTitle}>
-                {t('LEGAL_TERMS_PRIVACY_TITLE')}
+                {legalTitle('terms-of-use')||legalTitle('privacy-policy')}
               </Text>
-
               <TouchableOpacity
                 activeOpacity={0.7}
                 style={styles.modalCloseButton}
-                onPress={()=>
-                  setTermsModalVisible(false)
-                }
+                onPress={()=>setTermsModalVisible(false)}
               >
-                <Text style={styles.modalClose}>
-                  ×
-                </Text>
+                <Text style={styles.modalClose}>×</Text>
               </TouchableOpacity>
-
             </View>
 
             <ScrollView
               style={styles.modalScroll}
-              contentContainerStyle={
-                styles.modalScrollContent
-              }
+              contentContainerStyle={styles.modalScrollContent}
               showsVerticalScrollIndicator={true}
             >
+              {legalLoading&&(
+                <ActivityIndicator size="large" color={colors.primary}/>
+              )}
 
-              <Text style={styles.modalDocumentTitle}>
-                {t('TERMS.PAGE_TITLE')}
-              </Text>
+              {!legalLoading&&!!legalError&&(
+                <Text style={styles.modalText}>{legalError}</Text>
+              )}
 
-              {renderTermsSection({
-                title:'TERMS.SECTION_1_TITLE',
-                texts:[
-                  'TERMS.SECTION_1_TEXT',
-                ],
-              })}
+              {!legalLoading&&!legalError&&(
+                <>
+                  <Text style={styles.modalDocumentTitle}>
+                    {legalTitle('terms-of-use')}
+                  </Text>
+                  <Text numberOfLines={0} style={styles.modalText}>
+                    {legalContent('terms-of-use')}
+                  </Text>
 
-              {renderTermsSection({
-                title:'TERMS.SECTION_2_TITLE',
-                texts:[
-                  'TERMS.SECTION_2_TEXT',
-                ],
-              })}
+                  <View style={styles.modalDivider}/>
 
-              {renderTermsSection({
-                title:'TERMS.SECTION_3_TITLE',
-                texts:[
-                  'TERMS.SECTION_3_TEXT',
-                ],
-              })}
-
-              {renderTermsSection({
-                title:'TERMS.SECTION_4_TITLE',
-                texts:[
-                  'TERMS.SECTION_4_TEXT_1',
-                  'TERMS.SECTION_4_TEXT_2',
-                  'TERMS.SECTION_4_TEXT_3',
-                ],
-              })}
-
-              {renderTermsSection({
-                title:'TERMS.SECTION_5_TITLE',
-                texts:[
-                  'TERMS.SECTION_5_TEXT_1',
-                  'TERMS.SECTION_5_TEXT_2',
-                  'TERMS.SECTION_5_TEXT_3',
-                ],
-              })}
-
-              {renderTermsSection({
-                title:'TERMS.SECTION_6_TITLE',
-                texts:[
-                  'TERMS.SECTION_6_TEXT_1',
-                  'TERMS.SECTION_6_TEXT_2',
-                  'TERMS.SECTION_6_TEXT_3',
-                ],
-              })}
-
-              {renderTermsSection({
-                title:'TERMS.SECTION_7_TITLE',
-                texts:[
-                  'TERMS.SECTION_7_TEXT_1',
-                  'TERMS.SECTION_7_TEXT_2',
-                ],
-              })}
-
-              {renderTermsSection({
-                title:'TERMS.SECTION_8_TITLE',
-                texts:[
-                  'TERMS.SECTION_8_TEXT_1',
-                  'TERMS.SECTION_8_TEXT_2',
-                  'TERMS.SECTION_8_TEXT_3',
-                  'TERMS.SECTION_8_TEXT_4',
-                  'TERMS.SECTION_8_TEXT_5',
-                  'TERMS.SECTION_8_TEXT_6',
-                  'TERMS.SECTION_8_TEXT_7',
-                ],
-              })}
-
-              {renderTermsSection({
-                title:'TERMS.SECTION_9_TITLE',
-                texts:[
-                  'TERMS.SECTION_9_TEXT',
-                ],
-              })}
-
-              {renderTermsSection({
-                title:'TERMS.SECTION_10_TITLE',
-                items:[
-                  'TERMS.SECTION_10_ITEM_1',
-                  'TERMS.SECTION_10_ITEM_2',
-                  'TERMS.SECTION_10_ITEM_3',
-                  'TERMS.SECTION_10_ITEM_4',
-                  'TERMS.SECTION_10_ITEM_5',
-                ],
-              })}
-
-              <View style={styles.modalDivider}/>
-
-              <Text style={styles.modalDocumentTitle}>
-                {t('PRIVACY_POLICY.PAGE_TITLE')}
-              </Text>
-
-              {renderTermsSection({
-                title:
-                  'PRIVACY_POLICY.SECTION_1_TITLE',
-                texts:[
-                  'PRIVACY_POLICY.SECTION_1_TEXT',
-                ],
-              })}
-
-              {renderTermsSection({
-                title:
-                  'PRIVACY_POLICY.SECTION_2_TITLE',
-                texts:[
-                  'PRIVACY_POLICY.SECTION_2_TEXT',
-                ],
-                items:[
-                  'PRIVACY_POLICY.DATA_1',
-                  'PRIVACY_POLICY.DATA_2',
-                  'PRIVACY_POLICY.DATA_3',
-                  'PRIVACY_POLICY.DATA_4',
-                ],
-              })}
-
-              {renderTermsSection({
-                title:
-                  'PRIVACY_POLICY.SECTION_3_TITLE',
-                texts:[
-                  'PRIVACY_POLICY.SECTION_3_TEXT',
-                ],
-                items:[
-                  'PRIVACY_POLICY.PURPOSE_1',
-                  'PRIVACY_POLICY.PURPOSE_2',
-                  'PRIVACY_POLICY.PURPOSE_3',
-                ],
-              })}
-
-              {renderTermsSection({
-                title:
-                  'PRIVACY_POLICY.SECTION_4_TITLE',
-                texts:[
-                  'PRIVACY_POLICY.SECTION_4_TEXT_1',
-                  'PRIVACY_POLICY.SECTION_4_TEXT_2',
-                  'PRIVACY_POLICY.SECTION_4_TEXT_3',
-                ],
-              })}
-
-              {renderTermsSection({
-                title:
-                  'PRIVACY_POLICY.SECTION_5_TITLE',
-                texts:[
-                  'PRIVACY_POLICY.SECTION_5_TEXT',
-                ],
-                items:[
-                  'PRIVACY_POLICY.SHARING_1',
-                  'PRIVACY_POLICY.SHARING_2',
-                  'PRIVACY_POLICY.SHARING_3',
-                ],
-              })}
-
-              {renderTermsSection({
-                title:
-                  'PRIVACY_POLICY.SECTION_6_TITLE',
-                texts:[
-                  'PRIVACY_POLICY.SECTION_6_TEXT_1',
-                  'PRIVACY_POLICY.SECTION_6_TEXT_2',
-                  'PRIVACY_POLICY.SECTION_6_TEXT_3',
-                ],
-              })}
-
-              {renderTermsSection({
-                title:
-                  'PRIVACY_POLICY.SECTION_7_TITLE',
-                texts:[
-                  'PRIVACY_POLICY.SECTION_7_TEXT',
-                ],
-                items:[
-                  'PRIVACY_POLICY.RIGHT_1',
-                  'PRIVACY_POLICY.RIGHT_2',
-                  'PRIVACY_POLICY.RIGHT_3',
-                  'PRIVACY_POLICY.RIGHT_4',
-                  'PRIVACY_POLICY.RIGHT_5',
-                  'PRIVACY_POLICY.RIGHT_6',
-                  'PRIVACY_POLICY.RIGHT_7',
-                  'PRIVACY_POLICY.RIGHT_8',
-                  'PRIVACY_POLICY.RIGHT_9',
-                ],
-              })}
-
-              <Text style={styles.modalText}>
-                {t(
-                  'PRIVACY_POLICY.APPLICATION_TEXT',
-                )}
-              </Text>
-
-              {renderTermsSection({
-                title:
-                  'PRIVACY_POLICY.SECTION_8_TITLE',
-                texts:[
-                  'PRIVACY_POLICY.SECTION_8_TEXT',
-                ],
-              })}
-
+                  <Text style={styles.modalDocumentTitle}>
+                    {legalTitle('privacy-policy')}
+                  </Text>
+                  <Text numberOfLines={0} style={styles.modalText}>
+                    {legalContent('privacy-policy')}
+                  </Text>
+                </>
+              )}
             </ScrollView>
 
             <View style={styles.modalFooter}>
-
               <TouchableOpacity
                 activeOpacity={0.8}
                 style={styles.modalCancel}
-                onPress={()=>
-                  setTermsModalVisible(false)
-                }
+                onPress={()=>setTermsModalVisible(false)}
               >
-                <Text style={styles.modalCancelText}>
-                  {t('cancel')}
-                </Text>
+                <Text style={styles.modalCancelText}>{t('cancel')}</Text>
               </TouchableOpacity>
-
               <TouchableOpacity
                 activeOpacity={0.8}
-                style={[
-                  styles.modalAccept,
-                  {
-                    backgroundColor:colors.primary,
-                  },
-                ]}
+                style={[styles.modalAccept,{backgroundColor:colors.primary}]}
                 onPress={acceptTermsPrivacy}
+                disabled={legalLoading||!!legalError}
               >
-                <Text style={styles.modalAcceptText}>
-                  {t('ok')}
-                </Text>
+                <Text style={styles.modalAcceptText}>{t('ok')}</Text>
               </TouchableOpacity>
-
             </View>
-
           </View>
-
         </View>
       </Modal>
 
@@ -1063,160 +872,58 @@ const SignUp=(props)=>{
         transparent={true}
         animationType="slide"
         statusBarTranslucent={true}
-        onRequestClose={()=>
-          setKvkkModalVisible(false)
-        }
+        onRequestClose={()=>setKvkkModalVisible(false)}
       >
         <View style={styles.modalBackdrop}>
-
           <View style={styles.modalContainer}>
-
             <View style={styles.modalHeader}>
-
-              <Text style={styles.modalTitle}>
-                {t('KVKK_MODAL_TITLE')}
-              </Text>
-
+              <Text style={styles.modalTitle}>{legalTitle('kvkk')}</Text>
               <TouchableOpacity
                 activeOpacity={0.7}
                 style={styles.modalCloseButton}
-                onPress={()=>
-                  setKvkkModalVisible(false)
-                }
+                onPress={()=>setKvkkModalVisible(false)}
               >
-                <Text style={styles.modalClose}>
-                  ×
-                </Text>
+                <Text style={styles.modalClose}>×</Text>
               </TouchableOpacity>
-
             </View>
 
             <ScrollView
               style={styles.modalScroll}
-              contentContainerStyle={
-                styles.modalScrollContent
-              }
+              contentContainerStyle={styles.modalScrollContent}
               showsVerticalScrollIndicator={true}
             >
-
-              <Text style={styles.modalDocumentTitle}>
-                {t('KVKK.PAGE_TITLE')}
-              </Text>
-
-              {renderTermsSection({
-                title:'KVKK.SECTION_1_TITLE',
-                texts:[
-                  'KVKK.SECTION_1_TEXT',
-                ],
-              })}
-
-              {renderTermsSection({
-                title:'KVKK.SECTION_2_TITLE',
-                texts:[
-                  'KVKK.SECTION_2_TEXT',
-                ],
-                items:[
-                  'KVKK.PURPOSE_1',
-                  'KVKK.PURPOSE_2',
-                  'KVKK.PURPOSE_3',
-                  'KVKK.PURPOSE_4',
-                ],
-              })}
-
-              {renderTermsSection({
-                title:'KVKK.SECTION_3_TITLE',
-                texts:[
-                  'KVKK.SECTION_3_TEXT',
-                ],
-                items:[
-                  'KVKK.TRANSFER_1',
-                  'KVKK.TRANSFER_2',
-                  'KVKK.TRANSFER_3',
-                ],
-              })}
-
-              <Text style={styles.modalText}>
-                {t('KVKK.SECTION_3_NOTE')}
-              </Text>
-
-              {renderTermsSection({
-                title:'KVKK.SECTION_4_TITLE',
-                texts:[
-                  'KVKK.SECTION_4_TEXT',
-                ],
-                items:[
-                  'KVKK.LEGAL_BASIS_1',
-                  'KVKK.LEGAL_BASIS_2',
-                  'KVKK.LEGAL_BASIS_3',
-                ],
-              })}
-
-              {renderTermsSection({
-                title:'KVKK.SECTION_5_TITLE',
-                texts:[
-                  'KVKK.SECTION_5_TEXT_1',
-                  'KVKK.SECTION_5_TEXT_2',
-                  'KVKK.SECTION_5_TEXT_3',
-                ],
-              })}
-
-              {renderTermsSection({
-                title:'KVKK.SECTION_6_TITLE',
-                texts:[
-                  'KVKK.SECTION_6_TEXT',
-                ],
-                items:[
-                  'KVKK.RIGHT_1',
-                  'KVKK.RIGHT_2',
-                  'KVKK.RIGHT_3',
-                  'KVKK.RIGHT_4',
-                  'KVKK.RIGHT_5',
-                  'KVKK.RIGHT_6',
-                  'KVKK.RIGHT_7',
-                  'KVKK.RIGHT_8',
-                  'KVKK.RIGHT_9',
-                ],
-              })}
-
-              <Text style={styles.modalText}>
-                {t('KVKK.APPLICATION_TEXT')}
-              </Text>
-
+              {legalLoading&&(
+                <ActivityIndicator size="large" color={colors.primary}/>
+              )}
+              {!legalLoading&&!!legalError&&(
+                <Text style={styles.modalText}>{legalError}</Text>
+              )}
+              {!legalLoading&&!legalError&&(
+                <>
+                  <Text style={styles.modalDocumentTitle}>{legalTitle('kvkk')}</Text>
+                  <Text numberOfLines={0} style={styles.modalText}>{legalContent('kvkk')}</Text>
+                </>
+              )}
             </ScrollView>
 
             <View style={styles.modalFooter}>
-
               <TouchableOpacity
                 activeOpacity={0.8}
                 style={styles.modalCancel}
-                onPress={()=>
-                  setKvkkModalVisible(false)
-                }
+                onPress={()=>setKvkkModalVisible(false)}
               >
-                <Text style={styles.modalCancelText}>
-                  {t('cancel')}
-                </Text>
+                <Text style={styles.modalCancelText}>{t('cancel')}</Text>
               </TouchableOpacity>
-
               <TouchableOpacity
                 activeOpacity={0.8}
-                style={[
-                  styles.modalAccept,
-                  {
-                    backgroundColor:colors.primary,
-                  },
-                ]}
+                style={[styles.modalAccept,{backgroundColor:colors.primary}]}
                 onPress={acceptKvkk}
+                disabled={legalLoading||!!legalError}
               >
-                <Text style={styles.modalAcceptText}>
-                  {t('ok')}
-                </Text>
+                <Text style={styles.modalAcceptText}>{t('ok')}</Text>
               </TouchableOpacity>
-
             </View>
-
           </View>
-
         </View>
       </Modal>
 

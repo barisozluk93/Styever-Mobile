@@ -1,4 +1,4 @@
-package com.klcsoft.styever
+package com.styever.mobile
 
 import android.app.Application
 import android.content.res.Configuration

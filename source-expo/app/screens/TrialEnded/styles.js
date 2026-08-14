@@ -1,0 +1,64 @@
+import {StyleSheet} from 'react-native';
+import {BaseColor,Typography} from '@/config';
+
+export default StyleSheet.create({
+  container:{
+    flex:1,
+    paddingHorizontal:24,
+    paddingVertical:28,
+    justifyContent:'space-between',
+  },
+  content:{
+    flex:1,
+    justifyContent:'center',
+    alignItems:'center',
+    paddingBottom:24,
+  },
+  kickerRow:{
+    flexDirection:'row',
+    alignItems:'center',
+    marginBottom:34,
+  },
+  kickerLogo:{
+    width:24,
+    height:24,
+    marginRight:9,
+  },
+  kicker:{
+    ...Typography.body2,
+    fontWeight:'700',
+    letterSpacing:2.1,
+  },
+  iconBox:{
+    width:68,
+    height:68,
+    borderRadius:34,
+    alignItems:'center',
+    justifyContent:'center',
+    marginBottom:24,
+  },
+  title:{
+    ...Typography.header,
+    fontSize:28,
+    lineHeight:36,
+    textAlign:'center',
+    marginBottom:14,
+  },
+  description:{
+    ...Typography.body1,
+    fontSize:16,
+    lineHeight:25,
+    textAlign:'center',
+    maxWidth:330,
+  },
+  actions:{
+    paddingTop:18,
+  },
+  deleteButton:{
+    marginTop:12,
+    borderColor:BaseColor.pinkDarkColor,
+  },
+  deleteButtonText:{
+    color:BaseColor.pinkDarkColor,
+  },
+});

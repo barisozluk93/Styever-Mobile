@@ -1,4 +1,4 @@
-package com.klcsoft.styever
+package com.styever.mobile
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

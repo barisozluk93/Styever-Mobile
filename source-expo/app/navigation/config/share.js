@@ -19,6 +19,7 @@ import MyAddresses from '@/screens/MyAddresses';
 import MyAgreements from '@/screens/MyAgreements';
 import Membership from '@/screens/Membership';
 import Faqs from '@/screens/Faqs';
+import TrialEnded from '@/screens/TrialEnded';
 
 export default {
   Loading: {
@@ -95,6 +96,13 @@ export default {
     options: {
       title: 'membership'
     }
+  },
+  TrialEnded: {
+    component: TrialEnded,
+    options: {
+      title: 'trial_ended_title',
+      gestureEnabled: false,
+    },
   },
   MyAddresses: {
     component: MyAddresses,

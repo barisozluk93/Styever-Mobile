@@ -1,6 +1,6 @@
-import {ScrollView,TouchableOpacity,View} from 'react-native';
+import {ScrollView,View} from 'react-native';
 import {useTranslation} from 'react-i18next';
-import {Button, Header, Icon, Image, SafeAreaView, Text} from '@/components';
+import {Header, Icon, Image, SafeAreaView, Text} from '@/components';
 import {BaseStyle,useTheme} from '@/config';
 import {useSelector} from 'react-redux';
 import styles from './styles';
@@ -329,66 +329,7 @@ const Membership=({navigation})=>{
           )}
         </View>
 
-        {!user?.isTrial&&!user?.isActive&&(
-          <Button
-            full
-            style={styles.actionButton}
-            onPress={()=>
-              navigation.navigate(
-                'Pricing',
-                {
-                  isStandByPage:false,
-                  isProfilePage:true,
-                },
-              )
-            }
-          >
-            {t('buy_new_package')}
-          </Button>
-        )}
 
-        {!user?.isActive&&!user?.isTrial&&(
-          <TouchableOpacity
-            activeOpacity={0.8}
-            style={[
-              styles.manageHint,
-              {backgroundColor:colors.primary+'0D'},
-            ]}
-            onPress={()=>
-              navigation.navigate(
-                'Pricing',
-                {
-                  isStandByPage:false,
-                  isProfilePage:true,
-                },
-              )
-            }
-          >
-            <View style={styles.manageHintText}>
-              <Text
-                numberOfLines={0}
-                style={styles.manageTitle}
-              >
-                {t('membership_manage_title')}
-              </Text>
-
-              <Text
-                numberOfLines={0}
-                grayColor
-                style={styles.manageDescription}
-              >
-                {t('membership_manage_description')}
-              </Text>
-            </View>
-
-            <Icon
-              name="angle-right"
-              size={16}
-              color={colors.primary}
-              enableRTL={true}
-            />
-          </TouchableOpacity>
-        )}
       </ScrollView>
     </SafeAreaView>
   );
