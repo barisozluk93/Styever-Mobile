@@ -8,10 +8,12 @@ import {
 import { useTranslation } from 'react-i18next';
 
 import {
+  ActivityIndicator,
   AppState,
   KeyboardAvoidingView,
   Linking,
   Modal,
+  Platform,
   ScrollView,
   TouchableOpacity,
   View,
@@ -53,11 +55,17 @@ import {
   buyPackageRequest,
   confirmShopierPaymentRequest,
   getPendingShopierPaymentRequest,
+  getAppleTransactionCompletedRequest,
   payRequest,
   shopierPaymentStatusRequest,
+  verifyApplePurchaseRequest,
 } from '@/apis/userApi';
 
 import Toast from 'react-native-toast-message';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import * as RNIap from 'react-native-iap';
 
 import {
   logout,
@@ -67,6 +75,31 @@ import {
   lightCandleRequest,
   updateCandleRequest,
 } from '@/apis/memoryApi';
+
+import {
+  getPurchaseLegalContents,
+} from '@/apis/legalContentApi';
+
+import {
+  getLocalizedLegalContent,
+  getLocalizedLegalTitle,
+} from '@/utils/legalContent';
+
+const APPLE_PRODUCTS = {
+  2: 'com.styever.origin.yearly',
+  3: 'com.styever.heart.yearly',
+  4: 'com.styever.family.yearly',
+};
+
+// TEMP: App Store review screenshot fallback.
+// StoreKit returns the real localized value as soon as the products become available.
+const APPLE_REVIEW_FALLBACK = {
+  2: { name: 'Origin', price: '499.00 ₺' },
+  3: { name: 'Heart', price: '699.00 ₺' },
+  4: { name: 'Family', price: '1299.00 ₺' },
+};
+
+const APPLE_PENDING_CONTEXT_KEY = 'styever.apple.pendingPurchase';
 
 const FAILED_STATUSES = [
   'failed',
@@ -128,7 +161,7 @@ const Payment = (props) => {
   const [
     item,
     setItem,
-  ] = useState();
+  ] = useState(() => route?.params?.item || null);
 
   const [
     termsAccepted,
@@ -159,6 +192,151 @@ const Payment = (props) => {
     confirming,
     setConfirming,
   ] = useState(false);
+  const [
+    appleProducts,
+    setAppleProducts,
+  ] = useState([]);
+
+  const [
+    appleStoreReady,
+    setAppleStoreReady,
+  ] = useState(false);
+
+  const [
+    appleStoreError,
+    setAppleStoreError,
+  ] = useState('');
+
+  const [
+    purchaseLegalDocument,
+    setPurchaseLegalDocument,
+  ] = useState(null);
+
+  const [
+    purchaseLegalLoading,
+    setPurchaseLegalLoading,
+  ] = useState(false);
+
+  const [
+    purchaseLegalError,
+    setPurchaseLegalError,
+  ] = useState('');
+
+
+  const legalLanguage =
+    String(
+      i18n.language || 'tr',
+    ).split('-')[0] === 'en'
+      ? 'en'
+      : 'tr';
+
+  const purchaseLegalTitle = () =>
+    getLocalizedLegalTitle(
+      purchaseLegalDocument,
+      legalLanguage,
+    );
+
+  const purchaseLegalContent = () =>
+    getLocalizedLegalContent(
+      purchaseLegalDocument,
+      legalLanguage,
+    );
+
+  const getPurchaseAgreementSnapshots = () => {
+    const content = purchaseLegalContent();
+
+    if (!content) {
+      return {
+        preInformationTitle:
+          t('PRE_INFORMATION_FORM'),
+        preInformationContent: '',
+        distanceSalesTitle:
+          purchaseLegalTitle() ||
+          t('DISTANCE_SALES_CONTRACT'),
+        distanceSalesContent: '',
+      };
+    }
+
+    const distanceHeading =
+      legalLanguage === 'en'
+        ? 'SECTION II: DISTANCE SALES AGREEMENT'
+        : 'BÖLÜM II: MESAFELİ SATIŞ SÖZLEŞMESİ';
+
+    const splitIndex =
+      content.indexOf(distanceHeading);
+
+    if (splitIndex < 0) {
+      return {
+        preInformationTitle:
+          t('PRE_INFORMATION_FORM'),
+        preInformationContent: content,
+        distanceSalesTitle:
+          purchaseLegalTitle() ||
+          t('DISTANCE_SALES_CONTRACT'),
+        distanceSalesContent: content,
+      };
+    }
+
+    const preInformationContent =
+      content.slice(0, splitIndex).trim();
+
+    const distanceSalesContent =
+      content.slice(splitIndex).trim();
+
+    const firstLine = value =>
+      String(value || '')
+        .split('\n')
+        .map(x => x.trim())
+        .find(Boolean) || '';
+
+    return {
+      preInformationTitle:
+        firstLine(preInformationContent) ||
+        t('PRE_INFORMATION_FORM'),
+      preInformationContent,
+      distanceSalesTitle:
+        firstLine(distanceSalesContent) ||
+        purchaseLegalTitle() ||
+        t('DISTANCE_SALES_CONTRACT'),
+      distanceSalesContent,
+    };
+  };
+
+  useEffect(() => {
+    let mounted = true;
+
+    setPurchaseLegalLoading(true);
+    setPurchaseLegalError('');
+
+    getPurchaseLegalContents()
+      .then(document => {
+        if (mounted) {
+          setPurchaseLegalDocument(document);
+        }
+      })
+      .catch(error => {
+        if (mounted) {
+          setPurchaseLegalDocument(null);
+          setPurchaseLegalError(
+            error?.response?.data?.message ||
+            error?.message ||
+            t('legal_content_load_error'),
+          );
+        }
+      })
+      .finally(() => {
+        if (mounted) {
+          setPurchaseLegalLoading(false);
+        }
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [
+    legalLanguage,
+    t,
+  ]);
 
   const dispatch =
     useDispatch();
@@ -188,6 +366,18 @@ const Payment = (props) => {
     useRef(
       AppState.currentState,
     );
+
+  const applePurchaseProcessingRef =
+    useRef(false);
+
+  const applePurchaseHandlerRef =
+    useRef(null);
+
+  // A StoreKit pending transaction may be emitted as soon as the listener is
+  // attached. Never fulfill anything until the user has explicitly accepted
+  // the agreements and pressed the payment button in this screen session.
+  const applePurchaseAuthorizedRef =
+    useRef(false);
 
   const [
     success,
@@ -343,6 +533,22 @@ const Payment = (props) => {
       return '';
     }
 
+    // Explicit route flow wins. Login/isPaymentRequired must always fulfill
+    // through UserService.Pay; expired renewals through BuyPackage; gifts
+    // through BuyGiftPackage. typeId remains as the backwards-compatible
+    // fallback for existing navigation calls.
+    if (item.paymentFlow === 'Pay') {
+      return 'Pay';
+    }
+
+    if (item.paymentFlow === 'Package') {
+      return 'Package';
+    }
+
+    if (item.paymentFlow === 'Gift') {
+      return 'Gift';
+    }
+
     if (item.typeId === 1) {
       return 'Pay';
     }
@@ -363,34 +569,66 @@ const Payment = (props) => {
       return 0;
     }
 
-    if (item.typeId === 1) {
+    const purchaseType = getPurchaseType();
+
+    if (purchaseType === 'Pay') {
       return getRoleId();
     }
 
-    if (
-      item.typeId === 3 ||
-      item.typeId === 4
-    ) {
-      return (
-        item.selectedPlan ||
-        0
-      );
+    if (purchaseType === 'Gift' || purchaseType === 'Package') {
+      return item.selectedPlan || 0;
     }
 
     return 0;
   };
 
   const getPendingMemoryId = () => {
-    if (
-      item?.typeId === 4
-    ) {
-      return (
-        item.memoryId ||
-        0
-      );
+    return getPurchaseType() === 'Package'
+      ? item?.memoryId || 0
+      : 0;
+  };
+
+  const isIOS =
+    Platform.OS === 'ios';
+
+  const getAppleProductId = () =>
+    APPLE_PRODUCTS[
+      getPendingPlanId()
+    ] || null;
+
+  const getAppleProduct = () => {
+    const productId =
+      getAppleProductId();
+
+    return appleProducts.find(product =>
+      (product?.id || product?.productId) === productId
+    );
+  };
+
+  const getSelectedPlanId = () =>
+    getPendingPlanId();
+
+  const getDisplayedPlanName = () => {
+    if (!item || item.typeId === 2) {
+      return null;
     }
 
-    return 0;
+    return APPLE_REVIEW_FALLBACK[getSelectedPlanId()]?.name || null;
+  };
+
+  const getDisplayedPrice = () => {
+    if (isIOS && item?.typeId !== 2) {
+      const product = getAppleProduct();
+
+      // StoreKit's localized display price is the source of truth on iOS.
+      // Do not format/convert the amount ourselves; the active storefront
+      // determines TRY/USD/EUR etc.
+      return product?.displayPrice ||
+        product?.localizedPrice ||
+        t('APPLE_IAP.PRICE_LOADING');
+    }
+
+    return `${price} ₺`;
   };
 
   const resetForm = () => {
@@ -411,71 +649,71 @@ const Payment = (props) => {
   };
 
   const completePayment =
-    useCallback(() => {
-      if (
-        completedRef.current
-      ) {
+    useCallback(async () => {
+      if (completedRef.current) {
         return;
       }
 
-      completedRef.current =
-        true;
-
+      completedRef.current = true;
       stopPolling();
-
       setLoading(false);
       setConfirming(false);
-
-      setPendingReference(
-        null,
-      );
-
-      setPendingRedirectUrl(
-        null,
-      );
-
+      setPendingReference(null);
+      setPendingRedirectUrl(null);
       resetForm();
 
+      // IMPORTANT: success routing is based on the explicit payment flow,
+      // never on typeId or an old persisted Apple context.
+      const purchaseType = getPurchaseType();
       const successKey =
-        item?.typeId === 3
+        purchaseType === 'Gift'
           ? 'SHOPIER.GIFT_PAYMENT_SUCCESS'
-          : item?.typeId === 4
+          : purchaseType === 'Package'
             ? 'SHOPIER.PACKAGE_PAYMENT_SUCCESS'
             : 'SHOPIER.MEMBERSHIP_PAYMENT_SUCCESS';
 
-      showSuccess(
-        t(successKey),
-      );
+      showSuccess(t(successKey));
 
-      setTimeout(() => {
-        if (
-          item?.typeId === 3
-        ) {
-          navigation.goBack();
-          return;
+      if (purchaseType === 'Gift') {
+        await AsyncStorage.removeItem(APPLE_PENDING_CONTEXT_KEY).catch(() => {});
+        navigation.reset({
+          index: 0,
+          routes: [
+            {
+              name: 'Pricing',
+              params: {
+                isStandByPage: true,
+                isProfilePage: false,
+              },
+            },
+          ],
+        });
+        return;
+      }
+
+      if (purchaseType === 'Pay' || purchaseType === 'Package') {
+        // The backend has already committed the entitlement at this point.
+        // Clear the local session first, then replace the whole navigation
+        // stack so stale authenticated screens cannot remain visible.
+        await AsyncStorage.removeItem(APPLE_PENDING_CONTEXT_KEY).catch(() => {});
+
+        try {
+          await dispatch(logout());
         }
+        finally {
+          dispatch({ type: 'USER_INIT' });
+          dispatch({ type: 'MEMORY_INIT' });
+          dispatch({ type: 'ARTICLE_INIT' });
 
-        if (
-          item?.typeId === 1 ||
-          item?.typeId === 4
-        ) {
-          dispatch(
-            logout(),
-          );
-
-          dispatch({
-            type: 'USER_INIT',
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'SignIn' }],
           });
-
-          navigation.navigate(
-            'NHome',
-          );
-
-          return;
         }
+        return;
+      }
 
-        navigation.goBack();
-      }, 1200);
+      navigation.goBack();
     }, [
       dispatch,
       item,
@@ -728,110 +966,591 @@ const Payment = (props) => {
 
   useFocusEffect(
     useCallback(() => {
-      loadPendingPayment();
+      if (!isIOS) {
+        loadPendingPayment();
+      }
 
       return () => {
         stopPolling();
       };
     }, [
+      isIOS,
       loadPendingPayment,
     ]),
   );
 
-  const buildLegalSnapshot = () => {
-    const keys = [
-      'DISTANCE_SALES.PAGE_TITLE',
+  useEffect(() => {
+    if (!isIOS || !item) {
+      return undefined;
+    }
 
-      'DISTANCE_SALES.PRE_INFO_TITLE',
-      'DISTANCE_SALES.PRE_INFO_SECTION_1_TITLE',
-      'DISTANCE_SALES.PRE_INFO_SELLER_1',
-      'DISTANCE_SALES.PRE_INFO_SELLER_2',
-      'DISTANCE_SALES.PRE_INFO_SELLER_3',
-      'DISTANCE_SALES.PRE_INFO_SELLER_4',
+    let mounted = true;
+    let purchaseSubscription;
+    let purchaseErrorSubscription;
 
-      'DISTANCE_SALES.PRE_INFO_SECTION_2_TITLE',
-      'DISTANCE_SALES.PRE_INFO_SECTION_2_TEXT',
+    const processApplePurchase = async purchase => {
+      console.log('[Apple IAP] purchaseUpdated:', {
+        productId: purchase?.productId,
+        transactionId: purchase?.transactionId,
+        id: purchase?.id,
+        originalTransactionIdentifierIOS:
+          purchase?.originalTransactionIdentifierIOS,
+      });
 
-      'DISTANCE_SALES.PRE_INFO_SECTION_3_TITLE',
-      'DISTANCE_SALES.PRE_INFO_SECTION_3_TEXT',
+      console.log('[Apple IAP] purchaseUpdated keys:',
+        purchase ? Object.keys(purchase) : []
+      );
 
-      'DISTANCE_SALES.PRE_INFO_SECTION_4_TITLE',
-      'DISTANCE_SALES.PRE_INFO_SECTION_4_TEXT',
+      if (!applePurchaseAuthorizedRef.current) {
+        console.log(
+          '[Apple IAP] Ignoring pending purchaseUpdated until user accepts agreements and presses Pay.',
+        );
+        return;
+      }
 
-      'DISTANCE_SALES.PRE_INFO_SECTION_5_TITLE',
-      'DISTANCE_SALES.PRE_INFO_SECTION_5_TEXT',
+      if (applePurchaseProcessingRef.current) {
+        console.log('[Apple IAP] Purchase is already being processed.');
+        return;
+      }
 
-      'DISTANCE_SALES.CONTRACT_TITLE',
-      'DISTANCE_SALES.PARTIES_TITLE',
-      'DISTANCE_SALES.PARTIES_TEXT',
+      applePurchaseProcessingRef.current = true;
 
-      'DISTANCE_SALES.SECTION_1_TITLE',
+      try {
+        const rawContext =
+          await AsyncStorage.getItem(
+            APPLE_PENDING_CONTEXT_KEY,
+          );
 
-      'DISTANCE_SALES.SECTION_1_1_TITLE',
-      'DISTANCE_SALES.SECTION_1_1_ITEM_1',
-      'DISTANCE_SALES.SECTION_1_1_ITEM_2',
-      'DISTANCE_SALES.SECTION_1_1_ITEM_3',
-      'DISTANCE_SALES.SECTION_1_1_ITEM_4',
-      'DISTANCE_SALES.SECTION_1_1_ITEM_5',
-      'DISTANCE_SALES.SECTION_1_1_ITEM_6',
+        if (!rawContext) {
+          throw new Error(
+            t('APPLE_IAP.PENDING_CONTEXT_MISSING'),
+          );
+        }
 
-      'DISTANCE_SALES.SECTION_1_2_TITLE',
-      'DISTANCE_SALES.SECTION_1_2_TEXT',
+        const context =
+          JSON.parse(rawContext);
 
-      'DISTANCE_SALES.SECTION_1_3_TITLE',
-      'DISTANCE_SALES.SECTION_1_3_TEXT',
-      'DISTANCE_SALES.SECTION_1_3_ITEM_1',
-      'DISTANCE_SALES.SECTION_1_3_ITEM_2',
-      'DISTANCE_SALES.SECTION_1_3_ITEM_3',
-      'DISTANCE_SALES.SECTION_1_3_ITEM_4',
+        const transactionId =
+          purchase?.transactionId ||
+          purchase?.id ||
+          purchase?.originalTransactionIdentifierIOS;
 
-      'DISTANCE_SALES.SECTION_2_TITLE',
-      'DISTANCE_SALES.SECTION_2_TEXT',
+        if (!transactionId) {
+          throw new Error(
+            t('APPLE_IAP.TRANSACTION_MISSING'),
+          );
+        }
 
-      'DISTANCE_SALES.SECTION_3_TITLE',
-      'DISTANCE_SALES.SECTION_3_TEXT_1',
-      'DISTANCE_SALES.SECTION_3_TEXT_2',
-      'DISTANCE_SALES.SECTION_3_TEXT_3',
-      'DISTANCE_SALES.SECTION_3_TEXT_4',
+        // In OpenIAP/RNIAP purchase objects `id` can represent the
+        // transaction identifier. Only compare an explicit productId/SKU.
+        const purchaseProductId =
+          purchase?.productId ||
+          purchase?.sku ||
+          null;
 
-      'DISTANCE_SALES.SECTION_4_TITLE',
-      'DISTANCE_SALES.SECTION_4_TEXT_1',
-      'DISTANCE_SALES.SECTION_4_TEXT_2',
-      'DISTANCE_SALES.SECTION_4_TEXT_3',
-      'DISTANCE_SALES.SECTION_4_TEXT_4',
-      'DISTANCE_SALES.SECTION_4_TEXT_5',
+        if (
+          purchaseProductId &&
+          purchaseProductId !== context.productId
+        ) {
+          throw new Error(
+            t('APPLE_IAP.PRODUCT_MISMATCH'),
+          );
+        }
 
-      'DISTANCE_SALES.SECTION_5_TITLE',
-      'DISTANCE_SALES.SECTION_5_TEXT_1',
-      'DISTANCE_SALES.SECTION_5_TEXT_2',
-      'DISTANCE_SALES.SECTION_5_TEXT_3',
+        const isGuestGift =
+          context.purchaseType === 'Gift' &&
+          !context.userId;
 
-      'DISTANCE_SALES.SECTION_6_TITLE',
-      'DISTANCE_SALES.SECTION_6_TEXT_1',
-      'DISTANCE_SALES.SECTION_6_TEXT_2',
-      'DISTANCE_SALES.SECTION_6_TEXT_3',
-      'DISTANCE_SALES.SECTION_6_TEXT_4',
-      'DISTANCE_SALES.SECTION_6_TEXT_5',
-      'DISTANCE_SALES.SECTION_6_TEXT_6',
+        /*
+         * IMPORTANT: Apple fulfillment must never be blocked by the
+         * agreement persistence request. Apple has already charged/approved
+         * the sandbox/real transaction at this point. First verify the
+         * transaction with our backend and apply the purchased entitlement.
+         */
+        const verifyPayload = {
+          transactionId,
+          productId: context.productId,
+          purchaseType: context.purchaseType,
+          memoryId: context.memoryId || 0,
+          senderEmail: context.senderEmail || null,
+          senderFullName: context.senderFullName || null,
+          receiverEmail: context.receiverEmail || null,
+          message: context.message || null,
+        };
 
-      'DISTANCE_SALES.SECTION_7_TITLE',
-      'DISTANCE_SALES.SECTION_7_TEXT_1',
-      'DISTANCE_SALES.SECTION_7_TEXT_2',
-    ];
+        console.log('[Apple IAP] VERIFY REQUEST:', verifyPayload);
 
-    return keys
-      .map(
-        key => t(key),
-      )
-      .filter(Boolean)
-      .join('\n\n');
-  };
+        const response =
+          await verifyApplePurchaseRequest(
+            verifyPayload,
+          );
+
+        console.log('[Apple IAP] VERIFY RESPONSE:', response);
+
+        if (!response?.isSuccess) {
+          throw new Error(
+            response?.message ||
+            response?.Message ||
+            t('APPLE_IAP.VERIFICATION_FAILED'),
+          );
+        }
+
+        /*
+         * From this point on the backend has already verified the Apple
+         * transaction and applied the entitlement. Nothing below is allowed
+         * to block the success UX / logout flow.
+         */
+        if (!isGuestGift) {
+          try {
+            if (context?.agreements) {
+              await saveAgreementSnapshots(
+                transactionId,
+                context.agreements,
+                context.userId || user?.id,
+              );
+            }
+            else {
+              // Backward compatibility for purchases created before agreement
+              // snapshots were persisted in APPLE_PENDING_CONTEXT_KEY.
+              await saveAgreements(
+                transactionId,
+              );
+            }
+
+            console.log('[Apple IAP] Agreements saved:', transactionId);
+          }
+          catch (agreementError) {
+            console.error(
+              '[Apple IAP] AGREEMENT SAVE ERROR (purchase already fulfilled):',
+              agreementError,
+            );
+          }
+        }
+
+        let transactionFinished = false;
+
+        try {
+          console.log('[Apple IAP] Finishing transaction:', transactionId);
+
+          await RNIap.finishTransaction({
+            purchase,
+            isConsumable: false,
+          });
+
+          transactionFinished = true;
+          console.log('[Apple IAP] Transaction finished:', transactionId);
+        }
+        catch (finishError) {
+          // Entitlement is already applied and backend verification is
+          // idempotent. Keep the pending context so the transaction can be
+          // finished on the next launch, but never strand the user on Payment.
+          console.error(
+            '[Apple IAP] FINISH TRANSACTION ERROR (entitlement already applied):',
+            finishError,
+          );
+        }
+
+        if (transactionFinished) {
+          await AsyncStorage.removeItem(
+            APPLE_PENDING_CONTEXT_KEY,
+          );
+        }
+
+        console.log('[Apple IAP] Fulfillment complete; running success flow.');
+
+        if (mounted) {
+          completePayment();
+        }
+      }
+      catch (error) {
+        console.log(
+          'Apple IAP processing error:',
+          error,
+        );
+
+        if (mounted) {
+          setLoading(false);
+          showError(
+            error?.message ||
+            t('APPLE_IAP.GENERIC_ERROR'),
+          );
+        }
+      }
+      finally {
+        applePurchaseProcessingRef.current = false;
+        applePurchaseAuthorizedRef.current = false;
+      }
+    };
+
+    applePurchaseHandlerRef.current = processApplePurchase;
+
+    const recoverPendingAppleTransactions = async () => {
+      if (typeof RNIap.getPendingTransactionsIOS !== 'function') {
+        console.log('[Apple IAP] getPendingTransactionsIOS is unavailable.');
+        return;
+      }
+
+      try {
+        const pendingTransactions = await RNIap.getPendingTransactionsIOS();
+        const pendingList = Array.isArray(pendingTransactions)
+          ? pendingTransactions
+          : [];
+
+        console.log(
+          '[Apple IAP] Pending transactions:',
+          pendingList.map(purchase => ({
+            productId: purchase?.productId || purchase?.sku || null,
+            transactionId: purchase?.transactionId || purchase?.id || null,
+          })),
+        );
+
+        if (pendingList.length === 0 || !item) {
+          return;
+        }
+
+        const currentPurchaseType = getPurchaseType();
+        const currentProductId = getAppleProductId();
+
+        // Never let a stale AsyncStorage context decide the operation for the
+        // screen that is currently open. Login -> Pay, renewal -> Package,
+        // gift -> Gift are decided only by the current route.
+        const matchingPurchase = pendingList.find(purchase => {
+          const pendingProductId = purchase?.productId || purchase?.sku || null;
+          return pendingProductId === currentProductId;
+        });
+
+        if (!matchingPurchase) {
+          return;
+        }
+
+        // Gift recovery needs sender/receiver fields that may only exist in
+        // the persisted gift context. Do not reinterpret a stale Package/Pay
+        // transaction as Gift.
+        if (currentPurchaseType === 'Gift') {
+          const rawContext = await AsyncStorage.getItem(APPLE_PENDING_CONTEXT_KEY);
+          if (!rawContext) {
+            console.log('[Apple IAP] Gift pending transaction has no recoverable context.');
+            return;
+          }
+
+          const storedContext = JSON.parse(rawContext);
+          if (storedContext?.purchaseType !== 'Gift' ||
+              storedContext?.productId !== currentProductId) {
+            console.log('[Apple IAP] Ignoring stale non-gift context on Gift screen.');
+            return;
+          }
+        }
+        else {
+          // For authenticated Pay/Package flows, rebuild the context from the
+          // CURRENT route before processing a pending StoreKit transaction.
+          // This fixes login Pay being accidentally fulfilled as old Package.
+          const recoveryContext = {
+            productId: currentProductId,
+            purchaseType: currentPurchaseType,
+            memoryId: getPendingMemoryId(),
+            userId: user?.id || null,
+            senderEmail: null,
+            senderFullName: null,
+            receiverEmail: null,
+            message: null,
+            agreements: null,
+          };
+
+          if (!recoveryContext.userId) {
+            console.log('[Apple IAP] Pending recovery skipped until authenticated user is loaded.');
+            return;
+          }
+
+          await AsyncStorage.setItem(
+            APPLE_PENDING_CONTEXT_KEY,
+            JSON.stringify(recoveryContext),
+          );
+        }
+
+        console.log('[Apple IAP] Recovering unfinished transaction for CURRENT flow:', {
+          purchaseType: currentPurchaseType,
+          productId: currentProductId,
+        });
+
+        await processApplePurchase(matchingPurchase);
+      }
+      catch (error) {
+        console.error('[Apple IAP] Pending transaction recovery error:', error);
+      }
+    };
+
+    const setupAppleStore = async () => {
+      const skus = Object.values(
+        APPLE_PRODUCTS,
+      );
+
+      try {
+        setAppleStoreError('');
+
+        console.log('[Apple IAP] Initializing StoreKit...');
+        console.log('[Apple IAP] Requested product IDs:', skus);
+        console.log('[Apple IAP] API support:', {
+          fetchProducts: typeof RNIap.fetchProducts,
+          getProducts: typeof RNIap.getProducts,
+          requestPurchase: typeof RNIap.requestPurchase,
+        });
+
+        const connected =
+          await RNIap.initConnection();
+
+        console.log('[Apple IAP] initConnection result:', connected);
+
+        if (!mounted) {
+          return;
+        }
+
+        setAppleStoreReady(
+          connected !== false,
+        );
+
+        let products = [];
+
+        if (typeof RNIap.fetchProducts === 'function') {
+          // All Styever yearly Apple products are auto-renewable subscriptions.
+          // Fetch them only as subscriptions so a duplicate in-app query can
+          // never override the StoreKit product type used by requestPurchase.
+          const subscriptionProducts = await RNIap.fetchProducts({
+            skus,
+            type: 'subs',
+          });
+
+          products = (Array.isArray(subscriptionProducts)
+            ? subscriptionProducts
+            : []).map(product => ({
+              ...product,
+              __iapType: 'subs',
+            }));
+        }
+        else if (typeof RNIap.getProducts === 'function') {
+          /* Compatibility with older react-native-iap releases. */
+          try {
+            products = await RNIap.getProducts({
+              skus,
+            });
+          }
+          catch (objectArgumentError) {
+            console.log(
+              '[Apple IAP] getProducts({ skus }) failed, retrying with array:',
+              objectArgumentError,
+            );
+
+            products = await RNIap.getProducts(
+              skus,
+            );
+          }
+        }
+        else {
+          throw new Error(
+            'react-native-iap product fetch API is unavailable.',
+          );
+        }
+
+        const normalizedProducts = Array.from(
+          new Map(
+            (Array.isArray(products) ? products : []).map(product => [
+              product?.id || product?.productId,
+              product,
+            ]),
+          ).values(),
+        ).filter(product => product?.id || product?.productId);
+
+        console.log(
+          '[Apple IAP] Products returned by StoreKit:',
+          normalizedProducts.map(product => ({
+            id: product?.id,
+            productId: product?.productId,
+            displayName: product?.displayName,
+            title: product?.title,
+            displayPrice: product?.displayPrice,
+            localizedPrice: product?.localizedPrice,
+            price: product?.price,
+            currency: product?.currency,
+            currencyCode: product?.currencyCode,
+            type: product?.type,
+            fetchedAs: product?.__iapType,
+          })),
+        );
+
+        const missingSkus = skus.filter(
+          sku => !normalizedProducts.some(product =>
+            (product?.id || product?.productId) === sku
+          ),
+        );
+
+        if (missingSkus.length > 0) {
+          console.warn(
+            '[Apple IAP] StoreKit did not return these products:',
+            missingSkus,
+          );
+        }
+
+        if (mounted) {
+          setAppleProducts(
+            normalizedProducts,
+          );
+
+          if (normalizedProducts.length === 0) {
+            setAppleStoreError(
+              `StoreKit returned 0 products. Requested: ${skus.join(', ')}`,
+            );
+          }
+          else if (missingSkus.length > 0) {
+            setAppleStoreError(
+              `Missing App Store products: ${missingSkus.join(', ')}`,
+            );
+          }
+          else {
+            setAppleStoreError('');
+          }
+        }
+      }
+      catch (error) {
+        console.error(
+          '[Apple IAP] Store setup/fetch error:',
+          error,
+        );
+
+        if (mounted) {
+          setAppleStoreReady(false);
+          setAppleProducts([]);
+          setAppleStoreError(
+            `${error?.code ? `${error.code}: ` : ''}${error?.message || String(error)}`,
+          );
+        }
+      }
+    };
+
+    purchaseSubscription =
+      RNIap.purchaseUpdatedListener(
+        processApplePurchase,
+      );
+
+    purchaseErrorSubscription =
+      RNIap.purchaseErrorListener(error => {
+        console.error('[Apple IAP] purchaseError:', {
+          code: error?.code,
+          message: error?.message,
+          responseCode: error?.responseCode,
+          debugMessage: error?.debugMessage,
+        });
+
+        const code = String(
+          error?.code || '',
+        ).toLowerCase();
+
+        setLoading(false);
+        applePurchaseAuthorizedRef.current = false;
+
+        if (
+          code.includes('cancel') ||
+          code.includes('user-cancel')
+        ) {
+          return;
+        }
+
+        showError(
+          error?.message ||
+          t('APPLE_IAP.GENERIC_ERROR'),
+        );
+      });
+
+    const initializeAppleIap = async () => {
+      // Store setup/listeners only. Do NOT auto-recover pending purchases here.
+      // Recovery is allowed only after the user accepts the legal agreements
+      // and explicitly presses the payment button.
+      await setupAppleStore();
+    };
+
+    initializeAppleIap();
+
+    return () => {
+      mounted = false;
+
+      purchaseSubscription?.remove?.();
+      purchaseErrorSubscription?.remove?.();
+      applePurchaseHandlerRef.current = null;
+
+      RNIap.endConnection().catch(() => {});
+    };
+  }, [
+    isIOS,
+    t,
+    completePayment,
+    item,
+    user?.id,
+  ]);
+
+  const saveAgreementSnapshots =
+    async (reference, agreementSnapshots, agreementUserId) => {
+      if (!agreementSnapshots) {
+        throw new Error(
+          t('legal_content_load_error'),
+        );
+      }
+
+      const {
+        language,
+        preInformationTitle,
+        preInformationContent,
+        distanceSalesTitle,
+        distanceSalesContent,
+      } = agreementSnapshots;
+
+      if (
+        !preInformationContent ||
+        !distanceSalesContent
+      ) {
+        throw new Error(
+          t('legal_content_load_error'),
+        );
+      }
+
+      const response =
+        await acceptAgreementsRequest([
+          {
+            userId: agreementUserId || 0,
+            agreementType: 'PreInformationForm',
+            title: preInformationTitle,
+            version: '2026.08',
+            language: language || 'tr',
+            context: 'Purchase',
+            documentUrl: '/distance-sales-agreement',
+            contentSnapshot: preInformationContent,
+            relatedReference: reference,
+          },
+          {
+            userId: agreementUserId || 0,
+            agreementType: 'DistanceSalesAgreement',
+            title: distanceSalesTitle,
+            version: '2026.08',
+            language: language || 'tr',
+            context: 'Purchase',
+            documentUrl: '/distance-sales-agreement',
+            contentSnapshot: distanceSalesContent,
+            relatedReference: reference,
+          },
+        ]);
+
+      if (!response?.isSuccess) {
+        throw new Error(
+          response?.message ||
+          response?.Message ||
+          t('SHOPIER.AGREEMENT_SAVE_FAILED'),
+        );
+      }
+    };
 
   const saveAgreements =
     async reference => {
       /*
-       * Guest Gift'te Agreement endpoint'i çağrılmamalı.
-       * Yanlışlıkla bu metoda düşülürse auth isteği üretmeden çık.
+       * Agreement/Accept requires a real UserId.
+       * Guest Gift currently has no UserAgreementAcceptance owner,
+       * so it cannot be persisted to that table without a backend/schema change.
        */
       if (
         item?.typeId === 3 &&
@@ -840,36 +1559,47 @@ const Payment = (props) => {
         return;
       }
 
-      const language =
-        String(
-          i18n.language ||
-          'tr',
-        ).split('-')[0];
+      if (
+        purchaseLegalLoading ||
+        purchaseLegalError ||
+        !purchaseLegalDocument
+      ) {
+        throw new Error(
+          purchaseLegalError ||
+          t('legal_content_load_error'),
+        );
+      }
 
-      const contentSnapshot =
-        buildLegalSnapshot();
+      const language = legalLanguage;
+      const snapshots =
+        getPurchaseAgreementSnapshots();
 
-      /*
-       * Bu metod guest gift için çağrılmaz.
-       * Login kullanıcıdaki gerçek userId ile agreement kaydı yapılır.
-       */
-      const userId =
-        user?.id || null;
+      if (
+        !snapshots.preInformationContent ||
+        !snapshots.distanceSalesContent
+      ) {
+        throw new Error(
+          t('legal_content_load_error'),
+        );
+      }
+
+      const userId = user?.id || 0;
+
       const response =
         await acceptAgreementsRequest([
           {
             userId,
             agreementType:
               'PreInformationForm',
-            title: t(
-              'PRE_INFORMATION_FORM',
-            ),
+            title:
+              snapshots.preInformationTitle,
             version: '2026.08',
             language,
             context: 'Purchase',
             documentUrl:
               '/distance-sales-agreement',
-            contentSnapshot,
+            contentSnapshot:
+              snapshots.preInformationContent,
             relatedReference:
               reference,
           },
@@ -877,15 +1607,15 @@ const Payment = (props) => {
             userId,
             agreementType:
               'DistanceSalesAgreement',
-            title: t(
-              'DISTANCE_SALES_CONTRACT',
-            ),
+            title:
+              snapshots.distanceSalesTitle,
             version: '2026.08',
             language,
             context: 'Purchase',
             documentUrl:
               '/distance-sales-agreement',
-            contentSnapshot,
+            contentSnapshot:
+              snapshots.distanceSalesContent,
             relatedReference:
               reference,
           },
@@ -1089,6 +1819,198 @@ const Payment = (props) => {
       }
     };
 
+  const handleApplePayment = async () => {
+    const productId =
+      getAppleProductId();
+
+    console.log('[Apple IAP] Purchase requested:', {
+      productId,
+      purchaseType: getPurchaseType(),
+      planId: getPendingPlanId(),
+      storeReady: appleStoreReady,
+      loadedProducts: appleProducts.map(product =>
+        product?.id || product?.productId
+      ),
+    });
+
+    if (!productId) {
+      throw new Error(
+        t('APPLE_IAP.PRODUCT_NOT_FOUND'),
+      );
+    }
+
+    if (!appleStoreReady) {
+      throw new Error(
+        t('APPLE_IAP.STORE_NOT_READY'),
+      );
+    }
+
+    const product =
+      getAppleProduct();
+
+    if (!product) {
+      throw new Error(
+        t('APPLE_IAP.PRODUCT_NOT_AVAILABLE'),
+      );
+    }
+
+    const context = {
+      productId,
+      purchaseType:
+        getPurchaseType(),
+      memoryId:
+        getPendingMemoryId(),
+      userId:
+        getPurchaseType() === 'Gift'
+          ? user?.id || null
+          : user?.id,
+      senderEmail:
+        item.typeId === 3
+          ? user?.email || senderEmail
+          : null,
+      senderFullName:
+        item.typeId === 3
+          ? user
+            ? `${user?.name || ''} ${user?.surname || ''}`.trim()
+            : fullname
+          : null,
+      receiverEmail:
+        item.typeId === 3
+          ? receiverEmail
+          : null,
+      message:
+        item.typeId === 3
+          ? message
+          : null,
+      agreements:
+        item.typeId === 3 && !user?.id
+          ? null
+          : (() => {
+              const snapshots =
+                getPurchaseAgreementSnapshots();
+
+              return {
+                language: legalLanguage,
+                preInformationTitle:
+                  snapshots.preInformationTitle,
+                preInformationContent:
+                  snapshots.preInformationContent,
+                distanceSalesTitle:
+                  snapshots.distanceSalesTitle,
+                distanceSalesContent:
+                  snapshots.distanceSalesContent,
+              };
+            })(),
+    };
+
+    await AsyncStorage.setItem(
+      APPLE_PENDING_CONTEXT_KEY,
+      JSON.stringify(context),
+    );
+
+    // From this point the user has explicitly accepted the agreements and
+    // pressed Pay. Pending recovery / purchaseUpdated fulfillment is now
+    // authorized for this one payment attempt only.
+    applePurchaseAuthorizedRef.current = true;
+
+    // Before opening a new StoreKit sheet, clear only orphaned transactions
+    // that our backend has already completed. An unfinished transaction can
+    // keep StoreKit from starting a fresh subscription purchase.
+    if (typeof RNIap.getPendingTransactionsIOS === 'function') {
+      const pendingTransactions = await RNIap.getPendingTransactionsIOS();
+      const pendingList = Array.isArray(pendingTransactions)
+        ? pendingTransactions
+        : [];
+
+      for (const pendingPurchase of pendingList) {
+        const pendingProductId =
+          pendingPurchase?.productId ||
+          pendingPurchase?.sku ||
+          null;
+
+        const pendingTransactionId =
+          pendingPurchase?.transactionId ||
+          pendingPurchase?.id ||
+          pendingPurchase?.originalTransactionIdentifierIOS ||
+          null;
+
+        if (!pendingTransactionId || pendingProductId !== productId) {
+          continue;
+        }
+
+        console.log('[Apple IAP] Matching unfinished transaction found before purchase:', {
+          productId: pendingProductId,
+          transactionId: pendingTransactionId,
+        });
+
+        try {
+          const statusResponse = await getAppleTransactionCompletedRequest(
+            pendingTransactionId,
+          );
+
+          console.log('[Apple IAP] Existing transaction backend status:', statusResponse);
+
+          if (statusResponse?.isSuccess && statusResponse?.data === true) {
+            console.log('[Apple IAP] Clearing already-fulfilled StoreKit transaction:', pendingTransactionId);
+            await RNIap.finishTransaction({
+              purchase: pendingPurchase,
+              isConsumable: false,
+            });
+          }
+          else {
+            // StoreKit already has a paid/unfinished transaction for this SKU.
+            // Do not try to open another purchase sheet and do not fail the
+            // user. Fulfill this transaction using the CURRENT screen flow
+            // whose context was persisted immediately above.
+            console.log('[Apple IAP] Fulfilling unfinished StoreKit transaction with CURRENT flow:', {
+              transactionId: pendingTransactionId,
+              purchaseType: context.purchaseType,
+              productId,
+            });
+
+            if (typeof applePurchaseHandlerRef.current !== 'function') {
+              throw new Error('Apple purchase handler is not ready.');
+            }
+
+            await applePurchaseHandlerRef.current(pendingPurchase);
+            return;
+          }
+        }
+        catch (pendingError) {
+          console.error('[Apple IAP] Pending transaction could not be safely cleared:', pendingError);
+          throw pendingError;
+        }
+      }
+    }
+
+    console.log('[Apple IAP] Calling requestPurchase for:', productId);
+
+    if (RNIap.fetchProducts) {
+      const purchaseType = product?.__iapType || 'subs';
+
+      console.log('[Apple IAP] requestPurchase type:', purchaseType);
+
+      await RNIap.requestPurchase({
+        request: {
+          apple: {
+            sku: productId,
+            quantity: 1,
+          },
+          google: {
+            skus: [productId],
+          },
+        },
+        type: purchaseType,
+      });
+    }
+    else {
+      await RNIap.requestPurchase({
+        sku: productId,
+        andDangerouslyFinishTransactionAutomaticallyIOS: false,
+      });
+    }
+  };
+
   const onPay = async () => {
     if (
       !item ||
@@ -1101,6 +2023,18 @@ const Payment = (props) => {
       item.typeId === 2
     ) {
       await handleCandlePayment();
+      return;
+    }
+
+    if (
+      purchaseLegalLoading ||
+      purchaseLegalError ||
+      !purchaseLegalDocument
+    ) {
+      showError(
+        purchaseLegalError ||
+        t('legal_content_load_error'),
+      );
       return;
     }
 
@@ -1132,6 +2066,23 @@ const Payment = (props) => {
     }
 
     if (!giftValid) {
+      return;
+    }
+
+    if (isIOS) {
+      try {
+        setLoading(true);
+        await handleApplePayment();
+      }
+      catch (error) {
+        setLoading(false);
+        applePurchaseAuthorizedRef.current = false;
+        showError(
+          error?.message ||
+          t('APPLE_IAP.GENERIC_ERROR'),
+        );
+      }
+
       return;
     }
 
@@ -1299,45 +2250,6 @@ const Payment = (props) => {
       }
     };
 
-  const renderList = keys =>
-    keys.map(key => (
-      <View
-        key={key}
-        style={
-          styles.legalListRow
-        }
-      >
-        <Text
-          style={
-            styles.legalBullet
-          }
-        >
-          •
-        </Text>
-
-        <Text
-          style={
-            styles.legalListText
-          }
-        >
-          {t(key)}
-        </Text>
-      </View>
-    ));
-
-  const renderParagraphs =
-    keys =>
-      keys.map(key => (
-        <Text
-          key={key}
-          style={
-            styles.legalParagraph
-          }
-        >
-          {t(key)}
-        </Text>
-      ));
-
   return (
     <SafeAreaView
       style={[
@@ -1373,7 +2285,11 @@ const Payment = (props) => {
             return null;
           }}
           onPressLeft={() => {
-            navigation.goBack();
+            if (
+              !isPaymentRequired
+            ) {
+              navigation.goBack();
+            }
           }}
         />
 
@@ -1405,6 +2321,20 @@ const Payment = (props) => {
                 <Text numberOfLines={0} style={styles.pageTitle}>{t('payment')}</Text>
                 <Text style={styles.pageDescription}>{t('payment_description')}</Text>
               </View>
+
+              {item?.typeId !== 2 && getDisplayedPlanName() ? (
+                <View style={styles.selectedPlanCard}>
+                  <Text style={styles.selectedPlanLabel}>
+                    {i18n.language?.startsWith('en') ? 'Selected Plan' : 'Seçili Paket'}
+                  </Text>
+                  <Text style={[styles.selectedPlanName, { color: colors.primary }]}>
+                    {getDisplayedPlanName()}
+                  </Text>
+                  <Text style={styles.selectedPlanPeriod}>
+                    {i18n.language?.startsWith('en') ? '1 Year Access' : '1 Yıllık Erişim'}
+                  </Text>
+                </View>
+              ) : null}
 
               {isPaymentRequired && (
                 <View
@@ -1552,7 +2482,8 @@ const Payment = (props) => {
               )}
 
               {item &&
-                item.typeId !== 2 && (
+                item.typeId !== 2 &&
+                !isIOS && (
                   <View
                     style={
                       styles.shopierInfo
@@ -1578,7 +2509,7 @@ const Payment = (props) => {
                   </View>
                 )}
 
-              {pendingReference && (
+              {!isIOS && pendingReference && (
                 <View
                   style={[
                     styles.pendingBox,
@@ -1667,6 +2598,32 @@ const Payment = (props) => {
                     </Text>
                   </TouchableOpacity>
                 </View>
+              )}
+
+              {isIOS && item && item.typeId !== 2 && (
+                <>
+                  <View style={styles.shopierInfo}>
+                    <Icon
+                      name="apple"
+                      size={20}
+                      color={colors.primary}
+                    />
+                    <Text style={styles.shopierInfoText}>
+                      {t('APPLE_IAP.SECURITY_INFO')}
+                    </Text>
+                  </View>
+
+                  {__DEV__ && appleStoreError ? (
+                    <Text
+                      style={[
+                        styles.errorText,
+                        { marginTop: 8 },
+                      ]}
+                    >
+                      IAP Debug: {appleStoreError}
+                    </Text>
+                  ) : null}
+                </>
               )}
 
               {item &&
@@ -1812,23 +2769,38 @@ const Payment = (props) => {
 
       <CardBooking
         loading={loading}
+        disabled={
+          item?.typeId !== 2 &&
+          (
+            purchaseLegalLoading ||
+            !!purchaseLegalError ||
+            !purchaseLegalDocument ||
+            (
+              isIOS &&
+              !appleStoreReady
+            )
+          )
+        }
         description={t(
           'total_price',
         )}
-        price={`${price} ₺`}
+        price={getDisplayedPrice()}
         textButton={
-          pendingReference
+          !isIOS && pendingReference
             ? t(
               'SHOPIER.GO_TO_SHOPIER_AGAIN',
             )
             : item?.typeId === 2
               ? t('pay')
-              : t(
-                'SHOPIER.PAY_WITH_SHOPIER',
-              )
+              : isIOS
+                ? t('APPLE_IAP.PAY_WITH_APP_STORE')
+                : t(
+                  'SHOPIER.PAY_WITH_SHOPIER',
+                )
         }
         onPress={() => {
           if (
+            !isIOS &&
             pendingReference
           ) {
             reopenShopier();
@@ -1906,287 +2878,40 @@ const Payment = (props) => {
               }
               showsVerticalScrollIndicator
             >
-              <Text
-                style={
-                  styles.documentTitle
-                }
-              >
-                {t(
-                  'DISTANCE_SALES.PAGE_TITLE',
-                )}
-              </Text>
-
-              <View
-                style={
-                  styles.legalSection
-                }
-              >
-                <Text
-                  style={
-                    styles.sectionTitle
-                  }
-                >
-                  {t(
-                    'DISTANCE_SALES.PRE_INFO_TITLE',
-                  )}
-                </Text>
-
-                <Text
-                  style={
-                    styles.subSectionTitle
-                  }
-                >
-                  {t(
-                    'DISTANCE_SALES.PRE_INFO_SECTION_1_TITLE',
-                  )}
-                </Text>
-
-                {renderList([
-                  'DISTANCE_SALES.PRE_INFO_SELLER_1',
-                  'DISTANCE_SALES.PRE_INFO_SELLER_2',
-                  'DISTANCE_SALES.PRE_INFO_SELLER_3',
-                  'DISTANCE_SALES.PRE_INFO_SELLER_4',
-                ])}
-
-                <Text
-                  style={
-                    styles.subSectionTitle
-                  }
-                >
-                  {t(
-                    'DISTANCE_SALES.PRE_INFO_SECTION_2_TITLE',
-                  )}
-                </Text>
-
-                {renderParagraphs([
-                  'DISTANCE_SALES.PRE_INFO_SECTION_2_TEXT',
-                ])}
-
-                <Text
-                  style={
-                    styles.subSectionTitle
-                  }
-                >
-                  {t(
-                    'DISTANCE_SALES.PRE_INFO_SECTION_3_TITLE',
-                  )}
-                </Text>
-
-                {renderParagraphs([
-                  'DISTANCE_SALES.PRE_INFO_SECTION_3_TEXT',
-                ])}
-
-                <Text
-                  style={
-                    styles.subSectionTitle
-                  }
-                >
-                  {t(
-                    'DISTANCE_SALES.PRE_INFO_SECTION_4_TITLE',
-                  )}
-                </Text>
-
-                {renderParagraphs([
-                  'DISTANCE_SALES.PRE_INFO_SECTION_4_TEXT',
-                ])}
-
-                <Text
-                  style={
-                    styles.subSectionTitle
-                  }
-                >
-                  {t(
-                    'DISTANCE_SALES.PRE_INFO_SECTION_5_TITLE',
-                  )}
-                </Text>
-
-                {renderParagraphs([
-                  'DISTANCE_SALES.PRE_INFO_SECTION_5_TEXT',
-                ])}
-              </View>
-
-              <View
-                style={
-                  styles.legalSection
-                }
-              >
-                <Text
-                  style={
-                    styles.sectionTitle
-                  }
-                >
-                  {t(
-                    'DISTANCE_SALES.CONTRACT_TITLE',
-                  )}
-                </Text>
-
-                <Text
-                  style={
-                    styles.subSectionTitle
-                  }
-                >
-                  {t(
-                    'DISTANCE_SALES.PARTIES_TITLE',
-                  )}
-                </Text>
-
-                {renderParagraphs([
-                  'DISTANCE_SALES.PARTIES_TEXT',
-                ])}
-              </View>
-
-              <View
-                style={
-                  styles.legalSection
-                }
-              >
-                <Text
-                  style={
-                    styles.sectionTitle
-                  }
-                >
-                  {t(
-                    'DISTANCE_SALES.SECTION_1_TITLE',
-                  )}
-                </Text>
-
-                <Text
-                  style={
-                    styles.subSectionTitle
-                  }
-                >
-                  {t(
-                    'DISTANCE_SALES.SECTION_1_1_TITLE',
-                  )}
-                </Text>
-
-                {renderList([
-                  'DISTANCE_SALES.SECTION_1_1_ITEM_1',
-                  'DISTANCE_SALES.SECTION_1_1_ITEM_2',
-                  'DISTANCE_SALES.SECTION_1_1_ITEM_3',
-                  'DISTANCE_SALES.SECTION_1_1_ITEM_4',
-                  'DISTANCE_SALES.SECTION_1_1_ITEM_5',
-                  'DISTANCE_SALES.SECTION_1_1_ITEM_6',
-                ])}
-
-                <Text
-                  style={
-                    styles.subSectionTitle
-                  }
-                >
-                  {t(
-                    'DISTANCE_SALES.SECTION_1_2_TITLE',
-                  )}
-                </Text>
-
-                {renderParagraphs([
-                  'DISTANCE_SALES.SECTION_1_2_TEXT',
-                ])}
-
-                <Text
-                  style={
-                    styles.subSectionTitle
-                  }
-                >
-                  {t(
-                    'DISTANCE_SALES.SECTION_1_3_TITLE',
-                  )}
-                </Text>
-
-                {renderParagraphs([
-                  'DISTANCE_SALES.SECTION_1_3_TEXT',
-                ])}
-
-                {renderList([
-                  'DISTANCE_SALES.SECTION_1_3_ITEM_1',
-                  'DISTANCE_SALES.SECTION_1_3_ITEM_2',
-                  'DISTANCE_SALES.SECTION_1_3_ITEM_3',
-                  'DISTANCE_SALES.SECTION_1_3_ITEM_4',
-                ])}
-              </View>
-
-              {[
-                {
-                  title:
-                    'DISTANCE_SALES.SECTION_2_TITLE',
-                  texts: [
-                    'DISTANCE_SALES.SECTION_2_TEXT',
-                  ],
-                },
-                {
-                  title:
-                    'DISTANCE_SALES.SECTION_3_TITLE',
-                  texts: [
-                    'DISTANCE_SALES.SECTION_3_TEXT_1',
-                    'DISTANCE_SALES.SECTION_3_TEXT_2',
-                    'DISTANCE_SALES.SECTION_3_TEXT_3',
-                    'DISTANCE_SALES.SECTION_3_TEXT_4',
-                  ],
-                },
-                {
-                  title:
-                    'DISTANCE_SALES.SECTION_4_TITLE',
-                  texts: [
-                    'DISTANCE_SALES.SECTION_4_TEXT_1',
-                    'DISTANCE_SALES.SECTION_4_TEXT_2',
-                    'DISTANCE_SALES.SECTION_4_TEXT_3',
-                    'DISTANCE_SALES.SECTION_4_TEXT_4',
-                    'DISTANCE_SALES.SECTION_4_TEXT_5',
-                  ],
-                },
-                {
-                  title:
-                    'DISTANCE_SALES.SECTION_5_TITLE',
-                  texts: [
-                    'DISTANCE_SALES.SECTION_5_TEXT_1',
-                    'DISTANCE_SALES.SECTION_5_TEXT_2',
-                    'DISTANCE_SALES.SECTION_5_TEXT_3',
-                  ],
-                },
-                {
-                  title:
-                    'DISTANCE_SALES.SECTION_6_TITLE',
-                  texts: [
-                    'DISTANCE_SALES.SECTION_6_TEXT_1',
-                    'DISTANCE_SALES.SECTION_6_TEXT_2',
-                    'DISTANCE_SALES.SECTION_6_TEXT_3',
-                    'DISTANCE_SALES.SECTION_6_TEXT_4',
-                    'DISTANCE_SALES.SECTION_6_TEXT_5',
-                    'DISTANCE_SALES.SECTION_6_TEXT_6',
-                  ],
-                },
-                {
-                  title:
-                    'DISTANCE_SALES.SECTION_7_TITLE',
-                  texts: [
-                    'DISTANCE_SALES.SECTION_7_TEXT_1',
-                    'DISTANCE_SALES.SECTION_7_TEXT_2',
-                  ],
-                },
-              ].map(section => (
+              {purchaseLegalLoading ? (
                 <View
-                  key={
-                    section.title
-                  }
-                  style={
-                    styles.legalSection
-                  }
+                  style={{
+                    paddingVertical: 32,
+                    alignItems: 'center',
+                  }}
                 >
+                  <ActivityIndicator
+                    size="small"
+                    color={colors.primary}
+                  />
+                </View>
+              ) : purchaseLegalError ? (
+                <Text
+                  style={styles.modalText}
+                >
+                  {purchaseLegalError}
+                </Text>
+              ) : (
+                <>
                   <Text
-                    style={
-                      styles.sectionTitle
-                    }
+                    style={styles.documentTitle}
                   >
-                    {t(
-                      section.title,
-                    )}
+                    {purchaseLegalTitle()}
                   </Text>
 
-                  {renderParagraphs(
-                    section.texts,
-                  )}
-                </View>
-              ))}
+                  <Text
+                    numberOfLines={0}
+                    style={styles.modalText}
+                  >
+                    {purchaseLegalContent()}
+                  </Text>
+                </>
+              )}
             </ScrollView>
 
             <View
@@ -2216,14 +2941,34 @@ const Payment = (props) => {
 
               <TouchableOpacity
                 activeOpacity={0.8}
+                disabled={
+                  purchaseLegalLoading ||
+                  !!purchaseLegalError ||
+                  !purchaseLegalDocument
+                }
                 style={[
                   styles.acceptButton,
+                  (
+                    purchaseLegalLoading ||
+                    !!purchaseLegalError ||
+                    !purchaseLegalDocument
+                  ) && {
+                    opacity: 0.5,
+                  },
                   {
                     backgroundColor:
                       colors.primary,
                   },
                 ]}
                 onPress={() => {
+                  if (
+                    purchaseLegalLoading ||
+                    purchaseLegalError ||
+                    !purchaseLegalDocument
+                  ) {
+                    return;
+                  }
+
                   setTermsAccepted(
                     true,
                   );

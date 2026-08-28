@@ -22,3 +22,19 @@ export const getRegistrationLegalContents=async()=>{
     return result;
   },{});
 };
+
+
+export const getPurchaseLegalContents=async()=>{
+  const response=await getLegalContentBySlug(
+    'distance-sales-agreement',
+  );
+
+  if(!response?.isSuccess||!response?.data){
+    throw new Error(
+      response?.message||
+      'Purchase legal content could not be loaded.',
+    );
+  }
+
+  return response.data;
+};

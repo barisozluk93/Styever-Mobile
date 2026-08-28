@@ -14,6 +14,7 @@ const CardBooking = ({
   textButton,
   onPress,
   loading = false,
+  disabled = false,
 }) => {
   const { colors } = useTheme();
 
@@ -34,7 +35,11 @@ const CardBooking = ({
           {secondDescription}
         </Text>
       </View>
-      <Button style={{ height: 45 }} onPress={onPress}>
+      <Button
+        style={{ height: 45 }}
+        onPress={onPress}
+        disabled={disabled}
+      >
         {textButton}
       </Button>
     </View>
@@ -47,6 +52,7 @@ CardBooking.propTypes = {
   price: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   style: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
   onPress: PropTypes.func,
+  disabled: PropTypes.bool,
 };
 
 export default CardBooking;

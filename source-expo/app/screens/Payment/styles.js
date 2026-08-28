@@ -60,7 +60,7 @@ export default StyleSheet.create({
     borderRadius:10,
     paddingHorizontal:14,
     paddingVertical:12,
-    marginBottom:15,
+    marginVertical:7.5,
   },
 
   trialText:{
@@ -117,6 +117,36 @@ export default StyleSheet.create({
     fontSize:21,
     lineHeight:27,
     fontWeight:'800',
+  },
+
+  selectedPlanCard:{
+    paddingVertical:14,
+    paddingHorizontal:16,
+    borderRadius:10,
+    backgroundColor:'rgba(0,0,0,0.025)',
+  },
+
+  selectedPlanLabel:{
+    color:'#8A918D',
+    fontSize:11,
+    lineHeight:16,
+    fontWeight:'600',
+    textTransform:'uppercase',
+    letterSpacing:0.4,
+  },
+
+  selectedPlanName:{
+    marginTop:3,
+    fontSize:20,
+    lineHeight:26,
+    fontWeight:'800',
+  },
+
+  selectedPlanPeriod:{
+    marginTop:2,
+    color:'#626A66',
+    fontSize:12.5,
+    lineHeight:18,
   },
 
   paymentIcon:{

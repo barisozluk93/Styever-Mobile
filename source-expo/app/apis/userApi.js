@@ -129,6 +129,14 @@ export const confirmShopierPaymentRequest=async(reference)=>{
  *
  * Payment ekranı bunu 3 saniyede bir çağıracak.
  */
+export const getAppleTransactionCompletedRequest=async(transactionId)=>{
+  const response=await authApi.get(
+    `User/AppleTransactionCompleted/${encodeURIComponent(transactionId)}`,
+  );
+
+  return response.data;
+};
+
 export const shopierPaymentStatusRequest=async(reference)=>{
   const response=await authApi.get(
     `User/ShopierPaymentStatus/${encodeURIComponent(reference)}`,
@@ -190,6 +198,21 @@ export const getUserAgreementsRequest=async(userId)=>{
 export const voucherControlRequest=async(voucher)=>{
   const response=await authApi.get(
     `User/VoucherControl/${encodeURIComponent(voucher)}`,
+  );
+
+  return response.data;
+};
+/*
+ * APPLE IAP
+ *
+ * The backend validates transactionId directly with the App Store Server API.
+ * productId is sent only as an additional consistency check; the backend never
+ * trusts it to decide the plan.
+ */
+export const verifyApplePurchaseRequest=async(data)=>{
+  const response=await authApi.post(
+    'User/VerifyApplePurchase',
+    data,
   );
 
   return response.data;

@@ -120,6 +120,15 @@ const Profile = (props) => {
                 <Text body1>{t('system')}</Text>
                 <Icon name="angle-right" size={18} color={colors.primary} style={{ marginLeft: 5 }} enableRTL={true} />
               </TouchableOpacity>
+              {((user && user.isActive) || !user) && <TouchableOpacity
+                style={styleItem}
+                onPress={() => {
+                  navigation.navigate('Pricing', { isStandByPage: true });
+                }}
+              >
+                <Text body1>{t('purchase_voucher')}</Text>
+                <Icon name="angle-right" size={18} color={colors.primary} style={{ marginLeft: 5 }} enableRTL={true} />
+              </TouchableOpacity>}
               <TouchableOpacity
                 style={styleItem}
                 onPress={() => {
